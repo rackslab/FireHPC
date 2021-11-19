@@ -1,6 +1,6 @@
 # FireHPC: Instantly fire up container-based emulated HPC cluster
 
-## Description
+## Description
 
 FireHPC is a tool designed to quickly start and setup a tiny emulated HPC
 cluster based on Linux containers.
@@ -13,7 +13,7 @@ The purposes are the following:
 
 FireHPC aims to emulate HPC clusters with multiple distributions.
 
-## Architecture
+## Architecture
 
 FireHPC relies on:
 
@@ -41,7 +41,8 @@ systemctl restart systemd-resolvd.service
 systemctl restart NetworkManager.service
 ```
 
-Download `machinectl` Ansible connection plugin from @tomeon:
+Download `machinectl` Ansible connection plugin from
+[@tomeon](https://github.com/tomeon):
 
 ```
 mkdir conf/connections
