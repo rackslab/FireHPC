@@ -2,9 +2,10 @@
 
 ## Must have
 
-- [ ] Generate SSH host keys with ansible
-- [ ] Generate SSH known hosts\_file for local client
+- [x] Generate SSH host keys with ansible
+- [x] Generate SSH known hosts\_file for local client
 - [ ] Install OpenSSH with SSH host keys
+- [ ] Run as non-root
 
 ## Nice to have
 
