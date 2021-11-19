@@ -1,0 +1,6 @@
+hpc:
+  hosts:
+    admin:
+    front:
+    cn1:
+    cn2:
