@@ -1,1 +1,6 @@
 ssh_key_dir: ssh
+ssh_key_types:
+ - rsa
+ - dsa
+ - ecdsa
+ - ed25519

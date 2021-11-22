@@ -10,11 +10,11 @@
   community.crypto.openssh_keypair:
     path: "{{ ssh_key_dir }}/hosts/{{ item.0 }}/ssh_host_{{ item.1 }}_key"
     type: "{{ item.1 }}"
-  loop: "{{ groups['all'] | product(['rsa', 'dsa', 'ecdsa', 'ed25519']) | list }}"
+  loop: "{{ groups['all'] | product(ssh_key_types) | list }}"
 
 - name: Generate SSH known_host
   ansible.builtin.known_hosts:
     path: "{{ ssh_key_dir }}/known_hosts"
     name: "{{ item.0 }}"
     key: "{{ item.0 }} {{ lookup('file', '{{ ssh_key_dir }}/hosts/{{ item.0 }}/ssh_host_{{ item.1 }}_key.pub') }}"
-  loop: "{{ groups['all'] | product(['rsa', 'dsa', 'ecdsa', 'ed25519']) | list }}"
+  loop: "{{ groups['all'] | product(ssh_key_types) | list }}"
