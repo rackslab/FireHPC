@@ -10,20 +10,6 @@
 - hosts: all
   vars:
     ssh_key_dir: '../ssh'
-  tasks:
-  - name: Set a hostname specifying strategy
-    ansible.builtin.hostname:
-      name: "{{ inventory_hostname }}"
-      use: systemd
-  - name: Ensure basic packages are installed and updated
-    ansible.builtin.apt:
-      name: "{{ item }}"
-      state: latest
-    with_items:
-      - neovim
-      - htop
-      - gpg
-      - curl
-      - rsync
   roles:
+    - common
     - ssh

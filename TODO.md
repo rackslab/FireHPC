@@ -8,7 +8,7 @@
 - [ ] Generate root SSH keys
 - [ ] List of key types as variable
 - [ ] Deploy root authorized\_keys
-- [ ] Develop a common role
+- [x] Develop a common role
 - [x] Generate SSH keys and known\_hosts in ssh role
 - [ ] Run as non-root
 
