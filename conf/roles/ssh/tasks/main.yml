@@ -1,0 +1,29 @@
+---
+- name: Ensure OpenSSH daemon is installed
+  ansible.builtin.apt:
+    name: openssh-server
+    state: latest
+
+- name: Deploy SSH host public keys
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/ssh/{{ item | basename}}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_fileglob:
+    - "{{ ssh_key_dir }}/hosts/{{ inventory_hostname }}/ssh_host_*_key.pub"
+  notify:
+    - Restart SSH server
+
+- name: Deploy SSH host private keys
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/ssh/{{ item | basename}}"
+    owner: root
+    group: root
+    mode: '0600'
+  with_fileglob:
+    - "{{ ssh_key_dir }}/hosts/{{ inventory_hostname }}/ssh_host_*_key"
+  notify:
+    - Restart SSH server

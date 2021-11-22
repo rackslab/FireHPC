@@ -21,6 +21,8 @@
     loop: "{{ groups['all'] | product(['rsa', 'dsa', 'ecdsa', 'ed25519']) | list }}"
 
 - hosts: all
+  vars:
+    ssh_key_dir: '../ssh'
   tasks:
   - name: Set a hostname specifying strategy
     ansible.builtin.hostname:
@@ -36,3 +38,5 @@
       - gpg
       - curl
       - rsync
+  roles:
+    - ssh
