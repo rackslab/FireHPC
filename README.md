@@ -27,7 +27,8 @@ except its developper. **Use it at your own risk!**
 
 ## Quickstart
 
-On Ubuntu 21.10, first start and enable `systemd-networkd`:
+On Ubuntu 21.10, as _root_ or using _sudo_, start and enable
+`systemd-networkd`:
 
 ```
 systemctl start systemd-networkd.service
@@ -40,6 +41,22 @@ Restart systemd-resolvd and NetworkManager to get back DNS:
 systemctl restart systemd-resolvd.service
 systemctl restart NetworkManager.service
 ```
+
+Authorize the `sudo` group to manage containers and images without prompting
+for password by deploying this polkit policy file:
+
+```
+cp etc/polkit/firehpc.pkla /etc/polkit-1/localauthority/10-vendor.d/10-firehpc.pkla
+```
+
+NOTE: There might be a bug with `systemd-machined` actions default polkit policy
+relying on `auth_admin_keep` permission, see TODO.md for details.
+
+NOTE: Unfortunately, Debian/Ubuntu do not distribute recent versions of polkit
+with support of Javascript rules files. The provided `*.pkla` file does not
+setup fine-grained permissions for FireHPC made possible with polkit Javascript
+rules. In particular, all members of the _sudo_ group have the permissions to
+manage all system units, this is not great.
 
 Download `machinectl` Ansible connection plugin from
 [@tomeon](https://github.com/tomeon):
@@ -58,10 +75,10 @@ curl https://hub.nspawn.org/storage/masterkey.pgp -o /tmp/masterkey.nspawn.org
 sudo gpg --no-default-keyring --keyring=/etc/systemd/import-pubring.gpg --import /tmp/masterkey.nspawn.org
 ```
 
-Run FireHPC as _root_:
+Then, with your regular user, run FireHPC:
 
 ```
-sudo -E ./firehpc.sh
+./firehpc.sh
 ```
 
 You can connect to your containers (eg. _admin_) with this command:
@@ -80,7 +97,7 @@ When you are done, you can clean up everything with this command:
 
 
 ```
-sudo -E ./clean.sh
+./clean.sh
 ```
 
 ## Authors
