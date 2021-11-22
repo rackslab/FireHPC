@@ -70,6 +70,12 @@ You can connect to your containers (eg. _admin_) with this command:
 machinectl shell admin
 ```
 
+Or using SSH with this command:
+
+```
+ssh -o UserKnownHostsFile=ssh/known_hosts -I ssh/id_rsa root@admin
+```
+
 When you are done, you can clean up everything with this command:
 
 
