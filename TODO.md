@@ -5,9 +5,9 @@
 - [x] Generate SSH host keys with ansible
 - [x] Generate SSH known hosts\_file for local client
 - [x] Install OpenSSH with SSH host keys
-- [ ] Generate root SSH keys
+- [x] Generate root SSH keys
 - [x] List of key types as variable
-- [ ] Deploy root authorized\_keys
+- [x] Deploy root authorized\_keys
 - [x] Develop a common role
 - [x] Generate SSH keys and known\_hosts in ssh role
 - [ ] Run as non-root

@@ -27,3 +27,19 @@
     - "{{ ssh_key_dir }}/hosts/{{ inventory_hostname }}/ssh_host_*_key"
   notify:
     - Restart SSH server
+
+- name: Create root personal SSH directory
+  ansible.builtin.file:
+    path: "/root/.ssh"
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Deploy SSH root authorized_keys
+  ansible.builtin.copy:
+    src: "{{ ssh_key_dir }}/id_rsa.pub"
+    dest: "/root/.ssh/authorized_keys"
+    owner: root
+    group: root
+    mode: '0600'

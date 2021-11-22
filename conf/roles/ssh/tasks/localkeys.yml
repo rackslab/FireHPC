@@ -18,3 +18,8 @@
     name: "{{ item.0 }}"
     key: "{{ item.0 }} {{ lookup('file', '{{ ssh_key_dir }}/hosts/{{ item.0 }}/ssh_host_{{ item.1 }}_key.pub') }}"
   loop: "{{ groups['all'] | product(ssh_key_types) | list }}"
+
+- name: Generate SSH root keys
+  community.crypto.openssh_keypair:
+    path: "{{ ssh_key_dir }}/id_rsa"
+    type: "rsa"
