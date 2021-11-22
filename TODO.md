@@ -6,9 +6,10 @@
 - [x] Generate SSH known hosts\_file for local client
 - [x] Install OpenSSH with SSH host keys
 - [ ] Generate root SSH keys
-- [ ] Deploy root authorized_keys
+- [ ] List of key types as variable
+- [ ] Deploy root authorized\_keys
 - [ ] Develop a common role
-- [ ] Generate SSH keys and known_hosts in ssh role
+- [x] Generate SSH keys and known\_hosts in ssh role
 - [ ] Run as non-root
 
 ## Nice to have
