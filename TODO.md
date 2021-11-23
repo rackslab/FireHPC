@@ -10,7 +10,7 @@
 - [x] Deploy root authorized\_keys
 - [x] Develop a common role
 - [x] Generate SSH keys and known\_hosts in ssh role
-- [ ] Run as non-root
+- [x] Run as non-root
   - [x] Define polkit config with permissions for password-less images/container management
   - [x] ~~Installation of *.spawn unit files with user permissions~~ → Not
        feasible as all directories looked by `systemd-nspawn` are restricted to
@@ -19,7 +19,7 @@
        arguments in a temporary generated file.
   - [x] Develop template unit service file and wrapper
   - [x] Adapt FireHPC to launch the new specific service
-  - [ ] Adapt Ansible machinectl connection plugin to allow execution an non-root
+  - [x] Adapt Ansible machinectl connection plugin to allow execution an non-root
 - [ ] Add some fake users
 - [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
 - [ ] Fake shared filesystem
@@ -29,6 +29,8 @@
 
 ## Nice to have
 
+- [ ] Improve rackslab/ansible-connection-machinectl _non-root_ branch to match
+      [maintainer expectations](https://github.com/tomeon/ansible-connection-machinectl/issues/10#issuecomment-812534935).
 - [ ] Manual install script to simplify quickstart
 - [ ] Build and deploy mkosi images with python3 pre-installed
 - [ ] Fix shell glitch after ansible run with machinectl connection

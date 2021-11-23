@@ -70,15 +70,6 @@ setup fine-grained permissions for FireHPC made possible with polkit Javascript
 rules. In particular, all members of the _sudo_ group have the permissions to
 manage all system units, this is not great.
 
-Download `machinectl` Ansible connection plugin from
-[@tomeon](https://github.com/tomeon):
-
-```
-mkdir conf/connections
-wget https://github.com/tomeon/ansible-connection-machinectl/raw/master/connection_plugins/machinectl.py \
-  -O conf/connections/machinectl.py
-```
-
 Import [hub.nspawn.org](https://hub.nspawn.org) GPG key in `systemd-importd`
 keyring:
 
