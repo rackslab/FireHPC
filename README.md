@@ -3,7 +3,11 @@
 ## Description
 
 FireHPC is a tool designed to quickly start and setup a tiny emulated HPC
-cluster based on Linux containers.
+cluster based on Linux containers, ready to run non-intensive MPI jobs with
+[Slurm](https://slurm.schedmd.com/overview.html).
+
+Obviously, FireHPC does not aim at performances as you get better performances
+out of your computer without containers overhead.
 
 The purposes are the following:
 
