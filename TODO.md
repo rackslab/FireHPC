@@ -8,20 +8,20 @@
 - [x] Generate root SSH keys
 - [x] List of key types as variable
 - [x] Deploy root authorized\_keys
-- [x] Develop a common role
+- [x] Develop a common role
 - [x] Generate SSH keys and known\_hosts in ssh role
 - [ ] Run as non-root
   - [x] Define polkit config with permissions for password-less images/container management
-  - [ ] ~~Installation of *.spawn unit files with user permissions~~ → Not
+  - [x] ~~Installation of *.spawn unit files with user permissions~~ → Not
        feasible as all directories looked by `systemd-nspawn` are restricted to
        administrator. The other identified option is to start a template unit
        with a wrapper over systemd-nspawn that looks for `systemd-nspawn`
        arguments in a temporary generated file.
-  - [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
   - [x] Develop template unit service file and wrapper
   - [x] Adapt FireHPC to launch the new specific service
   - [ ] Adapt Ansible machinectl connection plugin to allow execution an non-root
 - [ ] Add some fake users
+- [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
 - [ ] Fake shared filesystem
 - [ ] Install Slurm controler, slurmd and clients
 - [ ] Support RPM distribution
