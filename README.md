@@ -46,34 +46,6 @@ sudo systemctl restart systemd-resolvd.service
 sudo systemctl restart NetworkManager.service
 ```
 
-Authorize the `sudo` group to manage containers and images without prompting
-for password by deploying this polkit policy file:
-
-```
-sudo install -m644 etc/polkit/firehpc.pkla /etc/polkit-1/localauthority/10-vendor.d/10-firehpc.pkla
-```
-
-Install FireHPC container service template:
-
-```
-sudo install -m644 etc/system/firehpc-container@.service /etc/systemd/system/firehpc-container@.service
-```
-
-Install `systemd-nspawn` wrapper:
-
-```
-sudo install -m755 lib/exec/firehpc-wrapper /usr/libexec/firehpc-wrapper 
-```
-
-NOTE: There might be a bug with `systemd-machined` actions default polkit policy
-relying on `auth_admin_keep` permission, see TODO.md for details.
-
-NOTE: Unfortunately, Debian/Ubuntu do not distribute recent versions of polkit
-with support of Javascript rules files. The provided `*.pkla` file does not
-setup fine-grained permissions for FireHPC made possible with polkit Javascript
-rules. In particular, all members of the _sudo_ group have the permissions to
-manage all system units, this is not great.
-
 Import [hub.nspawn.org](https://hub.nspawn.org) GPG key in `systemd-importd`
 keyring:
 
@@ -81,6 +53,16 @@ keyring:
 curl https://hub.nspawn.org/storage/masterkey.pgp -o /tmp/masterkey.nspawn.org
 sudo gpg --no-default-keyring --keyring=/etc/systemd/import-pubring.gpg --import /tmp/masterkey.nspawn.org
 ```
+
+Run installation script:
+
+```
+sudo ./install.sh
+```
+
+**NOTE:** Please refer to comments in the [install](install.sh) script to get
+full details about installed files.
+
 
 Then, with your regular user, run FireHPC:
 

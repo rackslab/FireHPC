@@ -31,7 +31,7 @@
 
 - [ ] Improve rackslab/ansible-connection-machinectl _non-root_ branch to match
       [maintainer expectations](https://github.com/tomeon/ansible-connection-machinectl/issues/10#issuecomment-812534935).
-- [ ] Manual install script to simplify quickstart
+- [x] Manual install script to simplify quickstart
 - [ ] Build and deploy mkosi images with python3 pre-installed
 - [ ] Fix shell glitch after ansible run with machinectl connection
 - [ ] Understand why the hostname is not set automatically in containers (I
