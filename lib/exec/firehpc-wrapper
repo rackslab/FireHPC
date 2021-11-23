@@ -1,0 +1,7 @@
+#!/bin/bash
+
+IFS=":" read -r ZONE MACHINE <<< "${1}"
+
+CMD="systemd-nspawn --quiet --keep-unit --boot --link-journal=try-guest --network-zone=${ZONE} -U --settings=override --machine=${MACHINE}"
+
+exec $CMD

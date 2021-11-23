@@ -12,16 +12,7 @@ done
 machinectl list-images
 
 for HOST in admin front cn1 cn2; do
-  cat <<EOF >/etc/systemd/nspawn/${HOST}.nspawn
-[Network]
-Private=yes
-VirtualEthernet=yes
-Zone=hpc
-EOF
-done
-
-for HOST in admin front cn1 cn2; do
-  machinectl start ${HOST}
+  systemctl start firehpc-container@hpc:${HOST}.service
 done
 
 # install python

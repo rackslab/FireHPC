@@ -27,26 +27,38 @@ except its developper. **Use it at your own risk!**
 
 ## Quickstart
 
-On Ubuntu 21.10, as _root_ or using _sudo_, start and enable
-`systemd-networkd`:
+On Ubuntu 21.10, start and enable `systemd-networkd` service with _root_
+permissions:
 
 ```
-systemctl start systemd-networkd.service
-systemctl enable systemd-networkd.service
+sudo systemctl start systemd-networkd.service
+sudo systemctl enable systemd-networkd.service
 ```
 
 Restart systemd-resolvd and NetworkManager to get back DNS:
 
 ```
-systemctl restart systemd-resolvd.service
-systemctl restart NetworkManager.service
+sudo systemctl restart systemd-resolvd.service
+sudo systemctl restart NetworkManager.service
 ```
 
 Authorize the `sudo` group to manage containers and images without prompting
 for password by deploying this polkit policy file:
 
 ```
-cp etc/polkit/firehpc.pkla /etc/polkit-1/localauthority/10-vendor.d/10-firehpc.pkla
+sudo install -m644 etc/polkit/firehpc.pkla /etc/polkit-1/localauthority/10-vendor.d/10-firehpc.pkla
+```
+
+Install FireHPC container service template:
+
+```
+sudo install -m644 etc/system/firehpc-container@.service /etc/systemd/system/firehpc-container@.service
+```
+
+Install `systemd-nspawn` wrapper:
+
+```
+sudo install -m755 lib/exec/firehpc-wrapper /usr/libexec/firehpc-wrapper 
 ```
 
 NOTE: There might be a bug with `systemd-machined` actions default polkit policy

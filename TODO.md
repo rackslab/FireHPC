@@ -12,7 +12,14 @@
 - [x] Generate SSH keys and known\_hosts in ssh role
 - [ ] Run as non-root
   - [x] Define polkit config with permissions for password-less images/container management
-  - [ ] Installation of *.spawn unit files with user permissions
+  - [ ] ~~Installation of *.spawn unit files with user permissions~~ → Not
+       feasible as all directories looked by `systemd-nspawn` are restricted to
+       administrator. The other identified option is to start a template unit
+       with a wrapper over systemd-nspawn that looks for `systemd-nspawn`
+       arguments in a temporary generated file.
+  - [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
+  - [x] Develop template unit service file and wrapper
+  - [x] Adapt FireHPC to launch the new specific service
   - [ ] Adapt Ansible machinectl connection plugin to allow execution an non-root
 - [ ] Add some fake users
 - [ ] Fake shared filesystem
@@ -22,6 +29,7 @@
 
 ## Nice to have
 
+- [ ] Manual install script to simplify quickstart
 - [ ] Build and deploy mkosi images with python3 pre-installed
 - [ ] Fix shell glitch after ansible run with machinectl connection
 - [ ] Understand why the hostname is not set automatically in containers (I

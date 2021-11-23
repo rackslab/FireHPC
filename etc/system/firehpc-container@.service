@@ -1,0 +1,43 @@
+# This file is part of FireHPC. It is largely based on systemd-nspawn@.service
+# from systemd.
+#
+# Copyright (c) 2021, Rackslab
+#
+# GNU General Public License v3.0+
+
+[Unit]
+Description=FireHPC container %i
+Wants=modprobe@tun.service modprobe@loop.service modprobe@dm-mod.service
+PartOf=machines.target
+Before=machines.target
+After=network.target systemd-resolved.service modprobe@tun.service modprobe@loop.service modprobe@dm-mod.service
+RequiresMountsFor=/var/lib/machines/%i
+
+[Service]
+ExecStart=/usr/libexec/firehpc-wrapper %i
+KillMode=mixed
+Type=notify
+RestartForceExitStatus=133
+SuccessExitStatus=133
+Slice=machine.slice
+Delegate=yes
+TasksMax=16384
+WatchdogSec=3min
+
+DevicePolicy=closed
+DeviceAllow=/dev/net/tun rwm
+DeviceAllow=char-pts rw
+
+# nspawn itself needs access to /dev/loop-control and /dev/loop, to implement
+# the --image= option. Add these here, too.
+DeviceAllow=/dev/loop-control rw
+DeviceAllow=block-loop rw
+DeviceAllow=block-blkext rw
+
+# nspawn can set up LUKS encrypted loopback files, in which case it needs
+# access to /dev/mapper/control and the block devices /dev/mapper/*.
+DeviceAllow=/dev/mapper/control rw
+DeviceAllow=block-device-mapper rw
+
+[Install]
+WantedBy=machines.target
