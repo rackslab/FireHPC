@@ -1,0 +1,6 @@
+---
+users_group: scientists
+users_gid: 10000
+users_defs:
+  - { login: "marie",  name: "Marie Curie",  uid: 10001 }
+  - { login: "pierre", name: "Pierre Curie", uid: 10002 }

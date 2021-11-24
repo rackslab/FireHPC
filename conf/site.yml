@@ -13,3 +13,4 @@
   roles:
     - common
     - ssh
+    - users

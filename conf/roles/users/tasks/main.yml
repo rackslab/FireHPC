@@ -1,0 +1,13 @@
+---
+- name: Create main group of users
+  ansible.builtin.group:
+    name: "{{ users_group }}"
+    gid: "{{ users_gid }}"
+
+- name: Create users
+  user:
+    name: "{{ item.login }}"
+    comment: "{{ item.name }}"
+    uid: "{{ item.uid }}"
+    group: "{{ users_group }}"
+  with_items: "{{ users_defs }}"

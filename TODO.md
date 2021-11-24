@@ -20,7 +20,7 @@
   - [x] Develop template unit service file and wrapper
   - [x] Adapt FireHPC to launch the new specific service
   - [x] Adapt Ansible machinectl connection plugin to allow execution an non-root
-- [ ] Add some fake users
+- [x] Add some fake users
 - [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
 - [ ] Fake shared filesystem
 - [ ] Install Slurm controler, slurmd and clients
