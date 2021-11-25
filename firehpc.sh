@@ -11,6 +11,9 @@ for HOST in front cn1 cn2; do
 done
 machinectl list-images
 
+# create directory for home shared by all containers
+systemd-run mkdir -p /var/tmp/firehpc/hpc/home
+
 for HOST in admin front cn1 cn2; do
   systemctl start firehpc-container@hpc:${HOST}.service
 done

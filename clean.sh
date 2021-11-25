@@ -16,3 +16,6 @@ echo "Removing container images"
 for HOST in admin front cn1 cn2; do
   machinectl remove ${HOST}
 done
+
+# Remove directory shared between containers
+systemd-run rm -rf /var/tmp/firehpc

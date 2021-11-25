@@ -21,14 +21,16 @@
   - [x] Adapt FireHPC to launch the new specific service
   - [x] Adapt Ansible machinectl connection plugin to allow execution an non-root
 - [x] Add some fake users
-- [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
-- [ ] Fake shared filesystem
+- [x] Fake shared /home filesystem
 - [ ] Install Slurm controler, slurmd and clients
 - [ ] Support RPM distribution
+- [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
 - [ ] Develop a real tool (ie. not a prototype) that can run anywhere
+- [ ] RELEASE THE SHMOO!
 
 ## Nice to have
 
+- [ ] Use triggered unit to manage (create/remove) shared directories
 - [ ] Improve rackslab/ansible-connection-machinectl _non-root_ branch to match
       [maintainer expectations](https://github.com/tomeon/ansible-connection-machinectl/issues/10#issuecomment-812534935).
 - [x] Manual install script to simplify quickstart
