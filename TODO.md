@@ -22,6 +22,7 @@
   - [x] Adapt Ansible machinectl connection plugin to allow execution an non-root
 - [x] Add some fake users
 - [x] Fake shared /home filesystem
+- [x] Use SSH for ansible once it is setup
 - [ ] Install Slurm controler, slurmd and clients
 - [ ] Support RPM distribution
 - [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)

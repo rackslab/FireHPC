@@ -23,5 +23,6 @@ for HOST in admin front cn1 cn2; do
   machinectl shell ${HOST} /usr/bin/apt install -y python3
 done
 
-ansible all -m ping
-ansible-playbook conf/site.yml
+ansible --connection machinectl all -m ping
+ansible-playbook --connection machinectl conf/playbooks/prepare-ssh.yml
+ANSIBLE_REMOTE_USER=root ansible-playbook conf/playbooks/site.yml

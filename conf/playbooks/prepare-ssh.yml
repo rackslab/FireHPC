@@ -1,6 +1,6 @@
 - hosts: localhost
   vars:
-    ssh_key_dir: '../ssh'
+    ssh_key_dir: '../../ssh'
   tasks:
   - name: Generate specific SSH files
     import_role:
@@ -9,8 +9,6 @@
 
 - hosts: all
   vars:
-    ssh_key_dir: '../ssh'
+    ssh_key_dir: '../../ssh'
   roles:
-    - common
     - ssh
-    - users
