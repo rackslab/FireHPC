@@ -27,4 +27,4 @@
 - name: Create cluster in slurmdbd
   ansible.builtin.command:
     cmd: "sacctmgr --immediate create cluster {{ slurm_cluster }}"
-    creates: "/var/lib/mysql/slurm_acct_db/{{ slurm_cluster }}_job_acct_table.ibd"
+    creates: "/var/lib/mysql/slurm_acct_db/{{ slurm_cluster }}_job_table.ibd"
