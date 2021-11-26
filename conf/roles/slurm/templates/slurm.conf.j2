@@ -1,0 +1,15 @@
+ClusterName={{ slurm_cluster }}                   # must be specified
+SlurmctldHost=admin                               # must be specified
+SlurmUser=slurm                                   # default: root
+StateSaveLocation={{ slurm_state_save_loc }}      # default: /var/spool
+AccountingStorageType=accounting_storage/slurmdbd # default: accounting_storage/none
+AccountingStorageHost=admin                       # must be specified, as soon as slurmdbd is used
+
+# Slurm default is proctrack/cgroup when cgroup are enabled but for the moment,
+# Slurm does not support cgroupv2 enabled in most modern distributions (eg.
+# Ubuntu 21.10). Fallback to old generic linuxproc for stay compatible with most
+# modern systems.
+ProctrackType=proctrack/linuxproc
+
+NodeName=cn[1-2] Procs=2 State=UNKNOWN
+PartitionName=normal Nodes=cn[1-2] Default=YES MaxTime=INFINITE State=UP

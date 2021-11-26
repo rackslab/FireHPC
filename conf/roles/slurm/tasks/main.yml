@@ -1,0 +1,32 @@
+---
+- name: Install slurm common packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - slurm-client
+    - munge
+
+- name: Deploy slurm configuration file
+  ansible.builtin.template:
+    src: slurm.conf.j2
+    dest: /etc/slurm/slurm.conf
+    owner: slurm
+    group: slurm
+    mode: '0644'
+  notify:
+    - Restart slurmctld
+    - Restart slurmd
+
+- name: Deploy munge key
+  ansible.builtin.copy:
+    src: "{{ slurm_local_munge_dir }}/munge.key"
+    dest: /etc/munge/munge.key
+    owner: munge
+    group: munge
+    mode: '0400'
+  notify: Restart munge
+
+- name: "Run slurm {{ slurm_role }} specific tasks"
+  ansible.builtin.include_tasks: "{{ slurm_role }}.yml"
+  when: slurm_role != "client"

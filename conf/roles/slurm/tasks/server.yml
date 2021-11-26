@@ -1,0 +1,30 @@
+---
+- name: Create slurmctld state directory
+  ansible.builtin.file:
+    path: "{{ slurm_state_save_loc }}"
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: '0700'
+
+- name: Deploy slurmdbd configuration file
+  ansible.builtin.template:
+    src: slurmdbd.conf.j2
+    dest: /etc/slurm/slurmdbd.conf
+    owner: slurm
+    group: slurm
+    mode: '0600'
+  notify: Restart slurmdbd
+
+- name: Install slurm server specific packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - slurmctld
+    - slurmdbd
+
+- name: Create cluster in slurmdbd
+  ansible.builtin.command:
+    cmd: "sacctmgr --immediate create cluster {{ slurm_cluster }}"
+    creates: "/var/lib/mysql/slurm_acct_db/{{ slurm_cluster }}_job_acct_table.ibd"

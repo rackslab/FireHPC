@@ -1,0 +1,7 @@
+---
+- name: Install slurm compute specific packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - slurmd

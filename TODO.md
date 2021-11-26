@@ -23,7 +23,13 @@
 - [x] Add some fake users
 - [x] Fake shared /home filesystem
 - [x] Use SSH for ansible once it is setup
-- [ ] Install Slurm controler, slurmd and clients
+- [x] Install Slurm controler, slurmd and clients
+- [ ] SSH key pair and authorized_keys for users
+- [ ] Add users in SlurmDBD accounting
+- [ ] Bootstrap MariaDB password in local file
+- [ ] Install OpenMPI
+- [ ] Introduce groups and inventory 
+- [ ] Fully support zones and parallel FireHPC clusters
 - [ ] Support RPM distribution
 - [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
 - [ ] Develop a real tool (ie. not a prototype) that can run anywhere
@@ -31,6 +37,7 @@
 
 ## Nice to have
 
+- [ ] Generate slurm partitions and nodes conf based on inventory
 - [ ] Use triggered unit to manage (create/remove) shared directories
 - [ ] Improve rackslab/ansible-connection-machinectl _non-root_ branch to match
       [maintainer expectations](https://github.com/tomeon/ansible-connection-machinectl/issues/10#issuecomment-812534935).

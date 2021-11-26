@@ -1,0 +1,22 @@
+---
+- name: Restart slurmctld
+  ansible.builtin.service:
+    name: slurmctld
+    state: restarted
+  when: slurm_role == "server"
+
+- name: Restart slurmdbd
+  ansible.builtin.service:
+    name: slurmdbd
+    state: restarted
+
+- name: Restart slurmd
+  ansible.builtin.service:
+    name: slurmd
+    state: restarted
+  when: slurm_role == "compute"
+
+- name: Restart munge
+  ansible.builtin.service:
+    name: munge
+    state: restarted

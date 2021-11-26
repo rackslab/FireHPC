@@ -1,0 +1,9 @@
+---
+dependencies:
+  - role: mariadb
+    mariadb_users:
+      - name: slurm
+        host: localhost
+        password: "{{ slurm_db_password }}"
+        priv: slurm_acct_db.*:ALL
+    when: slurm_role == 'server'

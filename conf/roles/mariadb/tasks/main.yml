@@ -1,0 +1,18 @@
+---
+- name: Install MariaDB and requirements
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - mariadb-server
+    - python3-pymysql  # requirement for ansible community.mysql modules
+
+- name: Create mariadb users
+  community.mysql.mysql_user:
+    name: "{{ item.name }}"
+    host: "{{ item.host }}"
+    password: "{{ item.password | mandatory }}"
+    priv: "{{ item.priv }}"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+  with_items: "{{ mariadb_users }}"
