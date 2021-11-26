@@ -1,1 +1,2 @@
+# roles variables
 slurm_role: compute
