@@ -43,3 +43,11 @@
     owner: root
     group: root
     mode: '0600'
+
+- name: Deploy SSH system known_hosts
+  ansible.builtin.copy:
+    src: "{{ ssh_key_dir }}/known_hosts"
+    dest: "/etc/ssh/ssh_known_hosts"
+    owner: root
+    group: root
+    mode: 0644
