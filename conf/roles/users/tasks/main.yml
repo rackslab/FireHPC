@@ -24,7 +24,7 @@
     owner: "{{ item.login }}"
     group: "{{ users_group }}"
   with_items: "{{ users_defs }}"
-  when: inventory_hostname == 'front'
+  when: "'front' in group_names"
 
 - name: Generate internal SSH keys
   community.crypto.openssh_keypair:
@@ -34,14 +34,14 @@
     owner: "{{ item.login }}"
     group: "{{ users_group }}"
   with_items: "{{ users_defs }}"
-  when: inventory_hostname == 'front'
+  when: "'front' in group_names"
 
 - name: Read generated users SSH public keys
   ansible.builtin.slurp:
     src: "/home/{{ item.login }}/.ssh/id_rsa.pub"
   register: users_ssh_pubkeys
   with_items: "{{ users_defs }}"
-  when: inventory_hostname == 'front'
+  when: "'front' in group_names"
 
 - name: Add user internal SSH key to authorized_keys
   ansible.posix.authorized_key:
@@ -49,7 +49,7 @@
      state: present
      key: "{{ item.content | b64decode }}"
   loop: "{{ users_ssh_pubkeys.results }}"
-  when: inventory_hostname == 'front'
+  when: "'front' in group_names"
 
 # Deploy SSH key generated on host in all users authorized_keys to easily
 # connect as users from host.
@@ -59,5 +59,5 @@
      user: "{{ item.login }}"
      state: present
      key: "{{ lookup('file', '{{ users_ssh_host_key_dir }}/id_rsa.pub') }}"
-  when: inventory_hostname == 'front'
+  when: "'front' in group_names"
   with_items: "{{ users_defs }}"
