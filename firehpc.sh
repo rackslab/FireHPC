@@ -18,6 +18,9 @@ for HOST in admin front cn1 cn2; do
   systemctl start firehpc-container@hpc:${HOST}.service
 done
 
+# wait a little to ensure network is ready in containers
+sleep 2
+
 # install python
 for HOST in admin front cn1 cn2; do
   machinectl shell ${HOST} /usr/bin/apt install -y python3
