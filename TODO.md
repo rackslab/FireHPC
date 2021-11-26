@@ -26,7 +26,7 @@
 - [x] Install Slurm controler, slurmd and clients
 - [x] SSH key pair and authorized_keys for users
 - [x] Deploy system known_host on all nodes
-- [ ] Add users in SlurmDBD accounting
+- [x] Add users in SlurmDBD accounting
 - [ ] Bootstrap MariaDB password in local file
 - [ ] Install OpenMPI
 - [x] Introduce groups and inventory 

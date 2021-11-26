@@ -3,3 +3,5 @@ slurm_role: client
 slurm_cluster: hpc
 slurm_db_password: CHANGEME
 slurm_state_save_loc: /var/spool/slurmctld
+slurm_users: []
+slurm_account: scientists

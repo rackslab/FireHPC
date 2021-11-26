@@ -28,3 +28,24 @@
   ansible.builtin.command:
     cmd: "sacctmgr --immediate create cluster {{ slurm_cluster }}"
     creates: "/var/lib/mysql/slurm_acct_db/{{ slurm_cluster }}_job_table.ibd"
+
+- name: Get current slurmdbd accounts
+  ansible.builtin.command:
+    cmd: sacctmgr --noheader --parsable2 list accounts format=Account
+  register: slurmdbd_accounts
+
+- name: Create account in slurmdbd
+  ansible.builtin.command:
+    cmd: "sacctmgr --immediate create account name={{ slurm_account }} cluster={{ slurm_cluster }}"
+  when: slurm_account not in slurmdbd_accounts.stdout_lines
+
+- name: Get current slurmdbd users
+  ansible.builtin.command:
+    cmd: sacctmgr --noheader --parsable2 list users format=User
+  register: slurmdbd_users
+
+- name: Create users in slurmdbd
+  ansible.builtin.command:
+    cmd: "sacctmgr --immediate create user name={{ item }} cluster={{ slurm_cluster }} account={{ slurm_account }}"
+  when: item not in slurmdbd_users.stdout_lines
+  with_items: "{{ slurm_users }}"
