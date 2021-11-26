@@ -24,7 +24,7 @@
 - [x] Fake shared /home filesystem
 - [x] Use SSH for ansible once it is setup
 - [x] Install Slurm controler, slurmd and clients
-- [ ] SSH key pair and authorized_keys for users
+- [x] SSH key pair and authorized_keys for users
 - [ ] Add users in SlurmDBD accounting
 - [ ] Bootstrap MariaDB password in local file
 - [ ] Install OpenMPI

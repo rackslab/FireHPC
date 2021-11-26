@@ -1,4 +1,6 @@
 - hosts: all
+  vars:
+    users_ssh_host_key_dir: '../../ssh'
   roles:
     - common
     - users
