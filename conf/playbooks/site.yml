@@ -1,38 +1,12 @@
-- hosts: all
-  vars:
-    users_ssh_host_key_dir: '../../ssh'
-  roles:
-    - common
-    - users
-
 - hosts: localhost
-  vars:
-    slurm_local_munge_dir: ../../local/munge
   tasks:
   - name: Generate munge key
     import_role:
       name: slurm
       tasks_from: bootstrap-munge
 
-- hosts: admin
-  vars:
-    slurm_local_munge_dir: ../../local/munge
-    slurm_role: server
-    slurm_db_passwd: superpasswd
+- hosts: all
   roles:
-    - slurm
-
-- hosts: front
-  vars:
-    slurm_local_munge_dir: ../../local/munge
-  roles:
-    - slurm
-
-- hosts:
-    - cn1
-    - cn2
-  vars:
-    slurm_local_munge_dir: ../../local/munge
-    slurm_role: compute
-  roles:
+    - common
+    - users
     - slurm

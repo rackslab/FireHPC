@@ -29,7 +29,7 @@
 - [ ] Add users in SlurmDBD accounting
 - [ ] Bootstrap MariaDB password in local file
 - [ ] Install OpenMPI
-- [ ] Introduce groups and inventory 
+- [x] Introduce groups and inventory 
 - [ ] Fully support zones and parallel FireHPC clusters
 - [ ] Support RPM distribution
 - [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
