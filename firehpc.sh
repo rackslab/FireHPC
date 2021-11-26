@@ -27,5 +27,5 @@ for HOST in admin front cn1 cn2; do
 done
 
 ansible --connection machinectl all -m ping
-ansible-playbook --connection machinectl conf/playbooks/prepare-ssh.yml
-ANSIBLE_REMOTE_USER=root ansible-playbook conf/playbooks/site.yml
+ansible-playbook conf/playbooks/prepare-ssh.yml
+ansible-playbook conf/playbooks/site.yml

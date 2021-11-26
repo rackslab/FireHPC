@@ -6,6 +6,7 @@
       tasks_from: bootstrap-munge
 
 - hosts: all
+  remote_user: root
   roles:
     - common
     - users
