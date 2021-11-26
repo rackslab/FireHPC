@@ -5,12 +5,13 @@
     gid: "{{ users_gid }}"
 
 - name: Create users
-  user:
+  ansible.builtin.user:
     name: "{{ item.login }}"
     comment: "{{ item.name }}"
     uid: "{{ item.uid }}"
     group: "{{ users_group }}"
     shell: /bin/bash
+    create_home: "{{ ('front' in group_names ) }}"  # create homes only on front to avoid conflicts on shared /home
   with_items: "{{ users_defs }}"
 
 # Generate users SSH keys and authorized_keys. It operates on front node only
