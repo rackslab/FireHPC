@@ -104,7 +104,7 @@ When you are done, you can clean up everything for a zone with this command:
 
 ## Authors
 
-FireHPC is developped by [Rackslab](https://rackslab.io).
+FireHPC is developed by [Rackslab](https://rackslab.io).
 
 ## License
 
