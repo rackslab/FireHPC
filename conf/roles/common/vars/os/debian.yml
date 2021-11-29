@@ -1,0 +1,9 @@
+---
+common_packages:
+  - neovim
+  - htop
+  - gpg
+  - curl
+  - rsync
+  - man-db
+  - less

@@ -1,26 +1,18 @@
 ---
+- name: Gather OS specific variables
+  ansible.builtin.include_vars:
+    file: "os/{{ ansible_facts.os_family | lower }}.yml"
+
 - name: Set a hostname specifying strategy
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
     use: systemd
 
-# This dpkg configuration file is present in container images downloaded from
-# hub.nspawn.io to exclude all docs from packages, including manpages. It is
-# removed so slurm and friends manpages can be installed.
-- name: Remove dpkg config to exclude docs
-  ansible.builtin.file:
-    path: /etc/dpkg/dpkg.cfg.d/01_nodoc
-    state: absent
+- name: Include OS specific tasks"
+  ansible.builtin.include_tasks: "os/{{ ansible_facts.os_family | lower }}.yml"
 
 - name: Ensure basic packages are installed and updated
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: latest
-  with_items:
-    - neovim
-    - htop
-    - gpg
-    - curl
-    - rsync
-    - man-db
-    - less
+  with_items: "{{ common_packages }}"
