@@ -53,10 +53,21 @@ done
 # wait a little to ensure network is ready in containers
 sleep 2
 
-# install python
-for HOST in admin login cn1 cn2; do
-  machinectl shell ${HOST}.${ZONE} /usr/bin/apt install -y python3
-done
+# fix images from hub.nspawn.org for ansible
+case $OS in
+  debian*)
+    # install python in debian images
+    for HOST in admin login cn1 cn2; do
+      machinectl shell ${HOST}.${ZONE} /usr/bin/apt install -y python3
+    done
+    ;;
+  centos*)
+    # rebuild RPM DB
+    for HOST in admin login cn1 cn2; do
+      machinectl shell ${HOST}.${ZONE} /usr/bin/rpmdb --rebuilddb
+    done
+    ;;
+esac
 
 # generate ansible configuration file and inventory
 mkdir -p ${LOCAL}
