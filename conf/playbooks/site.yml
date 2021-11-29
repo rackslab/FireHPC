@@ -4,3 +4,4 @@
     - common
     - users
     - slurm
+    - { role: mpi, when: mpi_nodes }

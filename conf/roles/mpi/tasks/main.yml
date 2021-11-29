@@ -1,0 +1,10 @@
+---
+- name: Install OpenMPI
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - openmpi-bin
+    - libopenmpi-dev
+    - gcc
+    - make

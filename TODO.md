@@ -28,7 +28,7 @@
 - [x] Deploy system known_host on all nodes
 - [x] Add users in SlurmDBD accounting
 - [x] Bootstrap MariaDB password in local file
-- [ ] Install OpenMPI
+- [x] Install OpenMPI
 - [x] Introduce groups and inventory 
 - [ ] Fully support zones and parallel FireHPC clusters
 - [ ] Support RPM distribution

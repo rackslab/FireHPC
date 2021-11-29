@@ -1,0 +1,4 @@
+---
+mpi_nodes: false   # This is used at playbook level to control role importation.
+                   # If it is not set explicitely to true in variables for a
+                   # host, the role is skipped.

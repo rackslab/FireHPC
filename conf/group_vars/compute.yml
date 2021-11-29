@@ -1,2 +1,3 @@
 # roles variables
 slurm_role: compute
+mpi_nodes: true
