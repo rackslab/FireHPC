@@ -4,15 +4,39 @@
 #
 # GNU General Public License v3.0+
 
-if [ -z $1 ]; then
-  echo "usage: $0 ZONE"
+usage() {
+  echo "usage: $0: ZONE OS"
   exit 1
+}
+
+if [ -z $1 ]; then
+  usage
+fi
+
+if [ -z $2 ]; then
+  usage
 fi
 
 ZONE=$1
+OS=$2
 LOCAL=local/$ZONE
 
-machinectl pull-raw https://hub.nspawn.org/storage/debian/bullseye/raw/image.raw.xz admin.${ZONE}
+case $OS in
+  debian11)
+    URI="https://hub.nspawn.org/storage/debian/bullseye/raw/image.raw.xz"
+    ;;
+
+  centos8)
+    URI="https://hub.nspawn.org/storage/centos/8/raw/image.raw.xz"
+    ;;
+
+  *)
+    echo "Unsupport OS '${OS}'"
+    exit 1
+    ;;
+esac
+
+machinectl pull-raw ${URI} admin.${ZONE}
 
 for HOST in login cn1 cn2; do
   machinectl clone admin.${ZONE} ${HOST}.${ZONE}

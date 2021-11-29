@@ -75,11 +75,14 @@ sudo ./install.sh
 full details about installed files.
 
 
-Then, with your regular user, run FireHPC with a zone name as argument:
+Then, with your regular user, run FireHPC with a zone name and an OS in
+arguments. For example:
 
 ```
-./firehpc.sh hpc
+./firehpc.sh hpc debian11
 ```
+
+**NOTE:** Supported OS are _debian11_ and _centos8_.
 
 You can connect to your containers (eg. _admin_) with this command:
 
