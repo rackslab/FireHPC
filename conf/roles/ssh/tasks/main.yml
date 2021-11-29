@@ -1,7 +1,11 @@
 ---
+- name: Gather OS specific variables
+  ansible.builtin.include_vars:
+    file: "os/{{ ansible_facts.os_family | lower }}.yml"
+
 - name: Ensure OpenSSH daemon is installed
-  ansible.builtin.apt:
-    name: openssh-server
+  ansible.builtin.package:
+    name: "openssh-server"
     state: latest
 
 - name: Deploy SSH host public keys
