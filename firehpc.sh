@@ -73,7 +73,9 @@ esac
 mkdir -p ${LOCAL}
 sed "s|%LOCAL%|${LOCAL}|g" conf/ansible.cfg.tpl > ${LOCAL}/ansible.cfg
 sed "s|%ZONE%|${ZONE}|g" conf/hosts.tpl > ${LOCAL}/hosts
-ln -s ../../conf/group_vars ${LOCAL}/group_vars
+if [ ! -L ${LOCAL} ]; then
+  ln -s ../../conf/group_vars ${LOCAL}/group_vars
+fi
 
 export ANSIBLE_CONFIG=${LOCAL}/ansible.cfg
 
