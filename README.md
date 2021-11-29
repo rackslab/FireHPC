@@ -88,7 +88,7 @@ machinectl shell admin
 Or using SSH with this command:
 
 ```
-ssh -o UserKnownHostsFile=ssh/known_hosts -I ssh/id_rsa root@admin
+ssh -o UserKnownHostsFile=ssh/known_hosts -I local/ssh/id_rsa root@admin
 ```
 
 When you are done, you can clean up everything with this command:
