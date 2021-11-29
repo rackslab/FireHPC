@@ -1,5 +1,5 @@
 # shared variables
-fhpc_local_dir: '../../local'
+fhpc_local_dir: '../../local/{{ fhpc_zone }}'
 fhpc_local_ssh_dir: "{{ fhpc_local_dir }}/ssh"
 fhpc_users:
   - { login: "marie",  name: "Marie Curie",  uid: 10001 }

@@ -15,7 +15,9 @@ The purposes are the following:
 - Learn tools and software in breakable environment
 - Testing and discovering new technologies in isolated environment
 
-FireHPC aims to emulate HPC clusters with multiple distributions.
+FireHPC aims to emulate HPC clusters with multiple distributions. It supports
+running multiple emulated HPC clusters in parallel on the same host, each
+cluster running in its dedicated zone.
 
 ## Architecture
 
@@ -73,29 +75,28 @@ sudo ./install.sh
 full details about installed files.
 
 
-Then, with your regular user, run FireHPC:
+Then, with your regular user, run FireHPC with a zone name as argument:
 
 ```
-./firehpc.sh
+./firehpc.sh hpc
 ```
 
 You can connect to your containers (eg. _admin_) with this command:
 
 ```
-machinectl shell admin
+machinectl shell admin.hpc
 ```
 
 Or using SSH with this command:
 
 ```
-ssh -o UserKnownHostsFile=ssh/known_hosts -I local/ssh/id_rsa root@admin
+ssh -o UserKnownHostsFile=ssh/known_hosts -I local/ssh/id_rsa root@admin.hpc
 ```
 
-When you are done, you can clean up everything with this command:
-
+When you are done, you can clean up everything for a zone with this command:
 
 ```
-./clean.sh
+./clean.sh hpc
 ```
 
 ## Authors

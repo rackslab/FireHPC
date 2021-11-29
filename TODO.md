@@ -30,7 +30,7 @@
 - [x] Bootstrap MariaDB password in local file
 - [x] Install OpenMPI
 - [x] Introduce groups and inventory 
-- [ ] Fully support zones and parallel FireHPC clusters
+- [x] Fully support zones and parallel FireHPC clusters
 - [ ] Support RPM distribution
 - [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
 - [ ] Develop a real tool (ie. not a prototype) that can run anywhere
@@ -38,6 +38,7 @@
 
 ## Nice to have
 
+- [ ] Install and setup clustershell
 - [x] Rename front to login as this name in more common in HPC
 - [ ] Generate slurm partitions and nodes conf based on inventory → This would
       requires a new filter, roughly similar to ansible.netcommon.vlan_parser,
