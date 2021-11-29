@@ -3,9 +3,9 @@ hpc:
     admin:
       hosts:
         admin:
-    front:
+    login:
       hosts:
-        front:
+        login:
     compute:
       hosts:
         cn[1:2]:

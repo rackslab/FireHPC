@@ -6,7 +6,7 @@
 
 machinectl pull-raw https://hub.nspawn.org/storage/debian/bullseye/raw/image.raw.xz admin
 
-for HOST in front cn1 cn2; do
+for HOST in login cn1 cn2; do
   machinectl clone admin ${HOST}
 done
 machinectl list-images
@@ -14,7 +14,7 @@ machinectl list-images
 # create directory for home shared by all containers
 systemd-run mkdir -p /var/tmp/firehpc/hpc/home
 
-for HOST in admin front cn1 cn2; do
+for HOST in admin login cn1 cn2; do
   systemctl start firehpc-container@hpc:${HOST}.service
 done
 
@@ -22,7 +22,7 @@ done
 sleep 2
 
 # install python
-for HOST in admin front cn1 cn2; do
+for HOST in admin login cn1 cn2; do
   machinectl shell ${HOST} /usr/bin/apt install -y python3
 done
 
