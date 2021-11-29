@@ -24,6 +24,15 @@ FireHPC relies on:
 - [`systemd-nspawn`](https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html) containers controlled with `systemd-{networkd,machined}`
 - [Ansible](https://docs.ansible.com/ansible/latest/index.html) automation tool
 
+FireHPC also requires the following community Ansible collections:
+
+- [community.general](https://docs.ansible.com/ansible/latest/collections/community/general/index.html) >= 3.8.1
+- [community.crypto](https://docs.ansible.com/ansible/latest/collections/community/crypto/index.html)
+- [community.mysql] (https://docs.ansible.com/ansible/latest/collections/community/mysql/index.html)
+
+They may not be installed within Ansible on your distribution. In this case,
+you can install on your system using `ansible-galaxy`.
+
 ## Status
 
 FireHPC is currently an ugly prototype, it is not ready to be used by anyone
