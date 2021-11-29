@@ -1,10 +1,3 @@
-- hosts: localhost
-  tasks:
-  - name: Generate munge key
-    import_role:
-      name: slurm
-      tasks_from: bootstrap-munge
-
 - hosts: all
   remote_user: root
   roles:

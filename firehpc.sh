@@ -27,5 +27,5 @@ for HOST in admin front cn1 cn2; do
 done
 
 ansible --connection machinectl all -m ping
-ansible-playbook conf/playbooks/prepare-ssh.yml
+ansible-playbook conf/playbooks/bootstrap.yml
 ansible-playbook conf/playbooks/site.yml

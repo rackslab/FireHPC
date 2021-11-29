@@ -1,7 +1,9 @@
 ---
 slurm_role: client
 slurm_cluster: hpc
-slurm_db_password: CHANGEME
+slurm_local_munge_dir: munge  # dummy
+slurm_local_mariadb_dir: mariadb  # dummy
+slurm_db_password: "{{ lookup('file', '{{ slurm_local_mariadb_dir }}/mariadb.password', errors='ignore') }}"
 slurm_state_save_loc: /var/spool/slurmctld
 slurm_users: []
 slurm_account: scientists

@@ -27,7 +27,7 @@
 - [x] SSH key pair and authorized_keys for users
 - [x] Deploy system known_host on all nodes
 - [x] Add users in SlurmDBD accounting
-- [ ] Bootstrap MariaDB password in local file
+- [x] Bootstrap MariaDB password in local file
 - [ ] Install OpenMPI
 - [x] Introduce groups and inventory 
 - [ ] Fully support zones and parallel FireHPC clusters
@@ -38,7 +38,10 @@
 
 ## Nice to have
 
-- [ ] Generate slurm partitions and nodes conf based on inventory
+- [ ] Rename front to login as this name in more common in HPC
+- [ ] Generate slurm partitions and nodes conf based on inventory → This would
+      requires a new filter, roughly similar to ansible.netcommon.vlan_parser,
+      to generate nodesets based on host lists.
 - [ ] Use triggered unit to manage (create/remove) shared directories
 - [ ] Improve rackslab/ansible-connection-machinectl _non-root_ branch to match
       [maintainer expectations](https://github.com/tomeon/ansible-connection-machinectl/issues/10#issuecomment-812534935).

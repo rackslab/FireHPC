@@ -9,5 +9,5 @@ ssh_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_ssh_host_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_defs: "{{ fhpc_users }}"
 slurm_local_munge_dir: ../../local/munge
-slurm_db_password: secret
+slurm_local_mariadb_dir: ../../local/mariadb
 slurm_users: "{{ fhpc_users | map(attribute='login') | list }}"

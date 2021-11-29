@@ -4,6 +4,10 @@
     import_role:
       name: ssh
       tasks_from: localkeys
+  - name: Generate munge key and MariaDB password
+    include_role:
+      name: slurm
+      tasks_from: bootstrap
 
 - hosts: all
   connection: machinectl
