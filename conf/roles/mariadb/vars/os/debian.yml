@@ -1,0 +1,5 @@
+---
+mariadb_packages:
+  - mariadb-server
+  - python3-pymysql  # requirement for ansible community.mysql modules
+mariadb_socket: /var/run/mysqld/mysqld.sock

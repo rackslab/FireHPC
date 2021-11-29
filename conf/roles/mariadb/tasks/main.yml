@@ -1,11 +1,21 @@
 ---
+- name: Gather OS specific variables
+  ansible.builtin.include_vars:
+    file: "os/{{ ansible_facts.os_family | lower }}.yml"
+
 - name: Install MariaDB and requirements
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: latest
-  with_items:
-    - mariadb-server
-    - python3-pymysql  # requirement for ansible community.mysql modules
+  with_items: "{{ mariadb_packages }}"
+
+# This is required on redhat based distributions as the service is not
+# automatically started by the RPM packages.
+- name: Ensure MariaDB service is started
+  ansible.builtin.service:
+    name: mariadb
+    state: started
+    enabled: yes
 
 - name: Create mariadb users
   community.mysql.mysql_user:
@@ -14,5 +24,5 @@
     password: "{{ item.password | mandatory }}"
     priv: "{{ item.priv }}"
     state: present
-    login_unix_socket: /var/run/mysqld/mysqld.sock
+    login_unix_socket: "{{ mariadb_socket }}"
   with_items: "{{ mariadb_users }}"
