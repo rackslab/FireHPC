@@ -5,7 +5,7 @@
 
 - name: Ensure OpenSSH daemon is installed
   ansible.builtin.package:
-    name: "openssh-server"
+    name: openssh-server
     state: latest
 
 - name: Deploy SSH host public keys
