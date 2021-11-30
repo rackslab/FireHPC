@@ -96,6 +96,27 @@ Or using SSH with this command:
 ssh -o UserKnownHostsFile=ssh/known_hosts -I local/ssh/id_rsa root@admin.hpc
 ```
 
+Connect with a test user account (_marie_ or _pierre_) on the login node:
+
+```
+ssh -o UserKnownHostsFile=local/hpc/ssh/known_hosts -i local/hpc/ssh/id_rsa pierre@login.hpc
+```
+
+Then run MPI job in Slurm job:
+
+```
+[pierre@login ~]$ curl --silent https://raw.githubusercontent.com/mpitutorial/mpitutorial/gh-pages/tutorials/mpi-hello-world/code/mpi_hello_world.c -o helloworld.c
+[pierre@login ~]$ export PATH=$PATH:/usr/lib64/openmpi/bin  # required on centos8, not on debian11
+[pierre@login ~]$ mpicc -o helloworld helloworld.c
+[pierre@login ~]$ salloc -N 2
+salloc: Granted job allocation 2
+[pierre@login ~]$ mpirun helloworld
+Hello world from processor cn1.hpc, rank 0 out of 4 processors
+Hello world from processor cn1.hpc, rank 1 out of 4 processors
+Hello world from processor cn2.hpc, rank 2 out of 4 processors
+Hello world from processor cn2.hpc, rank 3 out of 4 processors
+```
+
 When you are done, you can clean up everything for a zone with this command:
 
 ```
