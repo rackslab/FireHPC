@@ -10,3 +10,10 @@
   ansible.builtin.dnf:
     name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
     state: present
+
+# PowerTools repo is required to install Slurm packages dependencies.
+- name: Enable PowerTools repo
+  ansible.builtin.lineinfile:
+    path: /etc/yum.repos.d/CentOS-Linux-PowerTools.repo
+    regexp: '^enable='
+    line: enabled=1
