@@ -31,19 +31,26 @@
 - [x] Install OpenMPI
 - [x] Introduce groups and inventory 
 - [x] Fully support zones and parallel FireHPC clusters
-- [ ] Support RPM distribution
-- [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
+- [x] Support RPM distribution
 - [ ] Develop a real tool (ie. not a prototype) that can run anywhere
 - [ ] RELEASE THE SHMOO!
 
 ## Nice to have
 
-- [ ] Install and setup clustershell
+- [ ] Let user define their own inventory file. This would probably means
+      giving up group_vars directory and defining all FireHPC variables in
+      a plain file as group_vars directory is evaluated after the individual
+      files user could provide. For reference, see
+      [multiples inventory section](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#using-multiple-inventory-sources)
+      in Ansible documentation.
+- [ ] Install and setup
+      [clustershell](https://clustershell.readthedocs.io/en/latest/)
 - [x] Rename front to login as this name in more common in HPC
 - [ ] Generate slurm partitions and nodes conf based on inventory → This would
       requires a new filter, roughly similar to ansible.netcommon.vlan_parser,
       to generate nodesets based on host lists.
 - [ ] Use triggered unit to manage (create/remove) shared directories
+- [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
 - [ ] Improve rackslab/ansible-connection-machinectl _non-root_ branch to match
       [maintainer expectations](https://github.com/tomeon/ansible-connection-machinectl/issues/10#issuecomment-812534935).
 - [x] Manual install script to simplify quickstart

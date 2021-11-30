@@ -1,0 +1,6 @@
+---
+mpi_packages:
+  - openmpi-bin
+  - libopenmpi-dev
+  - gcc
+  - make
