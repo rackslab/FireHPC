@@ -41,7 +41,7 @@
 
 - name: Deploy munge key
   ansible.builtin.copy:
-    src: "{{ slurm_local_munge_dir }}/munge.key"
+    src: "{{ slurm_local_munge_key_file }}"
     dest: /etc/munge/munge.key
     owner: munge
     group: munge

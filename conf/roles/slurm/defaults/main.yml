@@ -3,12 +3,12 @@ slurm_profile: client  # default profile in the slurm cluster for the current no
 slurm_uid: 432  # picked randomly among 100-499
 slurm_gid: 432  # picked randomly among 100-499
 slurm_cluster: hpc
-slurm_local_munge_dir: munge  # dummy
-slurm_local_mariadb_dir: mariadb  # dummy
+slurm_local_munge_key_file: munge.key  # dummy
+slurm_local_mariadb_password_file: mariadb.password  # dummy
 # The lookup errors are ignored because the variable is loaded by boostrap
 # tasks file (in bootstrap playbook) before it generates the file. This way, a
 # warning is displayed but Ansible continues instead of failing with the error.
-slurm_db_password: "{{ lookup('file', '{{ slurm_local_mariadb_dir }}/mariadb.password', errors='ignore') }}"
+slurm_db_password: "{{ lookup('file', '{{ slurm_local_mariadb_password_file }}', errors='ignore') }}"
 slurm_state_save_loc: /var/spool/slurmctld
 slurm_users: []
 slurm_account: scientists
