@@ -17,3 +17,43 @@
     path: /etc/yum.repos.d/CentOS-Linux-PowerTools.repo
     regexp: '^enable='
     line: enabled=1
+
+# In centos8 image from hub.nspawn.io, NetworkManager is installed in place of
+# systemd-networkd. Also, systemd-resolved is not started. Install and start
+# systemd-networkd and systemd-resolved to make networking magic happen in
+# containers.
+- name: Check if NetworkManager service exist
+  ansible.builtin.stat:
+    path: /usr/lib/systemd/system/NetworkManager.service
+  register: nm_service
+
+- name: Ensure NetworkManager service is stopped
+  ansible.builtin.service:
+    name: NetworkManager
+    state: stopped
+  when: nm_service.stat.exists
+
+- name: Remove NetworkManager
+  ansible.builtin.package:
+    name: NetworkManager
+    state: removed
+
+- name: Install systemd-networkd
+  ansible.builtin.package:
+    name: systemd-networkd
+    state: latest
+
+- name: Ensure systemd-{networkd,resolvd} services are started and enabled
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+    - systemd-networkd
+    - systemd-resolved
+
+- name: Deploy systemd-resolved generated stub resolv.conf
+  ansible.builtin.copy:
+    src: /run/systemd/resolve/stub-resolv.conf
+    dest: /etc/resolv.conf
+    remote_src: yes
