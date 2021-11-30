@@ -45,6 +45,7 @@
       in Ansible documentation.
 - [ ] Install and setup
       [clustershell](https://clustershell.readthedocs.io/en/latest/)
+- [ ] Generate ssh config file on host
 - [x] Rename front to login as this name in more common in HPC
 - [ ] Generate slurm partitions and nodes conf based on inventory → This would
       requires a new filter, roughly similar to ansible.netcommon.vlan_parser,
