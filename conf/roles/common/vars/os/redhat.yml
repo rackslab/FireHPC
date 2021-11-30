@@ -2,7 +2,5 @@
 common_packages:
   - neovim
   - htop
-  - curl
   - rsync
   - man-db
-  - less
