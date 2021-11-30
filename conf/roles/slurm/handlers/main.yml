@@ -3,7 +3,7 @@
   ansible.builtin.service:
     name: slurmctld
     state: restarted
-  when: slurm_role == "server"
+  when: slurm_profile == "server"
 
 - name: Restart slurmdbd
   ansible.builtin.service:
@@ -14,7 +14,7 @@
   ansible.builtin.service:
     name: slurmd
     state: restarted
-  when: slurm_role == "compute"
+  when: slurm_profile == "compute"
 
 - name: Restart munge
   ansible.builtin.service:

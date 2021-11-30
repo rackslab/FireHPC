@@ -56,6 +56,6 @@
     state: started
     enabled: yes
 
-- name: "Run slurm {{ slurm_role }} specific tasks"
-  ansible.builtin.include_tasks: "{{ slurm_role }}.yml"
-  when: slurm_role != "client"
+- name: "Run slurm {{ slurm_profile }} specific tasks"
+  ansible.builtin.include_tasks: "{{ slurm_profile }}.yml"
+  when: slurm_profile != "client"

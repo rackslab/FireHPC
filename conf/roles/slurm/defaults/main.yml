@@ -1,5 +1,5 @@
 ---
-slurm_role: client  # default role in the slurm cluster for the current node
+slurm_profile: client  # default profile in the slurm cluster for the current node
 slurm_uid: 432  # picked randomly among 100-499
 slurm_gid: 432  # picked randomly among 100-499
 slurm_cluster: hpc
