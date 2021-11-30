@@ -1,0 +1,9 @@
+---
+slurm_common_packages:
+  - slurm-client
+  - munge
+slurm_server_packages:
+  - slurmctld
+  - slurmdbd
+slurm_compute_packages:
+  - slurmd

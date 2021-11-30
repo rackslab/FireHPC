@@ -18,6 +18,6 @@
 
 - name: Generate slurm MariaDB password file
   ansible.builtin.copy:
-    content: "{{ lookup('community.general.random_string', length=16) }}"
+    content: "{{ lookup('community.general.random_string', length=16, special=false) }}" # avoid special character that may confuse either slurmdbd or mariadb
     dest: "{{ slurm_local_mariadb_dir }}/mariadb.password"
     force: no  # do not overwrite the password if it has already been generated

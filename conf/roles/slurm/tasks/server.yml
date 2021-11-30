@@ -17,12 +17,21 @@
   notify: Restart slurmdbd
 
 - name: Install slurm server specific packages
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: latest
+  with_items: "{{ slurm_server_packages }}"
+
+# This is required on redhat based distributions as the service is not
+# automatically started by the RPM packages, and it does not hurt on Debian.
+- name: Ensure slurm server services are started
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
   with_items:
-    - slurmctld
     - slurmdbd
+    - slurmctld
 
 - name: Create cluster in slurmdbd
   ansible.builtin.command:

@@ -1,7 +1,14 @@
 ---
 - name: Install slurm compute specific packages
-  ansible.builtin.apt:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: latest
-  with_items:
-    - slurmd
+  with_items: "{{ slurm_compute_packages }}"
+
+# This is required on redhat based distributions as the service is not
+# automatically started by the RPM packages, and it does not hurt on Debian.
+- name: Ensure slurmd service is started
+  ansible.builtin.service:
+    name: slurmd
+    state: started
+    enabled: yes
