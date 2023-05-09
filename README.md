@@ -120,7 +120,7 @@ machinectl shell admin.hpc
 Or using SSH with this command:
 
 ```
-ssh -o UserKnownHostsFile=ssh/known_hosts -I local/ssh/id_rsa root@admin.hpc
+ssh -o UserKnownHostsFile=local/hpc/ssh/known_hosts -i local/hpc/ssh/id_rsa root@admin.hpc
 ```
 
 Connect with a test user account (_marie_ or _pierre_) on the login node:
