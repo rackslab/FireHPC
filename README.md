@@ -42,6 +42,33 @@ except its developper. **Use it at your own risk!**
 
 ## Quickstart
 
+Create file `/etc/systemd/system/systemd-importd.service.d/local.conf`:
+
+----
+[Service]
+CapabilityBoundingSet=CAP_LINUX_IMMUTABLE
+----
+
+NOTE: This a workaround for https://github.com/systemd/systemd/issues/19115 in systemd 248 fixed in 249.
+
+----
+curl https://hub.nspawn.org/storage/masterkey.pgp -o /tmp/masterkey.nspawn.org
+----
+
+----
+sudo gpg --no-default-keyring --keyring=/etc/systemd/import-pubring.gpg --import /tmp/masterkey.nspawn.org
+----
+
+----
+gpg: répertoire « /root/.gnupg » créé
+gpg: /root/.gnupg/trustdb.gpg : base de confiance créée
+gpg: clef 9F9B61E3E4EF5957 : clef publique « Nspawn.org Team (Nspawn.org Signing Key for containers.) <team@nspawn.org> » importée
+gpg: Quantité totale traitée : 1
+gpg:               importées : 1
+----
+
+https://github.com/systemd/systemd/issues/21397
+
 On Ubuntu 21.10, start and enable `systemd-networkd` service with _root_
 permissions:
 
