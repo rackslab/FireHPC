@@ -1,0 +1,11 @@
+all:
+  children:
+    admin:
+      hosts:
+        admin.{{ zone }}:
+    login:
+      hosts:
+        login.{{ zone }}:
+    compute:
+      hosts:
+        cn[1:2].{{ zone }}:

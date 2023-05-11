@@ -1,6 +1,5 @@
 # shared variables
-fhpc_local_dir: '../../local/{{ fhpc_zone }}'
-fhpc_local_ssh_dir: "{{ fhpc_local_dir }}/ssh"
+fhpc_local_ssh_dir: "{{ fhpc_zone_state_dir }}/ssh"
 fhpc_users:
   - { login: "marie",  name: "Marie Curie",  uid: 10001 }
   - { login: "pierre", name: "Pierre Curie", uid: 10002 }
@@ -9,6 +8,6 @@ fhpc_users:
 ssh_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_ssh_host_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_defs: "{{ fhpc_users }}"
-slurm_local_munge_key_file: "{{ fhpc_local_dir }}/munge/munge.key"
-slurm_local_mariadb_password_file: "{{ fhpc_local_dir }}/mariadb/mariadb.password"
+slurm_local_munge_key_file: "{{ fhpc_zone_state_dir }}/munge/munge.key"
+slurm_local_mariadb_password_file: "{{ fhpc_zone_state_dir }}/mariadb/mariadb.password"
 slurm_users: "{{ fhpc_users | map(attribute='login') | list }}"

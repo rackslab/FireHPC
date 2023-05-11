@@ -1,0 +1,8 @@
+[defaults]
+inventory = hosts
+connection_plugins = /usr/share/firehpc/conf/connections/connection_plugins
+interpreter_python = auto_silent
+roles_path = /usr/share/firehpc/conf/roles
+
+[ssh_connection]
+ssh_args = -C -o ControlMaster=auto -o ControlPersist=60s -o UserKnownHostsFile={{ state }}/ssh/known_hosts -i {{ state }}/ssh/id_rsa
