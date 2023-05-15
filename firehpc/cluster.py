@@ -57,7 +57,7 @@ class EmulatedCluster:
         return self.zone_dir / 'conf'
 
 
-    def deploy(self):
+    def deploy(self) -> None:
 
         if not self.state.exists():
             logger.debug("Creating state directory %s", self.state)
@@ -142,7 +142,7 @@ class EmulatedCluster:
             )
             shutil.rmtree(generated_path)
 
-    def clean(self):
+    def clean(self) -> None:
         for host in ['admin', 'login', 'cn1', 'cn2']:
             logger.info("Powering off container %s.%s", host, self.zone)
             cmd = [
