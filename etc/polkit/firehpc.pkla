@@ -1,12 +1,12 @@
-[Sudo group can manage machines]
-Identity=unix-group:sudo
+[firehpc group can manage machines]
+Identity=unix-group:firehpc
 Action=org.freedesktop.machine1.*
 ResultAny=no
 ResultInactive=no
 ResultActive=yes
 
-[Sudo group can import container images]
-Identity=unix-group:sudo
+[firehpc group can import container images]
+Identity=unix-group:firehpc
 Action=org.freedesktop.import1.*
 ResultAny=no
 ResultInactive=no
@@ -17,8 +17,8 @@ ResultActive=yes
 # units with *.pkla files. It is possible with Javascript *.rules files
 # supported by recent versions of polkit by it is not available in
 # Debian/Ubuntu.
-[Sudo group can manager system units]
-Identity=unix-group:sudo
+[firehpc group can manager system units]
+Identity=unix-group:firehpc
 Action=org.freedesktop.systemd1.manage-units
 ResultAny=no
 ResultInactive=no
