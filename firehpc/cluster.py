@@ -93,21 +93,6 @@ class EmulatedCluster:
             ]
             subprocess.run(cmd)
 
-        with open(self.zone_dir / 'ansible.cfg', 'w+') as fh:
-            fh.write(
-                Templater().frender(
-                    self.settings.ansible.path / 'ansible.cfg.j2',
-                    state=self.zone_dir,
-                )
-            )
-        with open(self.zone_dir / 'hosts', 'w+') as fh:
-            fh.write(
-                Templater().frender(
-                    self.settings.ansible.path / 'hosts.j2',
-                    zone=self.zone_dir,
-                )
-            )
-
         if self.conf_dir.exists():
             logger.debug(
                 "Removing existing configuration directory %s", self.conf_dir
@@ -115,6 +100,17 @@ class EmulatedCluster:
             shutil.rmtree(self.conf_dir)
 
         self.conf_dir.mkdir()
+
+        for template in ['ansible.cfg', 'hosts']:
+            logger.debug("Generating configuration file %s from template", self.conf_dir / template)
+            with open(self.conf_dir / template, 'w+') as fh:
+                fh.write(
+                    Templater().frender(
+                        self.settings.ansible.path / f"{template}.j2",
+                        state=self.zone_dir,
+                        zone=self.zone,
+                    )
+                )
 
         for subconf_dir in ['group_vars', 'roles', 'playbooks']:
             dest = self.settings.ansible.path / subconf_dir
