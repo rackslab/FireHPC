@@ -32,8 +32,8 @@ from .templates import Templater
 logger = logging.getLogger(__name__)
 
 OS_URL = {
-    'debian11': 'https://hub.nspawn.org/storage/debian/bullseye/raw/image.raw.xz',
-    'rocky8': 'https://hub.nspawn.org/storage/centos/8/raw/image.raw.xz',
+    'debian11': 'https://hpck.it/osi/firehpc/main/node-debian11_1.raw.xz',
+    'rocky8': 'https://hpck.it/osi/firehpc/main/node-rocky8_1.raw.xz',
 }
 
 
