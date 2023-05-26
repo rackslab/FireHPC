@@ -13,6 +13,5 @@
 
 - name: Ensure basic packages are installed and updated
   ansible.builtin.package:
-    name: "{{ item }}"
+    name: "{{ common_packages }}"
     state: latest
-  with_items: "{{ common_packages }}"
