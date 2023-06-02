@@ -102,7 +102,10 @@ class EmulatedCluster:
         self.conf_dir.mkdir()
 
         for template in ['ansible.cfg', 'hosts']:
-            logger.debug("Generating configuration file %s from template", self.conf_dir / template)
+            logger.debug(
+                "Generating configuration file %s from template",
+                self.conf_dir / template,
+            )
             with open(self.conf_dir / template, 'w+') as fh:
                 fh.write(
                     Templater().frender(
@@ -153,7 +156,7 @@ class EmulatedCluster:
             subprocess.run(cmd)
 
         logger.info("Waiting for containers to power off")
-        time.sleep(5.)
+        time.sleep(5.0)
 
         logger.info("Removing container images")
         for host in ['admin', 'login', 'cn1', 'cn2']:
