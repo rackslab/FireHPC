@@ -28,6 +28,7 @@ import logging
 import ansible_runner
 
 from .templates import Templater
+from .errors import FireHPCRuntimeError
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,11 @@ class EmulatedCluster:
             self.home_dir.mkdir()
 
         cmd = ['machinectl', 'pull-raw', OS_URL[self.os], f"admin.{self.zone}"]
-        subprocess.run(cmd)
+        try:
+            subprocess.run(cmd, check=True)
+        except subprocess.CalledProcessError as e:
+            raise FireHPCRuntimeError(f"error: {str(e)}")
+
         for host in ['login', 'cn1', 'cn2']:
             logger.info(
                 "Cloning admin container image for %s.%s", host, self.zone
@@ -81,7 +86,11 @@ class EmulatedCluster:
                 f"admin.{self.zone}",
                 f"{host}.{self.zone}",
             ]
-            subprocess.run(cmd)
+            try:
+                subprocess.run(cmd, check=True)
+            except subprocess.CalledProcessError as e:
+                raise FireHPCRuntimeError(f"error: {str(e)}")
+
         cmd = ['machinectl', 'list-images']
         subprocess.run(cmd)
         for host in ['admin', 'login', 'cn1', 'cn2']:
@@ -91,7 +100,10 @@ class EmulatedCluster:
                 'start',
                 f"firehpc-container@{self.zone}:{host}.service",
             ]
-            subprocess.run(cmd)
+            try:
+                subprocess.run(cmd, check=True)
+            except subprocess.CalledProcessError as e:
+                raise FireHPCRuntimeError(f"error: {str(e)}")
 
         if self.conf_dir.exists():
             logger.debug(

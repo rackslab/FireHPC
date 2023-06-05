@@ -26,6 +26,7 @@ from pathlib import Path
 from .version import __version__
 from .settings import RuntimeSettings
 from .cluster import EmulatedCluster
+from .errors import FireHPCRuntimeError
 from .log import TTYFormatter
 
 logger = logging.getLogger(__name__)
@@ -90,7 +91,11 @@ class FireHPCExec:
         self.args = parser.parse_args()
         self._setup_logger()
         self.settings = RuntimeSettings()
-        self._execute()
+        try:
+            self._execute()
+        except FireHPCRuntimeError as e:
+            logger.critical(str(e))
+            sys.exit(1)
 
     def _setup_logger(self):
         if self.args.debug:
