@@ -19,7 +19,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-import subprocess
+
 from pathlib import Path
 import shutil
 import time
@@ -27,8 +27,8 @@ import logging
 
 import ansible_runner
 
+from .runner import run
 from .templates import Templater
-from .errors import FireHPCRuntimeError
 
 logger = logging.getLogger(__name__)
 
@@ -74,10 +74,7 @@ class EmulatedCluster:
             self.home_dir.mkdir()
 
         cmd = ['machinectl', 'pull-raw', OS_URL[self.os], f"admin.{self.zone}"]
-        try:
-            subprocess.run(cmd, check=True)
-        except subprocess.CalledProcessError as e:
-            raise FireHPCRuntimeError(f"error: {str(e)}")
+        run(cmd)
 
         for host in ['login', 'cn1', 'cn2']:
             logger.info(
@@ -89,13 +86,10 @@ class EmulatedCluster:
                 f"admin.{self.zone}",
                 f"{host}.{self.zone}",
             ]
-            try:
-                subprocess.run(cmd, check=True)
-            except subprocess.CalledProcessError as e:
-                raise FireHPCRuntimeError(f"error: {str(e)}")
+            run(cmd, check=True)
 
         cmd = ['machinectl', 'list-images']
-        subprocess.run(cmd)
+        run(cmd)
 
         # generate environment file
         logger.debug("Generating zone environment file %s", self.zone_env_path)
@@ -109,10 +103,7 @@ class EmulatedCluster:
                 'start',
                 f"firehpc-container@{self.zone}:{host}.service",
             ]
-            try:
-                subprocess.run(cmd, check=True)
-            except subprocess.CalledProcessError as e:
-                raise FireHPCRuntimeError(f"error: {str(e)}")
+            run(cmd, check=True)
 
         logger.debug("Removing zone environment file %s", self.zone_env_path)
         self.zone_env_path.unlink()
@@ -177,7 +168,7 @@ class EmulatedCluster:
                 'poweroff',
                 f"{host}.{self.zone}",
             ]
-            subprocess.run(cmd)
+            run(cmd)
 
         logger.info("Waiting for containers to power off")
         time.sleep(5.0)
@@ -189,7 +180,7 @@ class EmulatedCluster:
                 'remove',
                 f"{host}.{self.zone}",
             ]
-            subprocess.run(cmd)
+            run(cmd)
 
         if self.home_dir.is_dir():
             logger.info("Remove zone home directory")
