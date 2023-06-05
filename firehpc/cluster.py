@@ -112,6 +112,7 @@ class EmulatedCluster:
         logger.debug("Removing zone environment file %s", self.zone_env_path)
         self.zone_env_path.unlink()
 
+    def conf(self) -> conf:
         if self.conf_dir.exists():
             logger.debug(
                 "Removing existing configuration directory %s", self.conf_dir

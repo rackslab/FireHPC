@@ -85,7 +85,7 @@ class FireHPCExec:
         parser.add_argument(
             'action',
             help="Action to perform",
-            choices=['deploy', 'clean'],
+            choices=['deploy', 'conf', 'clean'],
         )
 
         self.args = parser.parse_args()
@@ -117,6 +117,8 @@ class FireHPCExec:
     def _execute(self):
         if self.args.action == 'deploy':
             self._execute_deploy()
+        elif self.args.action == 'conf':
+            self._execute_conf()
         elif self.args.action == 'clean':
             self._execute_clean()
         else:
@@ -137,6 +139,19 @@ class FireHPCExec:
             self.settings, self.args.zone, self.args.os, self.args.state
         )
         cluster.deploy()
+        cluster.conf()
+
+    def _execute_conf(self):
+        if self.args.zone is None:
+            logger.critical("zone to configure is not defined")
+            logger.info(
+                "try setting the zone to configure with --zone argument"
+            )
+            sys.exit(1)
+        cluster = EmulatedCluster(
+            self.settings, self.args.zone, None, self.args.state
+        )
+        cluster.conf()
 
     def _execute_clean(self):
         if self.args.zone is None:
