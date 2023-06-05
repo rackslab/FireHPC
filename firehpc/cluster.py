@@ -104,6 +104,10 @@ class EmulatedCluster:
                 f"firehpc-container@{self.zone}:{host}.service",
             ]
             run(cmd, check=True)
+            # Slightly wait between each container invocation for network bridge
+            # setting to be ready and avoid IP address being sequentially
+            # flushed by the next container.
+            time.sleep(1.0)
 
         logger.debug("Removing zone environment file %s", self.zone_env_path)
         self.zone_env_path.unlink()
