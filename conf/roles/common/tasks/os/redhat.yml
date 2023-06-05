@@ -14,7 +14,7 @@
 # PowerTools repo is required to install Slurm packages dependencies.
 - name: Enable PowerTools repo
   ansible.builtin.lineinfile:
-    path: /etc/yum.repos.d/CentOS-Linux-PowerTools.repo
+    path: /etc/yum.repos.d/Rocky-PowerTools.repo
     regexp: '^enable='
     line: enabled=1
 
