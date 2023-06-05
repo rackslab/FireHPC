@@ -42,74 +42,46 @@ except its developper. **Use it at your own risk!**
 
 ## Quickstart
 
-Create file `/etc/systemd/system/systemd-importd.service.d/local.conf`:
+Install `firehpc`:
 
-----
-[Service]
-CapabilityBoundingSet=CAP_LINUX_IMMUTABLE
-----
+```
+$ sudo apt install firehpc
+```
 
-NOTE: This a workaround for https://github.com/systemd/systemd/issues/19115 in systemd 248 fixed in 249.
+Add your user in `firehpc` system group:
 
-----
-curl https://hub.nspawn.org/storage/masterkey.pgp -o /tmp/masterkey.nspawn.org
-----
+```
+$ sudo usermod -a -G firehpc ${USERNAME}
+```
 
-----
-sudo gpg --no-default-keyring --keyring=/etc/systemd/import-pubring.gpg --import /tmp/masterkey.nspawn.org
-----
+```
+$ curl -s https://hpck.it/keyring.asc | \
+  sudo gpg --no-default-keyring --keyring=/etc/systemd/import-pubring.gpg --import
+```
 
-----
-gpg: répertoire « /root/.gnupg » créé
-gpg: /root/.gnupg/trustdb.gpg : base de confiance créée
-gpg: clef 9F9B61E3E4EF5957 : clef publique « Nspawn.org Team (Nspawn.org Signing Key for containers.) <team@nspawn.org> » importée
-gpg: Quantité totale traitée : 1
-gpg:               importées : 1
-----
+```
+gpg: key F2EB7900E8151A0D: public key "HPCk.it team <contact@hpck.it>" imported
+gpg: Total number processed: 1
+gpg:               imported: 1
+```
 
 https://github.com/systemd/systemd/issues/21397
 
-On Ubuntu 21.10, start and enable `systemd-networkd` service with _root_
-permissions:
+On Debian 12, start and enable `systemd-networkd` service:
 
 ```
 sudo systemctl start systemd-networkd.service
 sudo systemctl enable systemd-networkd.service
 ```
 
-Restart systemd-resolvd and NetworkManager to get back DNS:
-
-```
-sudo systemctl restart systemd-resolvd.service
-sudo systemctl restart NetworkManager.service
-```
-
-Import [hub.nspawn.org](https://hub.nspawn.org) GPG key in `systemd-importd`
-keyring:
-
-```
-curl https://hub.nspawn.org/storage/masterkey.pgp -o /tmp/masterkey.nspawn.org
-sudo gpg --no-default-keyring --keyring=/etc/systemd/import-pubring.gpg --import /tmp/masterkey.nspawn.org
-```
-
-Run installation script:
-
-```
-sudo ./install.sh
-```
-
-**NOTE:** Please refer to comments in the [install](install.sh) script to get
-full details about installed files.
-
-
 Then, with your regular user, run FireHPC with a zone name and an OS in
 arguments. For example:
 
 ```
-./firehpc.sh hpc debian11
+$ firehpc deploy --zone hpc --os debian11
 ```
 
-**NOTE:** Supported OS are _debian11_ and _centos8_.
+**NOTE:** Supported OS are _debian11_ and _rocky8_.
 
 You can connect to your containers (eg. _admin_) with this command:
 
@@ -120,13 +92,13 @@ machinectl shell admin.hpc
 Or using SSH with this command:
 
 ```
-ssh -o UserKnownHostsFile=local/hpc/ssh/known_hosts -i local/hpc/ssh/id_rsa root@admin.hpc
+ssh -o UserKnownHostsFile=~/.local/state/firehpc/hpc/ssh/known_hosts -i ~/.local/state/firehpc/hpc/ssh/id_rsa root@admin.hpc
 ```
 
 Connect with a test user account (_marie_ or _pierre_) on the login node:
 
 ```
-ssh -o UserKnownHostsFile=local/hpc/ssh/known_hosts -i local/hpc/ssh/id_rsa pierre@login.hpc
+ssh -o UserKnownHostsFile=~/.local/state/firehpc/hpc/ssh/known_hosts -i ~/.local/state/firehpc/hpc/ssh/id_rsa pierre@login.hpc
 ```
 
 Then run MPI job in Slurm job:
@@ -147,7 +119,7 @@ Hello world from processor cn2.hpc, rank 3 out of 4 processors
 When you are done, you can clean up everything for a zone with this command:
 
 ```
-./clean.sh hpc
+$ firehpc clean --zone hpc
 ```
 
 ## Authors
