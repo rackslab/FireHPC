@@ -20,7 +20,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 import subprocess
-from io import StringIO
+from pathlib import Path
 import shutil
 import time
 import logging
@@ -57,6 +57,9 @@ class EmulatedCluster:
     def conf_dir(self) -> Path:
         return self.zone_dir / 'conf'
 
+    @property
+    def zone_env_path(self) -> Path:
+        return Path('/run/firehpc') / f"{self.zone}.env"
 
     def deploy(self) -> None:
 
@@ -93,6 +96,12 @@ class EmulatedCluster:
 
         cmd = ['machinectl', 'list-images']
         subprocess.run(cmd)
+
+        # generate environment file
+        logger.debug("Generating zone environment file %s", self.zone_env_path)
+        with open(self.zone_env_path, 'w+') as fh:
+            fh.write(f"ZONE_HOME={self.home_dir}\n")
+
         for host in ['admin', 'login', 'cn1', 'cn2']:
             logger.info("Starting container %s.%s", host, self.zone)
             cmd = [
@@ -104,6 +113,9 @@ class EmulatedCluster:
                 subprocess.run(cmd, check=True)
             except subprocess.CalledProcessError as e:
                 raise FireHPCRuntimeError(f"error: {str(e)}")
+
+        logger.debug("Removing zone environment file %s", self.zone_env_path)
+        self.zone_env_path.unlink()
 
         if self.conf_dir.exists():
             logger.debug(
