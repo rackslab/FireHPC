@@ -14,7 +14,7 @@ After=network.target systemd-resolved.service modprobe@tun.service modprobe@loop
 RequiresMountsFor=/var/lib/machines/%i
 
 [Service]
-ExecStart=/usr/libexec/firehpc-wrapper %i
+ExecStart=/usr/libexec/firehpc-container-wrapper %i
 KillMode=mixed
 Type=notify
 RestartForceExitStatus=133

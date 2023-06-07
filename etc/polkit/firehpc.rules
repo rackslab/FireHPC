@@ -4,8 +4,9 @@ polkit.addRule(function(action, subject) {
     if ((action.id.startsWith("org.freedesktop.machine1.") ||
          action.id.startsWith("org.freedesktop.import1.") ||
          (action.id == "org.freedesktop.systemd1.manage-units" && 
-	  action.lookup("unit").startsWith("firehpc-container@"))) &&
-	subject.isInGroup("firehpc")) {
+          (action.lookup("unit").startsWith("firehpc-container@") ||
+           action.lookup("unit").startsWith("firehpc-storage@")))) &&
+        subject.isInGroup("firehpc")) {
         return polkit.Result.YES;
     }
 });

@@ -1,0 +1,18 @@
+# This file is part of FireHPC. It is largely based on systemd-nspawn@.service
+# from systemd.
+#
+# Copyright (c) 2023, Rackslab
+#
+# GNU General Public License v3.0+
+
+[Unit]
+Description=FireHPC storage %i
+RequiresMountsFor=/var/lib/firehpc
+
+[Service]
+ExecStart=/usr/libexec/firehpc-storage-wrapper start %i
+ExecStop=/usr/libexec/firehpc-storage-wrapper stop %i
+RemainAfterExit=yes
+
+[Install]
+WantedBy=machines.target

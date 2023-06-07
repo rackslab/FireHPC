@@ -50,16 +50,8 @@ class EmulatedCluster:
         return self.state / self.zone
 
     @property
-    def home_dir(self) -> Path:
-        return self.zone_dir / 'home'
-
-    @property
     def conf_dir(self) -> Path:
         return self.zone_dir / 'conf'
-
-    @property
-    def zone_env_path(self) -> Path:
-        return Path('/run/firehpc') / f"{self.zone}.env"
 
     def deploy(self) -> None:
 
@@ -69,9 +61,6 @@ class EmulatedCluster:
         if not self.zone_dir.exists():
             logger.debug("Creating zone state directory %s", self.zone_dir)
             self.zone_dir.mkdir()
-        if not self.home_dir.exists():
-            logger.debug("Creating zone home directory %s", self.home_dir)
-            self.home_dir.mkdir()
 
         cmd = ['machinectl', 'pull-raw', OS_URL[self.os], f"admin.{self.zone}"]
         run(cmd)
@@ -91,10 +80,13 @@ class EmulatedCluster:
         cmd = ['machinectl', 'list-images']
         run(cmd)
 
-        # generate environment file
-        logger.debug("Generating zone environment file %s", self.zone_env_path)
-        with open(self.zone_env_path, 'w+') as fh:
-            fh.write(f"ZONE_HOME={self.home_dir}\n")
+        logger.info("Starting zone storage service %s", self.zone)
+        cmd = [
+            'systemctl',
+            'start',
+            f"firehpc-storage@{self.zone}.service",
+        ]
+        run(cmd, check=True)
 
         for host in ['admin', 'login', 'cn1', 'cn2']:
             logger.info("Starting container %s.%s", host, self.zone)
@@ -109,8 +101,6 @@ class EmulatedCluster:
             # flushed by the next container.
             time.sleep(1.0)
 
-        logger.debug("Removing zone environment file %s", self.zone_env_path)
-        self.zone_env_path.unlink()
 
     def conf(self) -> conf:
         if self.conf_dir.exists():
@@ -187,6 +177,10 @@ class EmulatedCluster:
             ]
             run(cmd)
 
-        if self.home_dir.is_dir():
-            logger.info("Remove zone home directory")
-            shutil.rmtree(self.home_dir)
+        logger.info("Stopping zone storage service")
+        cmd = [
+            'systemctl',
+            'stop',
+            f"firehpc-storage@{self.zone}.service",
+        ]
+        run(cmd)
