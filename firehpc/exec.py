@@ -26,6 +26,7 @@ from pathlib import Path
 from .version import __version__
 from .settings import RuntimeSettings
 from .cluster import EmulatedCluster
+from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
 from .log import TTYFormatter
 
@@ -109,6 +110,17 @@ class FireHPCExec:
         )
         parser_conf.set_defaults(func=self._execute_conf)
 
+        # ssh command
+        parser_ssh = subparsers.add_parser(
+            'ssh', help='Connect to cluster zone by SSH'
+        )
+        parser_ssh.add_argument(
+            'args',
+            help="Destination node and arguments of SSH connection",
+            nargs='+',
+        )
+        parser_ssh.set_defaults(func=self._execute_ssh)
+
         # clean command
         parser_clean = subparsers.add_parser('clean', help='Clean cluster zone')
         parser_clean.add_argument(
@@ -156,6 +168,18 @@ class FireHPCExec:
             self.settings, self.args.zone, None, self.args.state
         )
         cluster.conf(bootstrap=self.args.with_bootstrap)
+
+    def _execute_ssh(self):
+        if '.' not in self.args.args[0]:
+            logger.critical(
+                "Format of ssh command first argument is not valid, it must be "
+                "destination node with format: [login@]node.zone"
+            )
+            sys.exit(1)
+        zone = self.args.args[0].split('.')[1]
+        cluster = EmulatedCluster(self.settings, zone, None, self.args.state)
+        ssh = SSHClient(cluster)
+        ssh.exec(self.args.args)
 
     def _execute_clean(self):
         cluster = EmulatedCluster(
