@@ -24,9 +24,8 @@
 
 - name: Install slurm common packages
   ansible.builtin.package:
-    name: "{{ item }}"
+    name: "{{ slurm_common_packages }}"
     state: latest
-  with_items: "{{ slurm_common_packages }}"
 
 - name: Create slurm configuration directory
   ansible.builtin.file:
