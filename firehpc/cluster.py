@@ -101,8 +101,7 @@ class EmulatedCluster:
             # flushed by the next container.
             time.sleep(1.0)
 
-
-    def conf(self) -> conf:
+    def conf(self, bootstrap=True) -> conf:
         if self.conf_dir.exists():
             logger.debug(
                 "Removing existing configuration directory %s", self.conf_dir
@@ -140,7 +139,11 @@ class EmulatedCluster:
             'fhpc_zone': self.zone,
         }
 
-        for playbook in ['bootstrap', 'site']:
+        playbooks = ['site']
+        if bootstrap:
+            playbooks.insert(0, 'bootstrap')
+
+        for playbook in playbooks:
             ansible_runner.run(
                 private_data_dir=self.conf_dir,
                 playbook=f"playbooks/{playbook}.yml",

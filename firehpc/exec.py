@@ -67,6 +67,11 @@ class FireHPCExec:
             help="Show external libraries logs",
         )
         parser.add_argument(
+            '--with-bootstrap',
+            action='store_true',
+            help="Run configuration bootstrap when deploying configuration",
+        )
+        parser.add_argument(
             '--os',
             help="Operating system to deploy",
             choices=['debian11', 'rocky8'],
@@ -151,7 +156,7 @@ class FireHPCExec:
         cluster = EmulatedCluster(
             self.settings, self.args.zone, None, self.args.state
         )
-        cluster.conf()
+        cluster.conf(bootstrap=self.args.with_bootstrap)
 
     def _execute_clean(self):
         if self.args.zone is None:
