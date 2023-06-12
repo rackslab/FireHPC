@@ -72,32 +72,57 @@ class FireHPCExec:
             help="Run configuration bootstrap when deploying configuration",
         )
         parser.add_argument(
-            '--os',
-            help="Operating system to deploy",
-            choices=['debian11', 'rocky8'],
-        )
-        parser.add_argument(
-            '--zone',
-            help="Name of the zone to deploy",
-        )
-        parser.add_argument(
             '--state',
             help="Directory to store cluster state (default: %(default)s)",
             type=Path,
             default=default_state_dir(),
         )
-
-        parser.add_argument(
-            'action',
-            help="Action to perform",
-            choices=['deploy', 'conf', 'clean'],
+        subparsers = parser.add_subparsers(
+            help='Action to perform',
+            dest='action',
+            required=True,
         )
+
+        # deploy command
+        parser_deploy = subparsers.add_parser('deploy', help='Deploy cluster')
+        parser_deploy.add_argument(
+            '--os',
+            help="Operating system to deploy",
+            choices=['debian11', 'rocky8'],
+            required=True,
+        )
+        parser_deploy.add_argument(
+            '--zone',
+            help="Name of the zone to deploy",
+            required=True,
+        )
+        parser_deploy.set_defaults(func=self._execute_deploy)
+
+        # conf command
+        parser_conf = subparsers.add_parser(
+            'conf', help='Deploy configuration on cluster'
+        )
+        parser_conf.add_argument(
+            '--zone',
+            help="Name of the zone on which configuration is deployed",
+            required=True,
+        )
+        parser_conf.set_defaults(func=self._execute_conf)
+
+        # clean command
+        parser_clean = subparsers.add_parser('clean', help='Clean cluster zone')
+        parser_clean.add_argument(
+            '--zone',
+            help="Name of the zone to clean",
+            required=True,
+        )
+        parser_clean.set_defaults(func=self._execute_clean)
 
         self.args = parser.parse_args()
         self._setup_logger()
         self.settings = RuntimeSettings()
         try:
-            self._execute()
+            self.args.func()
         except FireHPCRuntimeError as e:
             logger.critical(str(e))
             sys.exit(1)
@@ -119,27 +144,7 @@ class FireHPCExec:
             handler.addFilter(lib_filter)
         root_logger.addHandler(handler)
 
-    def _execute(self):
-        if self.args.action == 'deploy':
-            self._execute_deploy()
-        elif self.args.action == 'conf':
-            self._execute_conf()
-        elif self.args.action == 'clean':
-            self._execute_clean()
-        else:
-            raise NotImplementedError(
-                f"action {self.args.action} is not supported"
-            )
-
     def _execute_deploy(self):
-        if self.args.zone is None:
-            logger.critical("zone to deploy is not defined")
-            logger.info("try setting the zone to deploy with --zone argument")
-            sys.exit(1)
-        if self.args.os is None:
-            logger.critical("operating system to deploy is not defined")
-            logger.info("try setting the zone to deploy with --os argument")
-            sys.exit(1)
         cluster = EmulatedCluster(
             self.settings, self.args.zone, self.args.os, self.args.state
         )
@@ -147,23 +152,13 @@ class FireHPCExec:
         cluster.conf()
 
     def _execute_conf(self):
-        if self.args.zone is None:
-            logger.critical("zone to configure is not defined")
-            logger.info(
-                "try setting the zone to configure with --zone argument"
-            )
-            sys.exit(1)
         cluster = EmulatedCluster(
             self.settings, self.args.zone, None, self.args.state
         )
         cluster.conf(bootstrap=self.args.with_bootstrap)
 
     def _execute_clean(self):
-        if self.args.zone is None:
-            logger.critical("zone to clean is not defined")
-            logger.info("try setting the zone to clean with --zone argument")
-            sys.exit(1)
         cluster = EmulatedCluster(
-            self.settings, self.args.zone, self.args.os, self.args.state
+            self.settings, self.args.zone, None, self.args.state
         )
         cluster.clean()
