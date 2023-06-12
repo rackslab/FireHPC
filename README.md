@@ -92,13 +92,13 @@ machinectl shell admin.hpc
 Or using SSH with this command:
 
 ```
-ssh -o UserKnownHostsFile=~/.local/state/firehpc/hpc/ssh/known_hosts -i ~/.local/state/firehpc/hpc/ssh/id_rsa root@admin.hpc
+$ firehpc ssh root@admin.hpc
 ```
 
 Connect with a test user account (_marie_ or _pierre_) on the login node:
 
 ```
-ssh -o UserKnownHostsFile=~/.local/state/firehpc/hpc/ssh/known_hosts -i ~/.local/state/firehpc/hpc/ssh/id_rsa pierre@login.hpc
+$ firehpc ssh pierre@login.hpc
 ```
 
 Then run MPI job in Slurm job:
