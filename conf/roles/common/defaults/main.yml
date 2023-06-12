@@ -1,0 +1,4 @@
+---
+common_hpckit_derivatives:
+- main
+- slurm23.02

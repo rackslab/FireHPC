@@ -57,3 +57,14 @@
     src: /run/systemd/resolve/stub-resolv.conf
     dest: /etc/resolv.conf
     remote_src: yes
+
+# Add hpck.it RPM packages repositories
+- name: Add HPCk.it rpm packages repository
+  ansible.builtin.yum_repository:
+    name: "hpck.it-{{ item }}"
+    description: "HPCk.it {{ item }} derivative repository"
+    file: hpckit
+    baseurl: "https://hpck.it/rpm/el$releasever/{{ item }}/$basearch/"
+    gpgcheck: yes
+    gpgkey: https://hpck.it/keyring.asc
+  loop: "{{ common_hpckit_derivatives }}"

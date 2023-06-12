@@ -6,3 +6,18 @@
   ansible.builtin.file:
     path: /etc/dpkg/dpkg.cfg.d/01_nodoc
     state: absent
+
+# Add hpck.it deb packages repositories
+- name: Add HPCk.it deb packages repository
+  block:
+
+    - name: Download HPCk.it packages repository keyring
+      ansible.builtin.get_url:
+        url: https://hpck.it/keyring.asc
+        dest: /usr/share/keyrings/hpckit.asc
+
+    - name: Add HPCk.it repository into sources list
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/hpckit.asc arch=amd64] https://hpck.it/deb {{ ansible_distribution_release }} {{ common_hpckit_derivatives|join(' ') }}"
+        state: present
+        filename: hpckit
