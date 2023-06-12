@@ -28,6 +28,14 @@
     state: latest
   with_items: "{{ slurm_common_packages }}"
 
+- name: Create slurm configuration directory
+  ansible.builtin.file:
+    path: /etc/slurm
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
 - name: Deploy slurm configuration file
   ansible.builtin.template:
     src: slurm.conf.j2
