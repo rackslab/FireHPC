@@ -35,5 +35,8 @@ class SSHClient:
             '-i',
             f"{self.cluster.zone_dir}/ssh/id_rsa",
         ]
+        # connect with root user by default
+        if '@' not in args[0]:
+            cmd += ['-l', 'root']
         cmd += args
         run(cmd)
