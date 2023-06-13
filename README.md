@@ -90,6 +90,26 @@ effect:
 $ sudo systemctl restart systemd-resolved.service
 ```
 
+Fix the order between `mymachine` and `resolve` services in `/etc/nsswitch.conf`
+so the `mymachines` service can resolve IP addresses of container names:
+
+```diff
+--- a/etc/nsswitch.conf
++++ b/etc/nsswitch.conf
+@@ -9,7 +9,7 @@
+ shadow:         files systemd sss
+ gshadow:        files systemd
+ 
+-hosts:          files resolve [!UNAVAIL=return] dns mymachines myhostname
++hosts:          files mymachines resolve [!UNAVAIL=return] dns myhostname
+ networks:       files
+ 
+ protocols:      db files
+```
+
+Without this modification, the `mymachines` service is basically ignored by the
+_return_ action on `resolve` service. For reference, see `nss-mymachines(8)`.
+
 Then, with your regular user, run FireHPC with a zone name and an OS in
 arguments. For example:
 
