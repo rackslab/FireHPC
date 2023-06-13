@@ -68,11 +68,6 @@ class FireHPCExec:
             help="Show external libraries logs",
         )
         parser.add_argument(
-            '--with-bootstrap',
-            action='store_true',
-            help="Run configuration bootstrap when deploying configuration",
-        )
-        parser.add_argument(
             '--state',
             help="Directory to store cluster state (default: %(default)s)",
             type=Path,
@@ -107,6 +102,11 @@ class FireHPCExec:
             '--zone',
             help="Name of the zone on which configuration is deployed",
             required=True,
+        )
+        parser_conf.add_argument(
+            '--with-bootstrap',
+            action='store_true',
+            help="Run configuration bootstrap",
         )
         parser_conf.set_defaults(func=self._execute_conf)
 
