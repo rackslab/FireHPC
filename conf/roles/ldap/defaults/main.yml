@@ -2,13 +2,8 @@
 ldap_base: "dc=cluster,dc=local"  # dummy
 ldap_user_password: secret
 ldap_email_domain: cluster.local  # dummy
-ldap_users:
-- login: pierre
-  firstname: Pierre
-  lastname: Curie
-- login: marie
-  firstname: Marie
-  lastname: Curie
+ldap_users: []  # dummy
+ldap_users_group: users  # dummy
 ldap_common_packages:
 - ldap-utils
 ldap_server_packages:

@@ -6,8 +6,8 @@ dn: ou=groups,{{ ldap_base }}
 ou: groups
 objectClass: organizationalUnit
 
-dn: cn=users,ou=groups,{{ ldap_base }}
-cn: users
+dn: cn={{ ldap_users_group }},ou=groups,{{ ldap_base }}
+cn: {{ ldap_users_group }}
 gidNumber: {{ ldap_server_first_gid }}
 objectClass: top
 objectClass: posixGroup
