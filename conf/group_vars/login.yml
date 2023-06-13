@@ -1,3 +1,2 @@
 ---
 mpi_nodes: true
-ldap_profile: client

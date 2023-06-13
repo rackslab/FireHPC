@@ -2,7 +2,7 @@
   remote_user: root
   roles:
     - common
-    - ldap
+    - { role: ldap, when: "'admin' in group_names" }
     - sssd
     - { role: users, when: "'login' in group_names" }
     - slurm

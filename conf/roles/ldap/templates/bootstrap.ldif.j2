@@ -8,7 +8,7 @@ objectClass: organizationalUnit
 
 dn: cn={{ ldap_users_group }},ou=groups,{{ ldap_base }}
 cn: {{ ldap_users_group }}
-gidNumber: {{ ldap_server_first_gid }}
+gidNumber: {{ ldap_first_gid }}
 objectClass: top
 objectClass: posixGroup
 
@@ -24,8 +24,8 @@ cn: {{ user.firstname }} {{ user.lastname }}
 givenName: {{ user.firstname }}
 sn: {{ user.lastname }}
 mail: {{ user.login }}@{{ ldap_email_domain}}
-uidNumber: {{ ldap_server_first_uid + loop.index0 }}
-gidNumber: {{ ldap_server_first_gid }}
+uidNumber: {{ ldap_first_uid + loop.index0 }}
+gidNumber: {{ ldap_first_gid }}
 userPassword: {{ ldap_user_password }}
 homeDirectory: /home/{{ user.login }}
 loginShell: /bin/bash

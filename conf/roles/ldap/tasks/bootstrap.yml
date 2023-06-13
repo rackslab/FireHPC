@@ -1,12 +1,12 @@
 ---
 - name: Create local LDAP directory
   ansible.builtin.file:
-    path: "{{ ldap_server_local_admin_password_file | dirname }}"
+    path: "{{ ldap_local_admin_password_file | dirname }}"
     state: directory
     recurse: true
 
 - name: Generate LDAP server administrator password file
   ansible.builtin.copy:
     content: "{{ lookup('community.general.random_string', length=16, special=false) }}" # avoid special character
-    dest: "{{ ldap_server_local_admin_password_file }}"
+    dest: "{{ ldap_local_admin_password_file }}"
     force: no  # do not overwrite the password if it has already been generated

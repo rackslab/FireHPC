@@ -7,9 +7,9 @@ fhpc_users_group: scientists
 
 # roles variables
 ssh_key_dir: "{{ fhpc_local_ssh_dir }}"
-ldap_server_local_admin_password_file: "{{ fhpc_zone_state_dir }}/ldap/ldap.password"
+ldap_local_admin_password_file: "{{ fhpc_zone_state_dir }}/ldap/ldap.password"
 ldap_base: "dc=cluster,dc={{ fhpc_zone }}"
-ldap_server_domain: "cluster.{{ fhpc_zone }}"
+ldap_domain: "cluster.{{ fhpc_zone }}"
 ldap_email_domain: "cluster.{{ fhpc_zone }}"
 ldap_users: "{{ fhpc_users }}"
 ldap_users_group: "{{ fhpc_users_group }}"
