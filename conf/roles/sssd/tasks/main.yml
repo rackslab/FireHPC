@@ -12,3 +12,6 @@
     group: root
     mode: 0600
   notify: Restart sssd
+
+- name: Flush handlers to make sssd service available
+  meta: flush_handlers
