@@ -1,8 +1,9 @@
 # shared variables
 fhpc_local_ssh_dir: "{{ fhpc_zone_state_dir }}/ssh"
 fhpc_users:
-  - { login: "marie",  name: "Marie Curie",  uid: 10001 }
-  - { login: "pierre", name: "Pierre Curie", uid: 10002 }
+- { login: pierre, firstname: Pierre, lastname: Curie }
+- { login: marie, firstname: Marie, lastname: Curie }
+fhpc_users_group: scientists
 
 # roles variables
 ssh_key_dir: "{{ fhpc_local_ssh_dir }}"
@@ -10,10 +11,13 @@ ldap_server_local_admin_password_file: "{{ fhpc_zone_state_dir }}/ldap/ldap.pass
 ldap_base: "dc=cluster,dc={{ fhpc_zone }}"
 ldap_server_domain: "cluster.{{ fhpc_zone }}"
 ldap_email_domain: "cluster.{{ fhpc_zone }}"
+ldap_users: "{{ fhpc_users }}"
+ldap_users_group: "{{ fhpc_users_group }}"
 sssd_ldap_base: "dc=cluster,dc={{ fhpc_zone }}"
 sssd_ldap_server: admin
 users_ssh_host_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_defs: "{{ fhpc_users }}"
+users_group: "{{ fhpc_users_group }}"
 slurm_local_munge_key_file: "{{ fhpc_zone_state_dir }}/munge/munge.key"
 slurm_local_mariadb_password_file: "{{ fhpc_zone_state_dir }}/mariadb/mariadb.password"
 slurm_users: "{{ fhpc_users | map(attribute='login') | list }}"
