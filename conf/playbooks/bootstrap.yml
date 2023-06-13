@@ -8,6 +8,10 @@
     include_role:
       name: slurm
       tasks_from: bootstrap
+  - name: Generate LDAP server admin password
+    include_role:
+      name: ldap
+      tasks_from: bootstrap
 
 - hosts: all
   connection: machinectl

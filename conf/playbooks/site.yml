@@ -2,6 +2,6 @@
   remote_user: root
   roles:
     - common
-    - users
+    - ldap
     - slurm
     - { role: mpi, when: mpi_nodes }

@@ -1,0 +1,26 @@
+---
+ldap_base: "dc=cluster,dc=local"  # dummy
+ldap_user_password: secret
+ldap_email_domain: cluster.local  # dummy
+ldap_users:
+- login: pierre
+  firstname: Pierre
+  lastname: Curie
+- login: marie
+  firstname: Marie
+  lastname: Curie
+ldap_common_packages:
+- ldap-utils
+ldap_server_packages:
+- slapd
+ldap_server_local_admin_password_file:  ldap.password  # dummy
+# The lookup errors are ignored because the variable is loaded by boostrap
+# tasks file (in bootstrap playbook) before it generates the file. This way, a
+# warning is displayed but Ansible continues instead of failing with the error.
+ldap_server_admin_password: "{{ lookup('file', '{{ ldap_server_local_admin_password_file }}', errors='ignore') }}"
+ldap_server_domain: cluster.local  # dummy
+ldap_server_ldif_path: /tmp/bootstrap.ldif
+ldap_server_system_user: openldap
+ldap_server_system_group: openldap
+ldap_server_first_uid: 10001
+ldap_server_first_gid: 10001

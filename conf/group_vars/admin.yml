@@ -1,2 +1,4 @@
+---
 # roles variables
 slurm_profile: server
+ldap_profile: server

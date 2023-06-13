@@ -1,0 +1,9 @@
+---
+- name: Install LDAP common packages
+  ansible.builtin.package:
+    name: "{{ ldap_common_packages }}"
+    state: latest
+
+- name: "Run ldap {{ ldap_profile }} specific tasks"
+  ansible.builtin.include_tasks: "{{ ldap_profile }}.yml"
+  when: ldap_profile == 'server'

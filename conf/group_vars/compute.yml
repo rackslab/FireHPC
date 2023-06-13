@@ -1,3 +1,5 @@
+---
 # roles variables
 slurm_profile: compute
+ldap_profile: client
 mpi_nodes: true

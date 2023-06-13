@@ -1,0 +1,33 @@
+dn: ou=people,{{ ldap_base }}
+ou: people
+objectClass: organizationalUnit
+
+dn: ou=groups,{{ ldap_base }}
+ou: groups
+objectClass: organizationalUnit
+
+dn: cn=users,ou=groups,{{ ldap_base }}
+cn: users
+gidNumber: {{ ldap_server_first_gid }}
+objectClass: top
+objectClass: posixGroup
+
+{% for user in ldap_users %}
+dn: uid={{ user.login }},ou=people,{{ ldap_base }}
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+objectClass: top
+uid: {{ user.login }}
+cn: {{ user.firstname }} {{ user.lastname }}
+givenName: {{ user.firstname }}
+sn: {{ user.lastname }}
+mail: {{ user.login }}@{{ ldap_email_domain}}
+uidNumber: {{ ldap_server_first_uid + loop.index0 }}
+gidNumber: {{ ldap_server_first_gid }}
+userPassword: {{ ldap_user_password }}
+homeDirectory: /home/{{ user.login }}
+loginShell: /bin/bash
+
+{% endfor %}

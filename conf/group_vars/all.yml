@@ -6,6 +6,10 @@ fhpc_users:
 
 # roles variables
 ssh_key_dir: "{{ fhpc_local_ssh_dir }}"
+ldap_server_local_admin_password_file: "{{ fhpc_zone_state_dir }}/ldap/ldap.password"
+ldap_base: "dc=cluster,dc={{ fhpc_zone }}"
+ldap_server_domain: "cluster.{{ fhpc_zone }}"
+ldap_email_domain: "cluster.{{ fhpc_zone }}"
 users_ssh_host_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_defs: "{{ fhpc_users }}"
 slurm_local_munge_key_file: "{{ fhpc_zone_state_dir }}/munge/munge.key"
