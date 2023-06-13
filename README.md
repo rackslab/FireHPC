@@ -70,8 +70,24 @@ https://github.com/systemd/systemd/issues/21397
 On Debian 12, start and enable `systemd-networkd` service:
 
 ```
-sudo systemctl start systemd-networkd.service
-sudo systemctl enable systemd-networkd.service
+$ sudo systemctl start systemd-networkd.service
+$ sudo systemctl enable systemd-networkd.service
+```
+
+Install `systemd-resolved`:
+
+```
+$ sudo apt install systemd-resolved
+```
+
+Unfortunarly, there is on ongoing [bug #1031236 in Debian](https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1031236)
+on `ifupdown`/`systemd-resolved` automatic integration. One workaround is to
+define DNS servers IP addresses and domains in `systemd-resolved` configuration
+file `/etc/systemd/resolved.conf`. Then restart the service so changes can take
+effect:
+
+```
+$ sudo systemctl restart systemd-resolved.service
 ```
 
 Then, with your regular user, run FireHPC with a zone name and an OS in
