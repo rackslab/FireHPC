@@ -43,7 +43,7 @@
     name: systemd-networkd
     state: latest
 
-- name: Ensure systemd-{networkd,resolvd} services are started and enabled
+- name: Ensure systemd-{networkd,resolved} services are started and enabled
   ansible.builtin.service:
     name: "{{ item }}"
     state: started
