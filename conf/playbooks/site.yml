@@ -3,5 +3,6 @@
   roles:
     - common
     - ldap
+    - sssd
     - slurm
     - { role: mpi, when: mpi_nodes }

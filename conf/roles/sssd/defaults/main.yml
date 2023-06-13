@@ -1,0 +1,5 @@
+---
+sssd_packages:
+- sssd
+sssd_ldap_base: dc=cluster,dc=local  # dummy
+sssd_ldap_server: localhost  # dummy

@@ -1,0 +1,10 @@
+[domain/default]
+id_provider = ldap
+auth_provider = ldap
+chpass_provider = ldap
+ldap_uri = ldap://{{ sssd_ldap_server }}/
+ldap_search_base = {{ sssd_ldap_base }}
+cache_credentials = True
+
+[sssd]
+domains = default
