@@ -4,5 +4,6 @@
     - common
     - ldap
     - sssd
+    - { role: users, when: "'login' in group_names" }
     - slurm
     - { role: mpi, when: mpi_nodes }

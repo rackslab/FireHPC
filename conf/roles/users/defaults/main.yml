@@ -1,5 +1,4 @@
 ---
-users_group: scientists
-users_gid: 10000
-users_defs: {}
+users_defs: {}  # dummy
+users_group: users  # dummy
 users_ssh_host_key_dir: ssh  # dummy
