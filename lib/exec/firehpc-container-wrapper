@@ -2,6 +2,11 @@
 
 IFS=":" read -r ZONE MACHINE <<< "${1}"
 
-CMD="systemd-nspawn --quiet --keep-unit --boot --link-journal=try-guest --network-zone=${ZONE} --settings=override --machine=${MACHINE}.${ZONE} --bind=/var/lib/firehpc/${ZONE}/home:/home"
+# Note that --resolv-conf=replace-stub is required for applications (eg. sssd)
+# that directly perform DNS requests instead of going through NSS stack for host
+# service a so all applications get the same results from systemd-resolved
+# daemon.
+
+CMD="systemd-nspawn --quiet --keep-unit --boot --link-journal=try-guest --network-zone=${ZONE} --settings=override --machine=${MACHINE}.${ZONE} --bind=/var/lib/firehpc/${ZONE}/home:/home --resolv-conf=replace-stub"
 
 exec $CMD
