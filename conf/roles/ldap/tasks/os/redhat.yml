@@ -1,0 +1,57 @@
+---
+- name: RedHat specific post-installation tasks
+  block:
+  - name: Fill LDAP schema with essential objects
+    ansible.builtin.command:
+      cmd: "/usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/{{ item }}.ldif"
+    loop:
+    - cosine
+    - nis
+    - inetorgperson
+
+  - name: Generate LDAP administration password hash
+    ansible.builtin.command:
+      cmd: "/usr/sbin/slappasswd -s {{ ldap_admin_password }}"
+    register: ldap_admin_password_hash_cmd
+
+  - name: Setup admin user password
+    community.general.ldap_attrs:
+      dn: olcDatabase={0}config,cn=config
+      attributes:
+        olcRootPW: "{{ ldap_admin_password_hash_cmd.stdout }}"
+      state: exact
+
+  - name: Configure monitor account and ACL
+    community.general.ldap_attrs:
+      dn: olcDatabase={1}monitor,cn=config
+      attributes:
+        olcAccess:
+            - >-
+              to *
+              by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" read
+              by dn.base="cn=Manager,{{ ldap_base }}" read
+              by * none
+      ordered: true
+      state: exact
+
+  - name: Configure domain, root DN and ACL
+    community.general.ldap_attrs:
+      dn: olcDatabase={2}mdb,cn=config
+      attributes:
+        olcSuffix: "{{ ldap_base }}"
+        olcRootDN: "cn=Manager,{{ ldap_base }}"
+        olcRootPW: "{{ ldap_admin_password_hash_cmd.stdout }}"
+        olcAccess:
+            - >-
+              to attrs=userPassword,shadowLastChange
+              by dn="cn=Manager,{{ ldap_base }}" write
+              by anonymous auth
+              by self write
+              by * none
+            - >-
+              to *
+              by dn="cn=Manager,{{ ldap_base }}" write
+              by * read
+      ordered: true
+      state: exact
+  when: ldap_phase == 'pre_install'

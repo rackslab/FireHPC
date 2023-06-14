@@ -1,0 +1,6 @@
+---
+ldap_packages:
+- ldap-utils
+- slapd
+ldap_system_user: openldap
+ldap_system_group: openldap

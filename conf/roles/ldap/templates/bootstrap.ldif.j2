@@ -1,3 +1,13 @@
+{% if ansible_facts.os_family == 'RedHat' %}
+{% set org = ldap_base.split('dc=')[-1] %}
+dn: {{ ldap_base }}
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: {{ org }}
+dc: cluster
+
+{% endif %}
 dn: ou=people,{{ ldap_base }}
 ou: people
 objectClass: organizationalUnit

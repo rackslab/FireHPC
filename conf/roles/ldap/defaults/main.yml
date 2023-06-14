@@ -4,9 +4,6 @@ ldap_user_password: secret
 ldap_email_domain: cluster.local  # dummy
 ldap_users: []  # dummy
 ldap_users_group: users  # dummy
-ldap_packages:
-- ldap-utils
-- slapd
 ldap_local_admin_password_file:  ldap.password  # dummy
 # The lookup errors are ignored because the variable is loaded by boostrap
 # tasks file (in bootstrap playbook) before it generates the file. This way, a
@@ -14,7 +11,5 @@ ldap_local_admin_password_file:  ldap.password  # dummy
 ldap_admin_password: "{{ lookup('file', '{{ ldap_local_admin_password_file }}', errors='ignore') }}"
 ldap_domain: cluster.local  # dummy
 ldap_ldif_path: /tmp/bootstrap.ldif
-ldap_system_user: openldap
-ldap_system_group: openldap
 ldap_first_uid: 10001
 ldap_first_gid: 10001

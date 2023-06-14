@@ -1,0 +1,20 @@
+---
+- name: Debian specific pre-installation tasks
+  block:
+  - name: Define LDAP server organization domain
+    ansible.builtin.debconf:
+      name: slapd
+      question: "slapd/domain"
+      value: "{{ ldap_domain }}"
+      vtype: string
+
+  - name: Define LDAP server administration password
+    ansible.builtin.debconf:
+      name: slapd
+      question: "{{ item }}"
+      value: "{{ ldap_admin_password }}"
+      vtype: password
+    loop:
+    - slapd/password1
+    - slapd/password2
+  when: ldap_phase == 'pre_install'

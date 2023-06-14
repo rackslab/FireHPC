@@ -1,26 +1,29 @@
 ---
-- name: Define LDAP server organization domain
-  ansible.builtin.debconf:
-    name: slapd
-    question: "slapd/domain"
-    value: "{{ ldap_domain }}"
-    vtype: string
+- name: Gather OS specific variables
+  ansible.builtin.include_vars:
+    file: "os/{{ ansible_facts.os_family | lower }}.yml"
 
-- name: Define LDAP server administration password
-  ansible.builtin.debconf:
-    name: slapd
-    question: "{{ item }}"
-    value: "{{ ldap_admin_password }}"
-    vtype: password
-  loop:
-  - slapd/password1
-  - slapd/password2
+- name: Include OS specific pre-installation tasks
+  ansible.builtin.include_tasks: "os/{{ ansible_facts.os_family | lower }}.yml"
+  vars:
+    ldap_phase: pre_install
 
 - name: Install LDAP packages
   ansible.builtin.package:
     name: "{{ ldap_packages }}"
     state: latest
   register: ldap_packages_installation
+
+- name: Ensure LDAP service is started and enabled
+  ansible.builtin.service:
+    name: slapd
+    state: started
+    enabled: yes
+
+- name: Include OS specific post-installation tasks
+  ansible.builtin.include_tasks: "os/{{ ansible_facts.os_family | lower }}.yml"
+  vars:
+    ldap_phase: post_install
 
 - name: Generate bootstrap LDIF
   ansible.builtin.template:
