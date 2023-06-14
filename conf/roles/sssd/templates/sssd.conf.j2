@@ -7,4 +7,7 @@ ldap_search_base = {{ sssd_ldap_base }}
 cache_credentials = True
 
 [sssd]
+{% if ansible_facts.os_family == 'RedHat' %}
+services = nss,pam
+{% endif %}
 domains = default
