@@ -54,4 +54,10 @@
               by * read
       ordered: true
       state: exact
-  when: ldap_phase == 'pre_install'
+  when:
+  # Run this block of tasks in post-install phase only if ldap server package
+  # was not installed initially. These tasks must only run once to bootstrap
+  # LDAP directory after it initial installation. Errors would be generated if
+  # these tasks are run a second time on installed LDAP directory.
+  - ldap_phase == 'post_install'
+  - ldap_server_package not in ansible_facts.packages

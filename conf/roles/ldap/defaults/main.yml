@@ -1,4 +1,5 @@
 ---
+ldap_packages: "{{ [ ldap_server_package ] + ldap_extra_packages }}"
 ldap_base: "dc=cluster,dc=local"  # dummy
 ldap_user_password: secret
 ldap_email_domain: cluster.local  # dummy

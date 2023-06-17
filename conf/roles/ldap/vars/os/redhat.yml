@@ -1,7 +1,7 @@
 ---
-ldap_packages:
+ldap_server_package: openldap-servers
+ldap_extra_packages:
 - openldap-clients
-- openldap-servers
 - python3-ldap
 ldap_system_user: ldap
 ldap_system_group: ldap

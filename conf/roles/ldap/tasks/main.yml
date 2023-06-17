@@ -3,6 +3,9 @@
   ansible.builtin.include_vars:
     file: "os/{{ ansible_facts.os_family | lower }}.yml"
 
+- name: Gather the package facts
+  ansible.builtin.package_facts: {}
+
 - name: Include OS specific pre-installation tasks
   ansible.builtin.include_tasks: "os/{{ ansible_facts.os_family | lower }}.yml"
   vars:

@@ -17,4 +17,9 @@
     loop:
     - slapd/password1
     - slapd/password2
-  when: ldap_phase == 'pre_install'
+  when:
+  # Run this block of tasks in pre-install phase only if ldap server package is
+  # not installed yet. It is pointless to define these debconf parameters if
+  # LDAP server package is already installed.
+  - ldap_phase == 'pre_install'
+  - ldap_server_package not in ansible_facts.packages
