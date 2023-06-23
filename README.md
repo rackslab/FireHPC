@@ -152,6 +152,13 @@ Hello world from processor cn2.hpc, rank 2 out of 4 processors
 Hello world from processor cn2.hpc, rank 3 out of 4 processors
 ```
 
+You can also try Slurm REST API:
+
+```
+[pierre@login ~]$ export $(scontrol token)
+[pierre@login ~]$ curl -H "X-SLURM-USER-NAME: ${USER}" -H "X-SLURM-USER-TOKEN: ${SLURM_JWT}" http://admin:6820/slurm/v0.0.39/nodes
+```
+
 When you are done, you can clean up everything for a zone with this command:
 
 ```
