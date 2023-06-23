@@ -37,26 +37,30 @@
 
 ## Nice to have
 
+- [ ] Dynamic sizing with RackDB
+- [ ] Notification when cluster is ready
 - [ ] Let user define their own inventory file. This would probably means
       giving up group_vars directory and defining all FireHPC variables in
       a plain file as group_vars directory is evaluated after the individual
       files user could provide. For reference, see
       [multiples inventory section](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#using-multiple-inventory-sources)
       in Ansible documentation.
+- [ ] Define available OS in external file.
+- [ ] Add command to list available OS.
 - [ ] Install and setup
       [clustershell](https://clustershell.readthedocs.io/en/latest/)
 - [ ] Generate ssh config file on host
 - [x] Rename front to login as this name in more common in HPC
-- [ ] Install and setup slurmrestd
+- [x] Install and setup slurmrestd
 - [ ] Generate slurm partitions and nodes conf based on inventory → This would
       requires a new filter, roughly similar to ansible.netcommon.vlan_parser,
       to generate nodesets based on host lists.
-- [ ] Use triggered unit to manage (create/remove) shared directories
+- [x] Use triggered unit to manage (create/remove) shared directories
 - [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
 - [ ] Improve rackslab/ansible-connection-machinectl _non-root_ branch to match
       [maintainer expectations](https://github.com/tomeon/ansible-connection-machinectl/issues/10#issuecomment-812534935).
 - [x] Manual install script to simplify quickstart
-- [ ] Build and deploy mkosi images with python3 pre-installed
+- [x] Build and deploy mkosi images with python3 pre-installed
 - [ ] Fix shell glitch after ansible run with machinectl connection
 - [ ] Understand why the hostname is not set automatically in containers (I
       though `systemd-hostnamed` would do the job)
