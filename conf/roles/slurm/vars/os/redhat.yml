@@ -5,5 +5,7 @@ slurm_common_packages:
 slurm_server_packages:
   - slurm-slurmctld
   - slurm-slurmdbd
+slurm_restd_packages:
+  - slurm-slurmrestd
 slurm_compute_packages:
   - slurm-slurmd

@@ -5,6 +5,12 @@
     state: restarted
   when: slurm_profile == "server"
 
+- name: Restart slurmrestd
+  ansible.builtin.service:
+    name: slurmrestd
+    state: restarted
+  when: slurm_profile == "server"
+
 - name: Restart slurmdbd
   ansible.builtin.service:
     name: slurmdbd

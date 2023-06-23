@@ -21,3 +21,20 @@
     content: "{{ lookup('community.general.random_string', length=16, special=false) }}" # avoid special character that may confuse either slurmdbd or mariadb
     dest: "{{ slurm_local_mariadb_password_file }}"
     force: no  # do not overwrite the password if it has already been generated
+
+- name: Create local slurm directory
+  ansible.builtin.file:
+    path: "{{ slurm_local_jwt_key_file | dirname }}"
+    state: directory
+    recurse: true
+  when:
+  - slurm_with_slurmrestd
+  - slurm_with_jwt
+
+- name: Generate slurm JWT signing key
+  ansible.builtin.command:
+    cmd: "dd if=/dev/urandom of={{ slurm_local_jwt_key_file }} bs=32 count=1"
+    creates: "{{ slurm_local_jwt_key_file }}"
+  when:
+  - slurm_with_slurmrestd
+  - slurm_with_jwt

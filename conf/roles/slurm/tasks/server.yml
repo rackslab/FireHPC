@@ -21,6 +21,26 @@
     name: "{{ slurm_server_packages }}"
     state: latest
 
+- name: Install slurmrestd
+  ansible.builtin.package:
+    name: "{{ slurm_restd_packages }}"
+    state: latest
+  when: slurm_with_slurmrestd
+
+# The slurm JWT signing key must be deployed early because it is referenced in
+# slurm.conf and slurmdbd.conf and its presence is required for these daemons to
+# start properly.
+- name: Deploy slurm JWT signing key
+  ansible.builtin.copy:
+    src: "{{ slurm_local_jwt_key_file }}"
+    dest: "{{ slurm_jwt_key_path }}"
+    owner: slurm
+    group: slurm
+    mode: 0400
+  when:
+  - slurm_with_slurmrestd
+  - slurm_with_jwt
+
 # This is required on redhat based distributions as the service is not
 # automatically started by the RPM packages, and it does not hurt on Debian.
 - name: Ensure slurm server services are started
@@ -31,6 +51,33 @@
   with_items:
     - slurmdbd
     - slurmctld
+
+- name: Create slurmrestd service override directory
+  ansible.builtin.file:
+    path: "{{ slurm_restd_service_override_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when: slurm_with_slurmrestd
+
+- name: Deploy slurmrestd service override file
+  ansible.builtin.template:
+    src: slurmrestd.service.j2
+    dest: "{{ slurm_restd_service_override_path }}"
+    owner: slurm
+    group: slurm
+    mode: 0644
+  notify: Restart slurmrestd
+  when: slurm_with_slurmrestd
+
+- name: Ensure slurmrestd service is started
+  ansible.builtin.systemd:
+    name: slurmrestd
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  when: slurm_with_slurmrestd
 
 - name: Create cluster in slurmdbd
   ansible.builtin.command:

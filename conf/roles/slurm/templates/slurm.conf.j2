@@ -5,7 +5,10 @@ StateSaveLocation={{ slurm_state_save_loc }}      # default: /var/spool
 AccountingStorageType=accounting_storage/slurmdbd # default: accounting_storage/none
 AccountingStorageHost=admin                       # must be specified, as soon as slurmdbd is used
 AccountingStorageEnforce=qos,limits,associations  # default: none
-
+{% if slurm_with_jwt %}
+AuthAltTypes=auth/jwt
+AuthAltParameters=jwt_key={{ slurm_jwt_key_path }}
+{% endif %}
 # Slurm default is proctrack/cgroup when cgroup are enabled but for the moment,
 # Slurm does not support cgroupv2 enabled in most modern distributions (eg.
 # Ubuntu 21.10). Fallback to old generic linuxproc for stay compatible with most

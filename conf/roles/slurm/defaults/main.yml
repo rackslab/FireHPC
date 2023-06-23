@@ -5,6 +5,7 @@ slurm_gid: 432  # picked randomly among 100-499
 slurm_cluster: hpc
 slurm_local_munge_key_file: munge.key  # dummy
 slurm_local_mariadb_password_file: mariadb.password  # dummy
+slurm_local_jwt_key_file: jwt_hs256.key  # dummy
 # The lookup errors are ignored because the variable is loaded by boostrap
 # tasks file (in bootstrap playbook) before it generates the file. This way, a
 # warning is displayed but Ansible continues instead of failing with the error.
@@ -12,3 +13,11 @@ slurm_db_password: "{{ lookup('file', '{{ slurm_local_mariadb_password_file }}',
 slurm_state_save_loc: /var/spool/slurmctld
 slurm_users: []
 slurm_account: scientists
+
+# When disabled, slurm REST API service is not deployed.
+slurm_with_slurmrestd: True
+# When disabled, slurmrestd fallback to local authentication on unix socket and
+# authentication on other daemons is based on munge only.
+slurm_with_jwt: True
+slurm_jwt_key_path: /var/lib/slurm/jwt_hs256.key
+slurm_restd_service_override_path: /etc/systemd/system/slurmrestd.service.d/firehpc.conf
