@@ -141,7 +141,7 @@ Then run MPI job in Slurm job:
 
 ```
 [pierre@login ~]$ curl --silent https://raw.githubusercontent.com/mpitutorial/mpitutorial/gh-pages/tutorials/mpi-hello-world/code/mpi_hello_world.c -o helloworld.c
-[pierre@login ~]$ export PATH=$PATH:/usr/lib64/openmpi/bin  # required on centos8, not on debian11
+[pierre@login ~]$ export PATH=$PATH:/usr/lib64/openmpi/bin  # required on rocky8, not on debian11
 [pierre@login ~]$ mpicc -o helloworld helloworld.c
 [pierre@login ~]$ salloc -N 2
 salloc: Granted job allocation 2
