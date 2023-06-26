@@ -1,4 +1,11 @@
 ---
+# Rebuild RPM databases to remove sqlite databases created by mkosi in el8 image
+# and not fully support by rpm version available in rocky8.
+- name: Rebuild RPM database to BDB format
+  ansible.builtin.command:
+    cmd: "/usr/bin/rpmdb --rebuilddb"
+    removes: /var/lib/rpm/rpmdb.sqlite
+
 # On redhat based distributions, add EPEL repos GPG key and yum conf using
 # release package
 - name: Import EPEL GPG key
