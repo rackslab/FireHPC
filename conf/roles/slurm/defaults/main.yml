@@ -10,7 +10,6 @@ slurm_local_jwt_key_file: jwt_hs256.key  # dummy
 # tasks file (in bootstrap playbook) before it generates the file. This way, a
 # warning is displayed but Ansible continues instead of failing with the error.
 slurm_db_password: "{{ lookup('file', '{{ slurm_local_mariadb_password_file }}', errors='ignore') }}"
-slurm_state_save_loc: /var/spool/slurmctld
 slurm_users: []
 slurm_account: scientists
 
@@ -19,5 +18,4 @@ slurm_with_slurmrestd: True
 # When disabled, slurmrestd fallback to local authentication on unix socket and
 # authentication on other daemons is based on munge only.
 slurm_with_jwt: True
-slurm_jwt_key_path: /var/lib/slurm/jwt_hs256.key
 slurm_restd_service_override_path: /etc/systemd/system/slurmrestd.service.d/firehpc.conf

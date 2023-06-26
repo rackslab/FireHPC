@@ -9,3 +9,5 @@ slurm_restd_packages:
   - slurmrestd
 slurm_compute_packages:
   - slurmd
+slurm_state_save_loc: /var/lib/slurm/slurmctld
+slurm_jwt_key_path: /var/lib/slurm/jwt_hs256.key

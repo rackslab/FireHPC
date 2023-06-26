@@ -7,3 +7,5 @@ ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS [::]:6820
 {% else %}
 ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS unix:/run/slurmrestd/slurmrestd.socket
 {% endif %}
+User=slurm
+Group=slurm
