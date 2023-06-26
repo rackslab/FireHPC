@@ -1,6 +1,7 @@
 ---
 common_packages:
   - neovim
+  - file
   - htop
   - rsync
   - man-db
