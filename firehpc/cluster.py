@@ -124,16 +124,6 @@ class EmulatedCluster:
                     )
                 )
 
-        for subconf_dir in ['group_vars', 'roles', 'playbooks']:
-            dest = self.settings.ansible.path / subconf_dir
-            source = self.conf_dir / subconf_dir
-            logger.debug(
-                "Symlinking configuration directory %s →  %s",
-                source,
-                dest,
-            )
-            source.symlink_to(dest)
-
         ansible_extravars = {
             'fhpc_zone_state_dir': str(self.state / self.zone),
             'fhpc_zone': self.zone,
