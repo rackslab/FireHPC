@@ -20,6 +20,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
+from datetime import datetime
 
 from dasbus.connection import SystemMessageBus
 
@@ -30,18 +31,39 @@ class RunningContainer:
     path: Path
 
 
+@dataclass
+class ContainerImage:
+    name: str
+    creation: datetime
+    modification: datetime
+    volume: int
+    path: Path
+
+
 class ContainersManager:
     def __init__(self, zone: str) -> ContainersManager:
         self.zone = zone
-
-    def running(self):
-        bus = SystemMessageBus()
-        proxy = bus.get_proxy(
+        self.proxy = SystemMessageBus().get_proxy(
             "org.freedesktop.machine1", "/org/freedesktop/machine1"
         )
+
+    def running(self):
         return [
             RunningContainer(machine[0], Path(machine[3]))
-            for machine in proxy.ListMachines()
+            for machine in self.proxy.ListMachines()
             if machine[0].endswith(f".{self.zone}")
             and machine[1] == 'container'
+        ]
+
+    def images(self):
+        return [
+            ContainerImage(
+                image[0],
+                datetime.utcfromtimestamp(image[3] / 10 ** 6),
+                datetime.utcfromtimestamp(image[4] / 10 ** 6),
+                image[5],
+                Path(image[6]),
+            )
+            for image in self.proxy.ListImages()
+            if image[0].endswith(f".{self.zone}")
         ]

@@ -31,6 +31,7 @@ import yaml
 from .runner import run
 from .templates import Templater
 from .users import UsersDirectory
+from .containers import ContainersManager
 
 logger = logging.getLogger(__name__)
 
@@ -79,8 +80,9 @@ class EmulatedCluster:
             ]
             run(cmd, check=True)
 
-        cmd = ['machinectl', 'list-images']
-        run(cmd)
+        images = ContainersManager(self.zone).images()
+        for image in images:
+            print(f"image: {image.name} size: {image.volume}")
 
         logger.info("Starting zone storage service %s", self.zone)
         cmd = [
