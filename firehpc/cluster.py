@@ -32,8 +32,8 @@ from .templates import Templater
 from .users import UsersDirectory
 from .containers import (
     ContainersManager,
-    ImageImporter,
-    ContainerService,
+    Container,
+    ContainerImage,
     StorageService,
 )
 
@@ -69,15 +69,10 @@ class EmulatedCluster:
             logger.debug("Creating zone state directory %s", self.zone_dir)
             self.zone_dir.mkdir()
 
-        admin_container_name = f"admin.{self.zone}"
-
-        importer = ImageImporter(
-            self.zone, OS_URL[self.os], admin_container_name
+        admin_image = ContainerImage.download(
+            self.zone, OS_URL[self.os], f"admin.{self.zone}"
         )
-        importer.transfer()
-
         manager = ContainersManager(self.zone)
-        admin_image = manager.image(admin_container_name)
 
         for host in ['login', 'cn1', 'cn2']:
             logger.info(
@@ -95,12 +90,7 @@ class EmulatedCluster:
 
         for host in ['admin', 'login', 'cn1', 'cn2']:
             logger.info("Starting container %s.%s", host, self.zone)
-            container = ContainerService(self.zone, host)
-            container.start()
-            # Slightly wait between each container invocation for network bridge
-            # setting to be ready and avoid IP address being sequentially
-            # flushed by the next container.
-            time.sleep(1.0)
+            Container.start(self.zone, host)
 
     def conf(self, reinit=True, bootstrap=True) -> conf:
         if self.conf_dir.exists() and reinit:

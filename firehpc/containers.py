@@ -18,12 +18,10 @@
 # along with FireHPC.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from dataclasses import dataclass
-from pathlib import Path
 from datetime import datetime
-from functools import cached_property
 import signal
 import threading
+import time
 import logging
 
 from dasbus.connection import SystemMessageBus
@@ -34,86 +32,61 @@ from .errors import FireHPCRuntimeError
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class RunningContainer:
-    name: str
-    path: Path
+class Singleton(type):
+    __instances = {}
 
-    @cached_property
-    def proxy(self):
-        return SystemMessageBus().get_proxy(
-            "org.freedesktop.machine1", str(self.path)
-        )
-
-    def poweroff(self) -> None:
-        # Mimic behaviour of machinectl poweroff that send SIGRTMIN+4 to system
-        # manager (1st process) in container to trigger clean poweroff.
-        self.proxy.Kill("leader", signal.SIGRTMIN + 4)
-
-
-@dataclass
-class ContainerImage:
-    name: str
-    creation: datetime
-    modification: datetime
-    volume: int
-    path: Path
-
-    @cached_property
-    def proxy(self):
-        return SystemMessageBus().get_proxy(
-            "org.freedesktop.machine1", str(self.path)
-        )
-
-    def remove(self) -> None:
-        self.proxy.Remove()
-
-    def clone(self, target) -> None:
-        self.proxy.Clone(target, False)
-
-
-class ContainersManager:
-    def __init__(self, zone: str) -> ContainersManager:
-        self.zone = zone
-        self.proxy = SystemMessageBus().get_proxy(
-            "org.freedesktop.machine1", "/org/freedesktop/machine1"
-        )
-
-    def running(self) -> list:
-        return [
-            RunningContainer(machine[0], Path(machine[3]))
-            for machine in self.proxy.ListMachines()
-            if machine[0].endswith(f".{self.zone}")
-            and machine[1] == 'container'
-        ]
-
-    def images(self) -> list:
-        return [
-            ContainerImage(
-                image[0],
-                datetime.utcfromtimestamp(image[3] / 10 ** 6),
-                datetime.utcfromtimestamp(image[4] / 10 ** 6),
-                image[5],
-                Path(image[6]),
+    def __call__(cls, *args, **kwargs):
+        if cls not in Singleton.__instances:
+            Singleton.__instances[cls] = super(Singleton, cls).__call__(
+                *args, **kwargs
             )
-            for image in self.proxy.ListImages()
-            if image[0].endswith(f".{self.zone}")
-        ]
-
-    def image(self, name) -> ContainerImage:
-        for image in self.images():
-            if image.name == name:
-                return image
+        return Singleton.__instances[cls]
 
 
-class ImageImporter:
-    def __init__(self, zone: str, url: str, name: str) -> ImagesImporter:
-        self.zone = zone
+class DBus(metaclass=Singleton):
+    def __init__(self) -> DBus:
+        self.bus = SystemMessageBus()
+
+    def proxy(self, interface, path):
+        return self.bus.get_proxy(interface, path)
+
+
+class DBusObject:
+    def __init__(self, obj: str):
+        self.proxy = DBus().proxy(self.INTERFACE, obj)
+
+
+class UnitService(DBusObject):
+    INTERFACE = "org.freedesktop.systemd1"
+
+    def __init__(self, name: str) -> UnitService:
+        super().__init__("/org/freedesktop/systemd1")
+        self.name = name
+
+    def start(self):
+        self.proxy.StartUnit(f"{self.name}.service", "fail")
+
+    def stop(self):
+        self.proxy.StartUnit(f"{self.name}.service", "fail")
+
+
+class ContainerService(UnitService):
+    def __init__(self, zone, name):
+        super().__init__(f"firehpc-container@{zone}:{name}")
+
+
+class StorageService(UnitService):
+    def __init__(self, zone):
+        super().__init__(f"firehpc-storage@{zone}")
+
+
+class ImageImporter(DBusObject):
+    INTERFACE = "org.freedesktop.import1"
+
+    def __init__(self, url: str, name: str) -> ImagesImporter:
+        super().__init__("/org/freedesktop/import1")
         self.url = url
         self.name = name
-        self.proxy = SystemMessageBus().get_proxy(
-            "org.freedesktop.import1", "/org/freedesktop/import1"
-        )
         self.terminated_transfer = threading.Event()
         self.loop = EventLoop()
         self.transfer_id = None
@@ -160,28 +133,118 @@ class ImageImporter:
             )
 
 
-@dataclass
-class UnitService:
-    name: str
+class Container(DBusObject):
+    INTERFACE = "org.freedesktop.machine1"
 
-    @cached_property
-    def proxy(self):
-        return SystemMessageBus().get_proxy(
-            "org.freedesktop.systemd1", "/org/freedesktop/systemd1"
+    def __init__(self, name: str, path: str) -> Container:
+        super().__init__(path)
+        self.name = name
+
+    def poweroff(self) -> None:
+        # Mimic behaviour of machinectl poweroff that send SIGRTMIN+4 to system
+        # manager (1st process) in container to trigger clean poweroff.
+        self.proxy.Kill("leader", signal.SIGRTMIN + 4)
+
+    @staticmethod
+    def start(zone, name):
+        service = ContainerService(zone, name)
+        service.start()
+        # Slightly wait between each container invocation for network bridge
+        # setting to be ready and avoid IP address being sequentially
+        # flushed by the next container.
+        time.sleep(1.0)
+        return ContainersManager(zone).container(name)
+
+    @classmethod
+    def from_machine(cls, machine) -> Container:
+        return cls(machine[0], machine[3])
+
+    @classmethod
+    def from_machine_path(cls, path) -> Container:
+        obj = DBus().proxy(cls.INTERFACE, path)
+        return cls(
+            obj.Name,
+            path,
         )
 
-    def start(self):
-        self.proxy.StartUnit(f"{self.name}.service", "fail")
 
-    def stop(self):
-        self.proxy.StartUnit(f"{self.name}.service", "fail")
+class ContainerImage(DBusObject):
+    INTERFACE = "org.freedesktop.machine1"
+
+    def __init__(
+        self,
+        name: str,
+        creation: int,
+        modification: int,
+        volume: int,
+        path: str,
+    ):
+        super().__init__(path)
+        self.name = name
+        self.creation = datetime.utcfromtimestamp(creation / 10 ** 6)
+        self.modification = datetime.utcfromtimestamp(modification / 10 ** 6)
+        self.volume = volume
+
+    def remove(self) -> None:
+        self.proxy.Remove()
+
+    def clone(self, target) -> None:
+        self.proxy.Clone(target, False)
+
+    @classmethod
+    def from_machine_image(cls, image) -> ContainerImage:
+        return cls(
+            image[0],
+            image[3],
+            image[4],
+            image[5],
+            image[6],
+        )
+
+    @classmethod
+    def from_machine_image_path(cls, path: str) -> ContainerImage:
+        obj = DBus().proxy(cls.INTERFACE, path)
+        return cls(
+            obj.Name,
+            obj.CreationTimestamp,
+            obj.CreationTimestamp,
+            obj.Usage,
+            path,
+        )
+
+    @staticmethod
+    def download(zone: str, url: str, name: str) -> ContainerImage:
+        importer = ImageImporter(url, name)
+        importer.transfer()
+        return ContainersManager(zone).image(name)
 
 
-class ContainerService(UnitService):
-    def __init__(self, zone, name):
-        super().__init__(f"firehpc-container@{zone}:{name}")
+class ContainersManager(DBusObject):
+    INTERFACE = "org.freedesktop.machine1"
 
+    def __init__(self, zone: str) -> ContainersManager:
+        super().__init__("/org/freedesktop/machine1")
+        self.zone = zone
 
-class StorageService(UnitService):
-    def __init__(self, zone):
-        super().__init__(f"firehpc-storage@{zone}")
+    def running(self) -> list:
+        return [
+            Container.from_machine(machine)
+            for machine in self.proxy.ListMachines()
+            if machine[0].endswith(f".{self.zone}")
+            and machine[1] == 'container'
+        ]
+
+    def container(self, name) -> Container:
+        return Container.from_machine_path(
+            self.proxy.GetMachine(f"{name}.{self.zone}")
+        )
+
+    def images(self) -> list:
+        return [
+            ContainerImage.from_machine_image(image)
+            for image in self.proxy.ListImages()
+            if image[0].endswith(f".{self.zone}")
+        ]
+
+    def image(self, name) -> ContainerImage:
+        return ContainerImage.from_machine_image_path(self.proxy.GetImage(name))
