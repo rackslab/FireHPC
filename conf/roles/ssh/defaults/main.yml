@@ -1,4 +1,4 @@
-ssh_key_dir: ssh
+ssh_key_dir: ssh  # dummy
 ssh_key_types:
  - rsa
  - dsa
