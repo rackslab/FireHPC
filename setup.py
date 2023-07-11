@@ -33,6 +33,7 @@ setup(
     platforms=['GNU/Linux'],
     install_requires=[
         'ansible-runner',
+        'dasbus',
         'Faker',
         'jinja2',
         'PyYAML',

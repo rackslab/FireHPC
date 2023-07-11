@@ -28,6 +28,7 @@ from .settings import RuntimeSettings
 from .cluster import EmulatedCluster
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
+from .containers import ContainersManager
 from .log import TTYFormatter
 
 logger = logging.getLogger(__name__)
@@ -130,6 +131,17 @@ class FireHPCExec:
         )
         parser_clean.set_defaults(func=self._execute_clean)
 
+        # status command
+        parser_status = subparsers.add_parser(
+            'status', help='Status of cluster in zone'
+        )
+        parser_status.add_argument(
+            '--zone',
+            help="Name of the zone",
+            required=True,
+        )
+        parser_status.set_defaults(func=self._execute_status)
+
         self.args = parser.parse_args()
         self._setup_logger()
         self.settings = RuntimeSettings()
@@ -186,3 +198,8 @@ class FireHPCExec:
             self.settings, self.args.zone, None, self.args.state
         )
         cluster.clean()
+
+    def _execute_status(self):
+        containers = ContainersManager(self.args.zone).running()
+        for container in containers:
+            print(f"container {container.name} is running")
