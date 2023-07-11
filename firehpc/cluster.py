@@ -65,24 +65,23 @@ class EmulatedCluster:
             logger.debug("Creating zone state directory %s", self.zone_dir)
             self.zone_dir.mkdir()
 
+        admin_container_name = f"admin.{self.zone}"
+
         importer = ImageImporter(
-            self.zone, OS_URL[self.os], f"admin.{self.zone}"
+            self.zone, OS_URL[self.os], admin_container_name
         )
         importer.transfer()
+
+        manager = ContainersManager(self.zone)
+        admin_image = manager.image(admin_container_name)
 
         for host in ['login', 'cn1', 'cn2']:
             logger.info(
                 "Cloning admin container image for %s.%s", host, self.zone
             )
-            cmd = [
-                'machinectl',
-                'clone',
-                f"admin.{self.zone}",
-                f"{host}.{self.zone}",
-            ]
-            run(cmd, check=True)
+            admin_image.clone(f"{host}.{self.zone}")
 
-        images = ContainersManager(self.zone).images()
+        images = manager.images()
         for image in images:
             print(f"image: {image.name} size: {image.volume}")
 

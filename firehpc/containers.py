@@ -68,6 +68,9 @@ class ContainerImage:
     def remove(self) -> None:
         self.proxy.Remove()
 
+    def clone(self, target) -> None:
+        self.proxy.Clone(target, False)
+
 
 class ContainersManager:
     def __init__(self, zone: str) -> ContainersManager:
@@ -96,6 +99,11 @@ class ContainersManager:
             for image in self.proxy.ListImages()
             if image[0].endswith(f".{self.zone}")
         ]
+
+    def image(self, name) -> ContainerImage:
+        for image in self.images():
+            if image.name == name:
+                return image
 
 
 class ImageImporter:
