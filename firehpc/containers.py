@@ -47,7 +47,7 @@ class ContainersManager:
             "org.freedesktop.machine1", "/org/freedesktop/machine1"
         )
 
-    def running(self):
+    def running(self) -> list:
         return [
             RunningContainer(machine[0], Path(machine[3]))
             for machine in self.proxy.ListMachines()
@@ -55,7 +55,7 @@ class ContainersManager:
             and machine[1] == 'container'
         ]
 
-    def images(self):
+    def images(self) -> list:
         return [
             ContainerImage(
                 image[0],
