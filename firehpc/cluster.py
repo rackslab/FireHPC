@@ -125,7 +125,7 @@ class EmulatedCluster:
                 )
 
         ansible_extravars = {
-            'fhpc_zone_state_dir': str(self.state / self.zone),
+            'fhpc_zone_state_dir': str(self.zone_dir),
             'fhpc_zone': self.zone,
         }
 
