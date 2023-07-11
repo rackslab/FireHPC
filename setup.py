@@ -34,6 +34,7 @@ setup(
     install_requires=[
         'ansible-runner',
         'jinja2',
+        'PyYAML',
     ],
     entry_points={
         'console_scripts': [

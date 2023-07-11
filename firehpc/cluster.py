@@ -26,6 +26,7 @@ import time
 import logging
 
 import ansible_runner
+import yaml
 
 from .runner import run
 from .templates import Templater
@@ -124,11 +125,18 @@ class EmulatedCluster:
                     )
                 )
 
-        ansible_extravars = {
+        # Generate custom.yml file with variables and add option to
+        # ansible-playbook command line to load this file as a source of extra
+        # variables.
+        extravars = {
             'fhpc_zone_state_dir': str(self.zone_dir),
             'fhpc_zone': self.zone,
         }
+        extravars_path = self.conf_dir / 'custom.yml'
+        with open(extravars_path, 'w+') as fh:
+            fh.write(yaml.dump(extravars))
 
+        cmdline = f"{self.settings.ansible.args} --extra-vars @{extravars_path}"
         playbooks = ['site']
         if bootstrap:
             playbooks.insert(0, 'bootstrap')
@@ -136,9 +144,8 @@ class EmulatedCluster:
         for playbook in playbooks:
             ansible_runner.run(
                 private_data_dir=self.conf_dir,
-                playbook=f"playbooks/{playbook}.yml",
-                extravars=ansible_extravars,
-                cmdline=self.settings.ansible.args,
+                playbook=f"{self.settings.ansible.path}/{playbook}.yml",
+                cmdline=cmdline,
             )
 
         for generated_dir in ['artifacts', 'env']:
