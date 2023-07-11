@@ -23,8 +23,15 @@ from pathlib import Path
 from datetime import datetime
 from functools import cached_property
 import signal
+import threading
+import logging
 
 from dasbus.connection import SystemMessageBus
+from dasbus.loop import EventLoop
+
+from .errors import FireHPCRuntimeError
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -89,3 +96,54 @@ class ContainersManager:
             for image in self.proxy.ListImages()
             if image[0].endswith(f".{self.zone}")
         ]
+
+
+class ImageImporter:
+    def __init__(self, zone: str, url: str, name: str) -> ImagesImporter:
+        self.zone = zone
+        self.url = url
+        self.name = name
+        self.proxy = SystemMessageBus().get_proxy(
+            "org.freedesktop.import1", "/org/freedesktop/import1"
+        )
+        self.terminated_transfer = threading.Event()
+        self.loop = EventLoop()
+        self.transfer_id = None
+
+    def _transfer_new_handler(
+        self, transfer_id: str, transfer_path: str
+    ) -> None:
+        logger.debug("transfer started: %s", transfer_id)
+
+    def _transfer_removed_handler(
+        self, transfer_id: str, transfer_path: str, result: str
+    ) -> None:
+        logger.debug(
+            "transfer removed: %s %s (%s)", transfer_id, transfer_path, result
+        )
+        logger.deb = logging.getLogger(__name__)
+        if transfer_id == self.transfer_id:
+            if result == 'done':
+                logger.info("Image %s is successfully imported", self.name)
+            else:
+                raise FireHPCRuntimeError(
+                    f"Transfer of image {self.name} has failed: {result}"
+                )
+            self.terminated_transfer.set()
+
+    def _waiter(self) -> None:
+        self.proxy.TransferNew.connect(self._transfer_new_handler)
+        self.proxy.TransferRemoved.connect(self._transfer_removed_handler)
+        self.loop.run()
+
+    def transfer(self) -> None:
+        logger.debug("Starting waiter thread")
+        waiter = threading.Thread(target=self._waiter)
+        waiter.start()
+        logger.info("Downloading image %s from URL %s", self.name, self.url)
+        self.transfer_id = self.proxy.PullRaw(
+            self.url, self.name, "signature", False
+        )[0]
+        logger.debug("Waiting for transfer to terminate…")
+        self.terminated_transfer.wait()
+        self.loop.quit()

@@ -31,7 +31,7 @@ import yaml
 from .runner import run
 from .templates import Templater
 from .users import UsersDirectory
-from .containers import ContainersManager
+from .containers import ContainersManager, ImageImporter
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +65,10 @@ class EmulatedCluster:
             logger.debug("Creating zone state directory %s", self.zone_dir)
             self.zone_dir.mkdir()
 
-        cmd = ['machinectl', 'pull-raw', OS_URL[self.os], f"admin.{self.zone}"]
-        run(cmd)
+        importer = ImageImporter(
+            self.zone, OS_URL[self.os], f"admin.{self.zone}"
+        )
+        importer.transfer()
 
         for host in ['login', 'cn1', 'cn2']:
             logger.info(
