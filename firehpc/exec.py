@@ -167,7 +167,7 @@ class FireHPCExec:
         cluster = EmulatedCluster(
             self.settings, self.args.zone, None, self.args.state
         )
-        cluster.conf(bootstrap=self.args.with_bootstrap)
+        cluster.conf(reinit=False, bootstrap=self.args.with_bootstrap)
 
     def _execute_ssh(self):
         if '.' not in self.args.args[0]:

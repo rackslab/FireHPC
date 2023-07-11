@@ -1,8 +1,5 @@
 # shared variables
 fhpc_local_ssh_dir: "{{ fhpc_zone_state_dir }}/ssh"
-fhpc_users:
-- { login: pierre, firstname: Pierre, lastname: Curie }
-- { login: marie, firstname: Marie, lastname: Curie }
 fhpc_users_group: scientists
 
 # roles variables

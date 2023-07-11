@@ -30,6 +30,7 @@ import yaml
 
 from .runner import run
 from .templates import Templater
+from .users import UsersDirectory
 
 logger = logging.getLogger(__name__)
 
@@ -102,14 +103,15 @@ class EmulatedCluster:
             # flushed by the next container.
             time.sleep(1.0)
 
-    def conf(self, bootstrap=True) -> conf:
-        if self.conf_dir.exists():
+    def conf(self, reinit=True, bootstrap=True) -> conf:
+        if self.conf_dir.exists() and reinit:
             logger.debug(
                 "Removing existing configuration directory %s", self.conf_dir
             )
             shutil.rmtree(self.conf_dir)
 
-        self.conf_dir.mkdir()
+        if not self.conf_dir.exists():
+            self.conf_dir.mkdir()
 
         for template in ['ansible.cfg', 'hosts']:
             logger.debug(
@@ -125,16 +127,20 @@ class EmulatedCluster:
                     )
                 )
 
-        # Generate custom.yml file with variables and add option to
-        # ansible-playbook command line to load this file as a source of extra
-        # variables.
-        extravars = {
-            'fhpc_zone_state_dir': str(self.zone_dir),
-            'fhpc_zone': self.zone,
-        }
+        # Unless already existing, generate custom.yml file with variables and
+        # add option to ansible-playbook command line to load this file as a
+        # source of extra variables. The file should not be regenerated every
+        # times to make randomly generated data (eg. users) persistent over
+        # successive runs.
         extravars_path = self.conf_dir / 'custom.yml'
-        with open(extravars_path, 'w+') as fh:
-            fh.write(yaml.dump(extravars))
+        if not extravars_path.exists():
+            extravars = {
+                'fhpc_zone_state_dir': str(self.zone_dir),
+                'fhpc_zone': self.zone,
+                'fhpc_users': UsersDirectory(10, self.zone).dump(),
+            }
+            with open(extravars_path, 'w+') as fh:
+                fh.write(yaml.dump(extravars))
 
         cmdline = f"{self.settings.ansible.args} --extra-vars @{extravars_path}"
         playbooks = ['site']
