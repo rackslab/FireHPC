@@ -21,6 +21,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime
+from functools import cached_property
+import signal
 
 from dasbus.connection import SystemMessageBus
 
@@ -30,6 +32,17 @@ class RunningContainer:
     name: str
     path: Path
 
+    @cached_property
+    def proxy(self):
+        return SystemMessageBus().get_proxy(
+            "org.freedesktop.machine1", str(self.path)
+        )
+
+    def poweroff(self) -> None:
+        # Mimic behaviour of machinectl poweroff that send SIGRTMIN+4 to system
+        # manager (1st process) in container to trigger clean poweroff.
+        self.proxy.Kill("leader", signal.SIGRTMIN + 4)
+
 
 @dataclass
 class ContainerImage:
@@ -38,6 +51,15 @@ class ContainerImage:
     modification: datetime
     volume: int
     path: Path
+
+    @cached_property
+    def proxy(self):
+        return SystemMessageBus().get_proxy(
+            "org.freedesktop.machine1", str(self.path)
+        )
+
+    def remove(self) -> None:
+        self.proxy.Remove()
 
 
 class ContainersManager:

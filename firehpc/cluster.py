@@ -164,26 +164,18 @@ class EmulatedCluster:
             shutil.rmtree(generated_path)
 
     def clean(self) -> None:
-        for host in ['admin', 'login', 'cn1', 'cn2']:
-            logger.info("Powering off container %s.%s", host, self.zone)
-            cmd = [
-                'machinectl',
-                'poweroff',
-                f"{host}.{self.zone}",
-            ]
-            run(cmd)
+        manager = ContainersManager(self.zone)
+
+        for container in manager.running():
+            logger.info("Powering off container %s", container.name)
+            container.poweroff()
 
         logger.info("Waiting for containers to power off")
         time.sleep(5.0)
 
-        logger.info("Removing container images")
-        for host in ['admin', 'login', 'cn1', 'cn2']:
-            cmd = [
-                'machinectl',
-                'remove',
-                f"{host}.{self.zone}",
-            ]
-            run(cmd)
+        for image in manager.images():
+            logger.info("Removing image %s", image.name)
+            image.remove()
 
         logger.info("Stopping zone storage service")
         cmd = [
