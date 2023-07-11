@@ -109,6 +109,7 @@ class ImageImporter:
         self.terminated_transfer = threading.Event()
         self.loop = EventLoop()
         self.transfer_id = None
+        self.error = None
 
     def _transfer_new_handler(
         self, transfer_id: str, transfer_path: str
@@ -126,9 +127,7 @@ class ImageImporter:
             if result == 'done':
                 logger.info("Image %s is successfully imported", self.name)
             else:
-                raise FireHPCRuntimeError(
-                    f"Transfer of image {self.name} has failed: {result}"
-                )
+                self.error = result
             self.terminated_transfer.set()
 
     def _waiter(self) -> None:
@@ -147,3 +146,7 @@ class ImageImporter:
         logger.debug("Waiting for transfer to terminate…")
         self.terminated_transfer.wait()
         self.loop.quit()
+        if self.error is not None:
+            raise FireHPCRuntimeError(
+                f"Transfer of image {self.name} has failed: {self.error}"
+            )
