@@ -28,10 +28,14 @@ import logging
 import ansible_runner
 import yaml
 
-from .runner import run
 from .templates import Templater
 from .users import UsersDirectory
-from .containers import ContainersManager, ImageImporter
+from .containers import (
+    ContainersManager,
+    ImageImporter,
+    ContainerService,
+    StorageService,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -86,21 +90,13 @@ class EmulatedCluster:
             print(f"image: {image.name} size: {image.volume}")
 
         logger.info("Starting zone storage service %s", self.zone)
-        cmd = [
-            'systemctl',
-            'start',
-            f"firehpc-storage@{self.zone}.service",
-        ]
-        run(cmd, check=True)
+        storage = StorageService(self.zone)
+        storage.start()
 
         for host in ['admin', 'login', 'cn1', 'cn2']:
             logger.info("Starting container %s.%s", host, self.zone)
-            cmd = [
-                'systemctl',
-                'start',
-                f"firehpc-container@{self.zone}:{host}.service",
-            ]
-            run(cmd, check=True)
+            container = ContainerService(self.zone, host)
+            container.start()
             # Slightly wait between each container invocation for network bridge
             # setting to be ready and avoid IP address being sequentially
             # flushed by the next container.
@@ -179,9 +175,5 @@ class EmulatedCluster:
             image.remove()
 
         logger.info("Stopping zone storage service")
-        cmd = [
-            'systemctl',
-            'stop',
-            f"firehpc-storage@{self.zone}.service",
-        ]
-        run(cmd)
+        storage = StorageService(self.zone)
+        storage.stop()

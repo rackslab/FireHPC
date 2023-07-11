@@ -158,3 +158,30 @@ class ImageImporter:
             raise FireHPCRuntimeError(
                 f"Transfer of image {self.name} has failed: {self.error}"
             )
+
+
+@dataclass
+class UnitService:
+    name: str
+
+    @cached_property
+    def proxy(self):
+        return SystemMessageBus().get_proxy(
+            "org.freedesktop.systemd1", "/org/freedesktop/systemd1"
+        )
+
+    def start(self):
+        self.proxy.StartUnit(f"{self.name}.service", "fail")
+
+    def stop(self):
+        self.proxy.StartUnit(f"{self.name}.service", "fail")
+
+
+class ContainerService(UnitService):
+    def __init__(self, zone, name):
+        super().__init__(f"firehpc-container@{zone}:{name}")
+
+
+class StorageService(UnitService):
+    def __init__(self, zone):
+        super().__init__(f"firehpc-storage@{zone}")
