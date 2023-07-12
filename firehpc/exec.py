@@ -143,6 +143,12 @@ class FireHPCExec:
         )
         parser_status.set_defaults(func=self._execute_status)
 
+        # images command
+        parser_images = subparsers.add_parser(
+            'images', help='List available OS images'
+        )
+        parser_images.set_defaults(func=self._execute_images)
+
         self.args = parser.parse_args()
         self._setup_logger()
         self.settings = RuntimeSettings()
@@ -211,3 +217,7 @@ class FireHPCExec:
         containers = ContainersManager(self.args.zone).running()
         for container in containers:
             print(f"container {container.name} is running")
+
+    def _execute_images(self):
+        images = OSImagesSources(self.settings)
+        print(str(images), end="")

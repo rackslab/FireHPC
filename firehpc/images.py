@@ -35,3 +35,10 @@ class OSImagesSources:
 
     def url(self, os: str) -> str:
         return self.sources[os]
+
+    def __str__(self):
+        result = ""
+        for os, url in self.sources.items():
+            result += f"{os:10s}: {url}\n"
+        return result
+
