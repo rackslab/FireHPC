@@ -21,7 +21,6 @@ from __future__ import annotations
 from datetime import datetime
 import signal
 import threading
-import time
 import logging
 
 from dasbus.connection import SystemMessageBus
@@ -132,6 +131,77 @@ class ImageImporter(DBusObject):
             )
 
 
+class ClusterStateModifier(DBusObject):
+    INTERFACE = "org.freedesktop.machine1"
+
+    def __init__(self, zone: str) -> ClusterStateModifier:
+        super().__init__("/org/freedesktop/machine1")
+        self.zone = zone
+        self.loop = EventLoop()
+        self.terminated_start = threading.Event()
+        self.terminated_stop = threading.Event()
+        self.must_start = []
+        self.must_stop = []
+        self.locker = threading.Lock()
+
+    def _machine_new_handler(self, machine: str, path: str) -> None:
+        logger.debug("machine started: %s", machine)
+        self.locker.acquire()
+        if machine in self.must_start:
+            self.must_start.remove(machine)
+        if not len(self.must_start):
+            self.terminated_start.set()
+        self.locker.release()
+
+    def _machine_removed_handler(self, machine: str, path: str) -> None:
+        logger.debug("machine stopped: %s", machine)
+        self.locker.acquire()
+        if machine in self.must_stop:
+            self.must_stop.remove(machine)
+        if not len(self.must_stop):
+            self.terminated_stop.set()
+        self.locker.release()
+
+    def _waiter(self) -> None:
+        self.proxy.MachineNew.connect(self._machine_new_handler)
+        self.proxy.MachineRemoved.connect(self._machine_removed_handler)
+        self.loop.run()
+
+    def start(self, containers: list) -> None:
+        self.must_start = [
+            f"{container}.{self.zone}" for container in containers
+        ]
+        if not len(self.must_start):
+            logger.info("No container to start")
+            return
+        logger.debug("Starting waiter thread")
+        waiter = threading.Thread(target=self._waiter)
+        waiter.start()
+        for container in containers:
+            logger.info("Starting container %s.%s", container, self.zone)
+            Container.start(self.zone, container)
+        logger.info("Waiting for containers to start…")
+        self.terminated_start.wait()
+        logger.info("All containers are successfully started")
+        self.loop.quit()
+
+    def stop(self, containers: list) -> None:
+        self.must_stop = [container.name for container in containers]
+        if not len(self.must_stop):
+            logger.info("No container to stop")
+            return
+        logger.debug("Starting waiter thread")
+        waiter = threading.Thread(target=self._waiter)
+        waiter.start()
+        for container in containers:
+            logger.info("Powering off container %s", container.name)
+            container.poweroff()
+        logger.info("Waiting for containers to stop…")
+        self.terminated_stop.wait()
+        logger.info("All containers are successfully stopped")
+        self.loop.quit()
+
+
 class Container(DBusObject):
     INTERFACE = "org.freedesktop.machine1"
 
@@ -145,14 +215,9 @@ class Container(DBusObject):
         self.proxy.Kill("leader", signal.SIGRTMIN + 4)
 
     @staticmethod
-    def start(zone, name):
+    def start(zone, name) -> None:
         service = ContainerService(zone, name)
         service.start()
-        # Slightly wait between each container invocation for network bridge
-        # setting to be ready and avoid IP address being sequentially
-        # flushed by the next container.
-        time.sleep(1.0)
-        return ContainersManager(zone).container(name)
 
     @classmethod
     def from_machine(cls, machine) -> Container:
@@ -247,3 +312,9 @@ class ContainersManager(DBusObject):
 
     def image(self, name) -> ContainerImage:
         return ContainerImage.from_machine_image_path(self.proxy.GetImage(name))
+
+    def start(self, containers: list):
+        ClusterStateModifier(self.zone).start(containers)
+
+    def stop(self):
+        ClusterStateModifier(self.zone).stop(self.running())

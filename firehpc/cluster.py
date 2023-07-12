@@ -88,9 +88,7 @@ class EmulatedCluster:
         storage = StorageService(self.zone)
         storage.start()
 
-        for host in ['admin', 'login', 'cn1', 'cn2']:
-            logger.info("Starting container %s.%s", host, self.zone)
-            Container.start(self.zone, host)
+        manager.start(['admin', 'login', 'cn1', 'cn2'])
 
     def conf(self, reinit=True, bootstrap=True) -> conf:
         if self.conf_dir.exists() and reinit:
@@ -153,12 +151,7 @@ class EmulatedCluster:
     def clean(self) -> None:
         manager = ContainersManager(self.zone)
 
-        for container in manager.running():
-            logger.info("Powering off container %s", container.name)
-            container.poweroff()
-
-        logger.info("Waiting for containers to power off")
-        time.sleep(5.0)
+        manager.stop()
 
         for image in manager.images():
             logger.info("Removing image %s", image.name)
