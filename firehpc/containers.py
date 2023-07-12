@@ -103,7 +103,6 @@ class ImageImporter(DBusObject):
         logger.debug(
             "transfer removed: %s %s (%s)", transfer_id, transfer_path, result
         )
-        logger.deb = logging.getLogger(__name__)
         if transfer_id == self.transfer_id:
             if result == 'done':
                 logger.info("Image %s is successfully imported", self.name)
