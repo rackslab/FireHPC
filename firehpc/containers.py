@@ -259,7 +259,9 @@ class ContainerImage(DBusObject):
             except DBusError as err:
                 if str(err) == "Device or resource busy":
                     logger.debug(
-                        "Container image (%s) busy, retrying (%d)…", self.name, left
+                        "Container image (%s) busy, retrying (%d)…",
+                        self.name,
+                        left,
                     )
                     time.sleep(1)
                     left -= 1

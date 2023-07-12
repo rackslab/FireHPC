@@ -32,6 +32,13 @@ class RuntimeSettingsAnsible:
         self.args = config.get(self.SECTION, 'args')
 
 
+class RuntimeSettingsImages:
+    SECTION = 'images'
+
+    def __init__(self, config):
+        self.sources = Path(config.get(self.SECTION, 'sources'))
+
+
 class RuntimeSettings:
     """Settings from configuration files."""
 
@@ -53,3 +60,4 @@ class RuntimeSettings:
             _config.read_file(open(self.SITE_PATH))
 
         self.ansible = RuntimeSettingsAnsible(_config)
+        self.images = RuntimeSettingsImages(_config)

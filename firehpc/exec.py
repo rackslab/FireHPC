@@ -29,6 +29,7 @@ from .cluster import EmulatedCluster
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
 from .containers import ContainersManager
+from .images import OSImagesSources
 from .log import TTYFormatter
 
 logger = logging.getLogger(__name__)
@@ -169,15 +170,20 @@ class FireHPCExec:
         root_logger.addHandler(handler)
 
     def _execute_deploy(self):
+        images = OSImagesSources(self.settings)
         cluster = EmulatedCluster(
-            self.settings, self.args.zone, self.args.os, self.args.state
+            self.settings,
+            self.args.zone,
+            self.args.os,
+            self.args.state,
+            images,
         )
         cluster.deploy()
         cluster.conf()
 
     def _execute_conf(self):
         cluster = EmulatedCluster(
-            self.settings, self.args.zone, None, self.args.state
+            self.settings, self.args.zone, None, self.args.state, None
         )
         cluster.conf(reinit=False, bootstrap=self.args.with_bootstrap)
 
@@ -189,13 +195,15 @@ class FireHPCExec:
             )
             sys.exit(1)
         zone = self.args.args[0].split('.')[1]
-        cluster = EmulatedCluster(self.settings, zone, None, self.args.state)
+        cluster = EmulatedCluster(
+            self.settings, zone, None, self.args.state, None
+        )
         ssh = SSHClient(cluster)
         ssh.exec(self.args.args)
 
     def _execute_clean(self):
         cluster = EmulatedCluster(
-            self.settings, self.args.zone, None, self.args.state
+            self.settings, self.args.zone, None, self.args.state, None
         )
         cluster.clean()
 

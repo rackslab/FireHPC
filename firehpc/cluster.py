@@ -39,11 +39,6 @@ from .containers import (
 
 logger = logging.getLogger(__name__)
 
-OS_URL = {
-    'debian11': 'https://hpck.it/osi/firehpc/main/node-debian11_1.raw.xz',
-    'rocky8': 'https://hpck.it/osi/firehpc/main/node-rocky8_1.raw.xz',
-}
-
 
 @dataclass
 class EmulatedCluster:
@@ -51,6 +46,7 @@ class EmulatedCluster:
     zone: str
     os: str
     state: Path
+    images: OSImagesSources
 
     @property
     def zone_dir(self) -> Path:
@@ -70,7 +66,9 @@ class EmulatedCluster:
             self.zone_dir.mkdir()
 
         admin_image = ContainerImage.download(
-            self.zone, OS_URL[self.os], f"admin.{self.zone}"
+            self.zone,
+            self.images.url(self.os),
+            f"admin.{self.zone}",
         )
         manager = ContainersManager(self.zone)
 
