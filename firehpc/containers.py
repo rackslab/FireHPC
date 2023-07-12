@@ -21,10 +21,12 @@ from __future__ import annotations
 from datetime import datetime
 import signal
 import threading
+import time
 import logging
 
 from dasbus.connection import SystemMessageBus
 from dasbus.loop import EventLoop
+from dasbus.error import DBusError
 
 from .errors import FireHPCRuntimeError
 
@@ -249,8 +251,28 @@ class ContainerImage(DBusObject):
         self.modification = datetime.utcfromtimestamp(modification / 10 ** 6)
         self.volume = volume
 
-    def remove(self) -> None:
-        self.proxy.Remove()
+    def remove(self, retries=3) -> None:
+        left = retries
+        while left:
+            try:
+                self.proxy.Remove()
+            except DBusError as err:
+                if str(err) == "Device or resource busy":
+                    logger.debug(
+                        "Container image (%s) busy, retrying (%d)…", self.name, left
+                    )
+                    time.sleep(1)
+                    left -= 1
+                    continue
+                else:
+                    raise FireHPCRuntimeError(
+                        f"Unable to remove container image {self.name}: {err}"
+                    ) from err
+            else:
+                return
+        raise FireHPCRuntimeError(
+            f"Unable to remove container image {self.name} after {retries} tries"
+        )
 
     def clone(self, target) -> None:
         self.proxy.Clone(target, False)
