@@ -1,10 +1,14 @@
 # shared variables
 fhpc_local_ssh_dir: "{{ fhpc_zone_state_dir }}/ssh"
+fhpc_local_ca_dir: "{{ fhpc_zone_state_dir }}/ca"
+fhpc_ldap_server: "{{ groups['admin'][0] }}"
 fhpc_users_group: scientists
 
 # roles variables
-common_local_ca_dir: "{{ fhpc_zone_state_dir }}/ca"
+common_local_ca_dir: "{{ fhpc_local_ca_dir }}"
 ssh_key_dir: "{{ fhpc_local_ssh_dir }}"
+ldap_local_ca_dir: "{{ fhpc_local_ca_dir }}"
+ldap_server_hostname: "{{ fhpc_ldap_server }}"
 ldap_local_admin_password_file: "{{ fhpc_zone_state_dir }}/ldap/ldap.password"
 ldap_base: "dc=cluster,dc={{ fhpc_zone }}"
 ldap_domain: "cluster.{{ fhpc_zone }}"
@@ -12,7 +16,7 @@ ldap_email_domain: "cluster.{{ fhpc_zone }}"
 ldap_users: "{{ fhpc_users }}"
 ldap_users_group: "{{ fhpc_users_group }}"
 sssd_ldap_base: "dc=cluster,dc={{ fhpc_zone }}"
-sssd_ldap_server: admin
+sssd_ldap_server: "{{ fhpc_ldap_server }}"
 users_ssh_host_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_defs: "{{ fhpc_users }}"
 users_group: "{{ fhpc_users_group }}"

@@ -28,6 +28,46 @@
   vars:
     ldap_phase: post_install
 
+- name: Create LDAP SSL directory
+  ansible.builtin.file:
+    path: "{{ ldap_tls_dir }}"
+    state: directory
+    recurse: true
+
+- name: Deploy CA certificate
+  ansible.builtin.copy:
+    src: "{{ ldap_local_ca_cert_file }}"
+    dest: "{{ ldap_tls_ca_cert_file }}"
+    owner: "{{ ldap_system_user }}"
+    group: "{{ ldap_system_group }}"
+    mode: 0644
+
+- name: Deploy LDAP TLS certificate
+  ansible.builtin.copy:
+    src: "{{ ldap_local_tls_cert_file }}"
+    dest: "{{ ldap_tls_cert_file }}"
+    owner: "{{ ldap_system_user }}"
+    group: "{{ ldap_system_group }}"
+    mode: 0644
+
+- name: Deploy LDAP TLS key
+  ansible.builtin.copy:
+    src: "{{ ldap_local_tls_key_file }}"
+    dest: "{{ ldap_tls_key_file }}"
+    owner: "{{ ldap_system_user }}"
+    group: "{{ ldap_system_group }}"
+    mode: 0600
+
+- name: Configure TLS certificate and key
+  community.general.ldap_attrs:
+    dn: cn=config
+    attributes:
+      olcTLSCACertificateFile: "{{ ldap_tls_ca_cert_file }}"
+      olcTLSCertificateFile: "{{ ldap_tls_cert_file }}"
+      olcTLSCertificateKeyFile: "{{ ldap_tls_key_file }}"
+    state: exact
+  when: ldap_server_package not in ansible_facts.packages
+
 - name: Generate bootstrap LDIF
   ansible.builtin.template:
     src: bootstrap.ldif.j2

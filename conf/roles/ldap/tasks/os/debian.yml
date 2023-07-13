@@ -23,3 +23,14 @@
   # LDAP server package is already installed.
   - ldap_phase == 'pre_install'
   - ldap_server_package not in ansible_facts.packages
+
+- name: Debian specific post-installation tasks
+  block:
+  - name: Ensure LDAP server listens for ldaps protocol
+    ansible.builtin.lineinfile:
+      path: /etc/default/slapd
+      regexp: '^SLAPD_SERVICES='
+      line: SLAPD_SERVICES="ldap:/// ldapi:/// ldaps:///"
+    notify: Restart slapd
+  when:
+  - ldap_phase == 'post_install'

@@ -2,5 +2,6 @@
 ldap_server_package: slapd
 ldap_extra_packages:
 - ldap-utils
+- python3-ldap
 ldap_system_user: openldap
 ldap_system_group: openldap

@@ -10,3 +10,25 @@
     content: "{{ lookup('community.general.random_string', length=16, special=false) }}" # avoid special character
     dest: "{{ ldap_local_admin_password_file }}"
     force: no  # do not overwrite the password if it has already been generated
+
+- name: Create private key LDAP TLS certificate
+  community.crypto.openssl_privatekey:
+    path: "{{ ldap_local_tls_key_file }}"
+
+- name: Create certificate signing request (CSR) for LDAP certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: "{{ ldap_local_tls_key_file }}"
+    subject_alt_name:
+      - "DNS:{{ ldap_server_hostname }}"
+  register: csr
+
+- name: Sign certificate with internal CA
+  community.crypto.x509_certificate:
+    csr_content: "{{ csr.csr }}"
+    provider: ownca
+    ownca_path: "{{ ldap_local_ca_cert_file }}"
+    ownca_privatekey_path: "{{ ldap_local_ca_key_file }}"
+    ownca_privatekey_passphrase: "{{ lookup('ansible.builtin.file', ldap_local_ca_password_file) }}"
+    ownca_not_after: +365d  # valid for one year
+    ownca_not_before: "-1d"  # valid since yesterday
+    path: "{{ ldap_local_tls_cert_file }}"

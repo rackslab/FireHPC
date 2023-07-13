@@ -14,3 +14,15 @@ ldap_domain: cluster.local  # dummy
 ldap_ldif_path: /tmp/bootstrap.ldif
 ldap_first_uid: 10001
 ldap_first_gid: 10001
+ldap_local_ca_dir: ca  # dummy
+ldap_server_hostname: admin  # dummy
+ldap_local_ca_password_file: "{{ ldap_local_ca_dir }}/ca.password"
+ldap_local_ca_key_file: "{{ ldap_local_ca_dir }}/key.pem"
+ldap_local_ca_cert_file: "{{ ldap_local_ca_dir }}/ca.crt"
+ldap_local_tls_key_file: "{{ ldap_local_ca_dir }}/key-ldap.pem"
+ldap_local_tls_cert_file: "{{ ldap_local_ca_dir }}/cert-ldap.crt"
+
+ldap_tls_dir: /etc/ldap/tls
+ldap_tls_ca_cert_file: "{{ ldap_tls_dir }}/ca.crt"
+ldap_tls_cert_file: "{{ ldap_tls_dir }}/cert.crt"
+ldap_tls_key_file: "{{ ldap_tls_dir }}/key.pem"
