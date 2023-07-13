@@ -3,6 +3,7 @@ fhpc_local_ssh_dir: "{{ fhpc_zone_state_dir }}/ssh"
 fhpc_users_group: scientists
 
 # roles variables
+common_local_ca_dir: "{{ fhpc_zone_state_dir }}/ca"
 ssh_key_dir: "{{ fhpc_local_ssh_dir }}"
 ldap_local_admin_password_file: "{{ fhpc_zone_state_dir }}/ldap/ldap.password"
 ldap_base: "dc=cluster,dc={{ fhpc_zone }}"

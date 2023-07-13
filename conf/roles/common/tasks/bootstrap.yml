@@ -1,0 +1,40 @@
+---
+- name: Create local CA directory
+  ansible.builtin.file:
+    path: "{{ common_local_ca_dir }}"
+    state: directory
+    recurse: true
+
+- name: Generate CA password file
+  ansible.builtin.copy:
+    content: "{{ lookup('community.general.random_string', length=16, special=false) }}"
+    dest: "{{ common_local_ca_password_file }}"
+    force: no  # do not overwrite the password if it has already been generated
+
+- name: Create private key with password protection
+  community.crypto.openssl_privatekey:
+    path: "{{ common_local_ca_key_file }}"
+    passphrase: "{{ lookup('ansible.builtin.file', common_local_ca_password_file) }}"
+    cipher: auto
+
+- name: Create certificate signing request (CSR) for CA certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: "{{ common_local_ca_key_file }}"
+    privatekey_passphrase: "{{ lookup('ansible.builtin.file', common_local_ca_password_file) }}"
+    common_name: FireHPC CA
+    use_common_name_for_san: false  # since we do not specify SANs, don't use CN as a SAN
+    basic_constraints:
+      - 'CA:TRUE'
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+    key_usage_critical: true
+  register: ca_csr
+
+- name: Create self-signed CA certificate from CSR
+  community.crypto.x509_certificate:
+    path: "{{ common_local_ca_cert_file }}"
+    csr_content: "{{ ca_csr.csr }}"
+    privatekey_path: "{{ common_local_ca_key_file }}"
+    privatekey_passphrase: "{{ lookup('ansible.builtin.file', common_local_ca_password_file) }}"
+    provider: selfsigned

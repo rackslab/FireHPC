@@ -15,3 +15,13 @@
   ansible.builtin.package:
     name: "{{ common_packages }}"
     state: latest
+
+- name: Deploy CA certificate
+  ansible.builtin.copy:
+    src: "{{ common_local_ca_cert_file }}"
+    dest: "{{ common_ca_system_dir }}/{{ common_local_ca_cert_file | basename }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Update CA certificates

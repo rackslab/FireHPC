@@ -1,0 +1,3 @@
+- name: Update CA certificates
+  command:
+    cmd: "{{ common_ca_update_cmd }}"

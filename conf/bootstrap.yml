@@ -4,6 +4,10 @@
     import_role:
       name: ssh
       tasks_from: localkeys
+  - name: Generate CA
+    import_role:
+      name: common
+      tasks_from: bootstrap
   - name: Generate munge key and MariaDB password
     include_role:
       name: slurm
