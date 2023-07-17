@@ -32,21 +32,24 @@
 - [x] Introduce groups and inventory 
 - [x] Fully support zones and parallel FireHPC clusters
 - [x] Support RPM distribution
-- [ ] Develop a real tool (ie. not a prototype) that can run anywhere
+- [x] Develop a real tool (ie. not a prototype) that can run anywhere
 - [ ] RELEASE THE SHMOO!
 
 ## Nice to have
 
 - [ ] Dynamic sizing with RackDB
 - [ ] Notification when cluster is ready
-- [ ] Let user define their own inventory file. This would probably means
+- [x] Let user define their own inventory file. This would probably means
       giving up group_vars directory and defining all FireHPC variables in
       a plain file as group_vars directory is evaluated after the individual
       files user could provide. For reference, see
       [multiples inventory section](https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html#using-multiple-inventory-sources)
       in Ansible documentation.
-- [ ] Define available OS in external file.
-- [ ] Add command to list available OS.
+- [x] Generate random list of users
+- [x] Dump available users list
+- [x] Enable TLS on LDAP
+- [x] Define available OS in external file.
+- [x] Add command to list available OS.
 - [ ] Install and setup
       [clustershell](https://clustershell.readthedocs.io/en/latest/)
 - [ ] Generate ssh config file on host
