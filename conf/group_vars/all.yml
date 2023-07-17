@@ -1,7 +1,7 @@
 # shared variables
 fhpc_local_ssh_dir: "{{ fhpc_zone_state_dir }}/ssh"
 fhpc_local_ca_dir: "{{ fhpc_zone_state_dir }}/ca"
-fhpc_ldap_server: "{{ groups['admin'][0] }}"
+fhpc_ldap_server: admin
 fhpc_users_group: scientists
 
 # roles variables
