@@ -3,6 +3,10 @@ inventory = hosts
 connection_plugins = /usr/share/firehpc/extra/connection_plugins
 interpreter_python = auto_silent
 roles_path = /usr/share/firehpc/conf/roles
+# Alter default ansible variable precedence order to give users the possibilty
+# to define variables in inventory and override variables defined in playbook
+# provided by FireHPC.
+precedence = 'all_plugins_play', 'groups_plugins_play', 'all_inventory', 'groups_inventory', 'all_plugins_inventory', 'groups_plugins_inventory'
 
 [ssh_connection]
 ssh_args = -C -o ControlMaster=auto -o ControlPersist=60s -o UserKnownHostsFile={{ state }}/ssh/known_hosts -i {{ state }}/ssh/id_rsa

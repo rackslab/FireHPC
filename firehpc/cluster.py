@@ -82,17 +82,15 @@ class EmulatedCluster:
             )
             admin_image.clone(f"{host}.{self.zone}")
 
-        images = manager.images()
-        for image in images:
-            print(f"image: {image.name} size: {image.volume}")
-
         logger.info("Starting zone storage service %s", self.zone)
         storage = StorageService(self.zone)
         storage.start()
 
         manager.start(['admin', 'login', 'cn1', 'cn2'])
 
-    def conf(self, reinit=True, bootstrap=True) -> conf:
+    def conf(
+        self, reinit: bool = True, bootstrap: bool = True, custom: Path = None
+    ) -> conf:
         if self.conf_dir.exists() and reinit:
             logger.debug(
                 "Removing existing configuration directory %s", self.conf_dir
@@ -101,6 +99,26 @@ class EmulatedCluster:
 
         if not self.conf_dir.exists():
             self.conf_dir.mkdir()
+
+        for subdir in ['group_vars', 'host_vars']:
+            dest_custom_path = self.conf_dir / subdir
+            if dest_custom_path.exists():
+                logger.info(
+                    "Removing existing custom variable directory %s",
+                    dest_custom_path,
+                )
+                shutil.rmtree(dest_custom_path)
+
+        if custom:
+            for subdir in ['group_vars', 'host_vars']:
+                orig_custom_path = custom / subdir
+                dest_custom_path = self.conf_dir / subdir
+                if orig_custom_path.exists():
+                    logger.info(
+                        "Copying custom variables directory %s in configuration directory",
+                        orig_custom_path,
+                    )
+                    shutil.copytree(orig_custom_path, dest_custom_path)
 
         for template in ['ansible.cfg', 'hosts']:
             logger.debug(

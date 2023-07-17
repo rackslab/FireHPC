@@ -95,6 +95,12 @@ class FireHPCExec:
             help="Name of the zone to deploy",
             required=True,
         )
+        parser_deploy.add_argument(
+            '-c',
+            '--custom',
+            help="Path of variables directories to customize FireHPC default",
+            type=Path,
+        )
         parser_deploy.set_defaults(func=self._execute_deploy)
 
         # conf command
@@ -105,6 +111,12 @@ class FireHPCExec:
             '--zone',
             help="Name of the zone on which configuration is deployed",
             required=True,
+        )
+        parser_conf.add_argument(
+            '-c',
+            '--custom',
+            help="Path of variables directories to customize FireHPC default",
+            type=Path,
         )
         parser_conf.add_argument(
             '--with-bootstrap',
@@ -186,13 +198,17 @@ class FireHPCExec:
             images,
         )
         cluster.deploy()
-        cluster.conf()
+        cluster.conf(custom=self.args.custom)
 
     def _execute_conf(self):
         cluster = EmulatedCluster(
             self.settings, self.args.zone, None, self.args.state, None
         )
-        cluster.conf(reinit=False, bootstrap=self.args.with_bootstrap)
+        cluster.conf(
+            reinit=False,
+            bootstrap=self.args.with_bootstrap,
+            custom=self.args.custom,
+        )
 
     def _execute_ssh(self):
         if '.' not in self.args.args[0]:
