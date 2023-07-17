@@ -30,6 +30,7 @@ from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
 from .containers import ContainersManager
 from .images import OSImagesSources
+from .users import UsersDirectory
 from .log import TTYFormatter
 
 logger = logging.getLogger(__name__)
@@ -214,9 +215,10 @@ class FireHPCExec:
         cluster.clean()
 
     def _execute_status(self):
-        containers = ContainersManager(self.args.zone).running()
-        for container in containers:
-            print(f"container {container.name} is running")
+        cluster = EmulatedCluster(
+            self.settings, self.args.zone, None, self.args.state, None
+        )
+        cluster.status()
 
     def _execute_images(self):
         images = OSImagesSources(self.settings)

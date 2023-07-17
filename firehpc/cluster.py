@@ -56,6 +56,10 @@ class EmulatedCluster:
     def conf_dir(self) -> Path:
         return self.zone_dir / 'conf'
 
+    @property
+    def extravars_path(self) -> Path:
+        return self.conf_dir / 'custom.yml'
+
     def deploy(self) -> None:
 
         if not self.state.exists():
@@ -117,17 +121,16 @@ class EmulatedCluster:
         # source of extra variables. The file should not be regenerated every
         # times to make randomly generated data (eg. users) persistent over
         # successive runs.
-        extravars_path = self.conf_dir / 'custom.yml'
-        if not extravars_path.exists():
+        if not self.extravars_path.exists():
             extravars = {
                 'fhpc_zone_state_dir': str(self.zone_dir),
                 'fhpc_zone': self.zone,
                 'fhpc_users': UsersDirectory(10, self.zone).dump(),
             }
-            with open(extravars_path, 'w+') as fh:
+            with open(self.extravars_path, 'w+') as fh:
                 fh.write(yaml.dump(extravars))
 
-        cmdline = f"{self.settings.ansible.args} --extra-vars @{extravars_path}"
+        cmdline = f"{self.settings.ansible.args} --extra-vars @{self.extravars_path}"
         playbooks = ['site']
         if bootstrap:
             playbooks.insert(0, 'bootstrap')
@@ -158,3 +161,15 @@ class EmulatedCluster:
         logger.info("Stopping zone storage service")
         storage = StorageService(self.zone)
         storage.stop()
+
+    def status(self) -> None:
+        containers = ContainersManager(self.zone).running()
+        print("containers:")
+        for container in containers:
+            print(f"  {container.name} is running")
+        with open(self.extravars_path) as fh:
+            content = yaml.safe_load(fh)
+        users = UsersDirectory.load(self.zone, content['fhpc_users'])
+        print("users:")
+        for user in users:
+            print(f"  {user.login:15s} ({user.firstname} {user.lastname})")

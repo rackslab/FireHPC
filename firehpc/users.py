@@ -47,6 +47,10 @@ class UserEntry:
             "email": self.email,
         }
 
+    @classmethod
+    def load(cls, zone: str, user: dict) -> UserEntry:
+        return cls(user['firstname'], user['lastname'], zone)
+
 
 class UsersDirectory:
     def __init__(self, size: int, zone: str) -> UsersDirectory:
@@ -58,5 +62,16 @@ class UsersDirectory:
             for _ in range(self.size)
         ]
 
+    def __iter__(self):
+        for user in self.db:
+            yield user
+
     def dump(self):
         return [user.dump() for user in self.db]
+
+    @classmethod
+    def load(cls, zone: str, users: list) -> UsersDirectory:
+        directory = cls(0, zone)
+        for user in users:
+            directory.db.append(UserEntry.load(zone, user))
+        return directory
