@@ -1,4 +1,12 @@
 ---
+- name: Create slurmd spool directory
+  ansible.builtin.file:
+    path: "{{ slurm_slurmd_spool_dir }}"
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: '0700'
+
 - name: Install slurm compute specific packages
   ansible.builtin.package:
     name: "{{ slurm_compute_packages }}"
