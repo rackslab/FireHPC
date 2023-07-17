@@ -33,12 +33,13 @@
 - [x] Fully support zones and parallel FireHPC clusters
 - [x] Support RPM distribution
 - [x] Develop a real tool (ie. not a prototype) that can run anywhere
+- [ ] Write manpage for firehpc command
 - [ ] RELEASE THE SHMOO!
 
 ## Nice to have
 
-- [ ] Dynamic sizing with RackDB
-- [ ] Notification when cluster is ready
+- [/] Dynamic sizing with RackDB → #1
+- [/] Notification when cluster is ready → #2
 - [x] Let user define their own inventory file. This would probably means
       giving up group_vars directory and defining all FireHPC variables in
       a plain file as group_vars directory is evaluated after the individual
@@ -50,24 +51,24 @@
 - [x] Enable TLS on LDAP
 - [x] Define available OS in external file.
 - [x] Add command to list available OS.
-- [ ] Install and setup
-      [clustershell](https://clustershell.readthedocs.io/en/latest/)
-- [ ] Generate ssh config file on host
+- [/] Install and setup
+      [clustershell](https://clustershell.readthedocs.io/en/latest/) → #3
+- [-] Generate ssh config file on host
 - [x] Rename front to login as this name in more common in HPC
 - [x] Install and setup slurmrestd
-- [ ] Generate slurm partitions and nodes conf based on inventory → This would
+- [/] Generate slurm partitions and nodes conf based on inventory → This would
       requires a new filter, roughly similar to ansible.netcommon.vlan_parser,
-      to generate nodesets based on host lists.
+      to generate nodesets based on host lists. → #1
 - [x] Use triggered unit to manage (create/remove) shared directories
-- [ ] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
-- [ ] Improve rackslab/ansible-connection-machinectl _non-root_ branch to match
+- [-] Define tmpfiles.d for `systemd-nspawn` arguments (eg. bind-mounts)
+- [-] Improve rackslab/ansible-connection-machinectl _non-root_ branch to match
       [maintainer expectations](https://github.com/tomeon/ansible-connection-machinectl/issues/10#issuecomment-812534935).
 - [x] Manual install script to simplify quickstart
 - [x] Build and deploy mkosi images with python3 pre-installed
-- [ ] Fix shell glitch after ansible run with machinectl connection
-- [ ] Understand why the hostname is not set automatically in containers (I
+- [-] Fix shell glitch after ansible run with machinectl connection
+- [-] Understand why the hostname is not set automatically in containers (I
       though `systemd-hostnamed` would do the job)
-- [ ] Understand why polkit `auth_admin_keep` permission for active sessions on
+- [-] Understand why polkit `auth_admin_keep` permission for active sessions on
       `org.freedesktop.machine1.*` actions are not effective (at least on
       Ubuntu 21.10). An additional rule is required to avoid typing password
       for all `machinectl` commands:
