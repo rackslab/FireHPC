@@ -130,7 +130,9 @@ class EmulatedCluster:
             with open(self.extravars_path, 'w+') as fh:
                 fh.write(yaml.dump(extravars))
 
-        cmdline = f"{self.settings.ansible.args} --extra-vars @{self.extravars_path}"
+        cmdline = (
+            f"{self.settings.ansible.args} --extra-vars @{self.extravars_path}"
+        )
         playbooks = ['site']
         if bootstrap:
             playbooks.insert(0, 'bootstrap')
