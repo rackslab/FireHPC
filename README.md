@@ -48,6 +48,53 @@ you can install on your system using `ansible-galaxy`.
 
 ## Quickstart
 
+Download and install Rackslab packages repository signing keyring:
+
+```
+$ curl -sS https://pkgs.rackslab.io/keyring.asc | gpg --dearmor | sudo tee /usr/share/keyrings/rackslab.gpg > /dev/null
+```
+
+Create `/etc/apt/sources.list.d/rackslab.sources`:
+
+* For Debian 12 _Bookworm_:
+
+```
+Types: deb
+URIs: https://pkgs.rackslab.io/deb
+Suites: bookworm
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/rackslab.gpg
+```
+
+* For Debian 13 _Trixie_:
+
+```
+Types: deb
+URIs: https://pkgs.rackslab.io/deb
+Suites: trixie
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/rackslab.gpg
+```
+
+* For Debian _sid_:
+
+```
+Types: deb
+URIs: https://pkgs.rackslab.io/deb
+Suites: sid
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/rackslab.gpg
+```
+
+Update packages database:
+
+```
+$ sudo apt update
+```
+
 Install `firehpc`:
 
 ```
