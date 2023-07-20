@@ -1,4 +1,0 @@
-[submodule "conf/connections"]
-	path = extra/connections
-	url = git@github.com:rackslab/ansible-connection-machinectl.git
-	branch = non-root
