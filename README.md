@@ -19,6 +19,15 @@ FireHPC aims to emulate HPC clusters with multiple distributions. It supports
 running multiple emulated HPC clusters in parallel on the same host, each
 cluster running in its dedicated zone.
 
+The following services are automatically deployed in the emulated cluster:
+
+- Slurm workload manager
+- SlurmDBD accounting with MariaDB backend
+- Slurmrestd REST API
+- LDAP directory with TLS
+- SSH with public keys
+- OpenMPI
+
 ## Architecture
 
 FireHPC requires Python >= 3.9.
