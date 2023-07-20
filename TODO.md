@@ -33,7 +33,7 @@
 - [x] Fully support zones and parallel FireHPC clusters
 - [x] Support RPM distribution
 - [x] Develop a real tool (ie. not a prototype) that can run anywhere
-- [ ] Write manpage for firehpc command
+- [x] Write manpage for firehpc command
 - [ ] RELEASE THE SHMOO!
 
 ## Nice to have

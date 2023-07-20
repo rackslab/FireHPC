@@ -1,0 +1,168 @@
+= firehpc(1)
+Rackslab: https://rackslab.io
+:doctype: manpage
+:manmanual: firehpc
+:man-linkstyle: pass:[blue R < >]
+
+== Name
+
+firehpc - Fire up container-based emulated HPC cluster
+
+== Synopsis
+
+[.cli-opt]#*firehpc*# `[_GENERAL OPTIONS_] COMMAND [_COMMAND OPTIONS_]`
+
+== Description
+
+FireHPC deploys emulated HPC clusters with containers, virtual network and
+virtual shared storage service. Multiple emulated clusters can be deployed on
+the same host in distinct zones. The emulated nodes are automatically setup with
+Ansible playbooks. Deployed services include:
+
+* Slurm workload manager
+* SlurmDBD accounting with MariaDB backend
+* Slurmrestd REST API
+* LDAP directory
+* SSH with public keys
+* OpenMPI
+
+It is possible to define custom Ansible variables to alter the default
+configuration provided by FireHPC. Fake users accounts are generated randomly
+for tests purpose.
+
+The configuration is actually deployed in two phases: the _bootstrap_ and the
+_deployment_ phases. During the _bootstrap_ phase, all the sensible files (SSH
+and TLS keys, passwords, etc) are generated in a local state directory. In the
+_deployment_ phase, configuration files are deployed in containers and services
+are started.
+
+== General Options
+
+[.cli-opt]#*-h, --help*#::
+  Show this help message and exit.
+
+[.cli-opt]#*-v, --version*#::
+  Show RacksDB version number and exit.
+
+[.cli-opt]#*--debug*#::
+  Enable debug mode with more messages in output.
+
+[.cli-opt]#*--show-libs-logs*#::
+  Show external libraries logs additionally to FireHPC internal logs.
+
+[.cli-opt]#*--state*=#[.cli-optval]##_STATE_##::
+  Path FireHPC state directory where generated files (keys, certificates, users,
+  etc) are stored before deployment in containers. Default value is
+  [.path]#`~/.local/state/firehpc`#. If _$XDG_STATE_HOME_ environment variable
+  is defined, its value appended with _firehpc_ subfolder is considered the new
+  default.
+
+== Commands
+
+All commands accept [.cli-opt]#*-h, --help*# option to get details about
+available option for this particular command (_ex:_ `firehpc deploy --help`).
+Commands are listed in lexicographical order.
+
+[.cli-opt]#*clean*#::
+
+  Stop and clean and emulated HPC clusters, with the following steps: stop
+  containers, remove container images and stop storage service in a zone.
++
+--
+This command accepts the following options:
+
+[.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
+  Name of the zone to clean. This option is required.
+--
+
+[.cli-opt]#*conf*#::
+
+  Re-deploy the configuration on a started emulated cluster in a zone.
++
+--
+This command accepts the following options:
+
+[.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
+  Name of the zone to configure. This option is required.
+
+[.cli-opt]#*-c, --custom*=#[.cli-optval]##_CUSTOM_##::
+  Path to directory with custom Ansible variables to override default variables
+  provided in FireHPC. The given path must contain a [.path]#`group_vars/`# or a
+  [.path]#`host_vars/`# directory with files supported by Ansible.
+
+[.cli-opt]#*--with-bootstrap*#::
+  Execute configuration _bootstrap_ phase, additionally to the _deployment_
+  phase. By default, only the _deployment_ phase is run.
+--
+
+[.cli-opt]#*deploy*#::
+
+  Deploy an emulated HPC cluster, with the following steps: download container
+  images, setup virtual network and shared storage service, start containers and
+  deploy configuration in two phases (_bootstrap_ and _deployment_).
+
++
+--
+This command accepts the following options:
+
+[.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
+  Name of the zone to configure. This option is required.
+
+[.cli-opt]#*--os*=#[.cli-optval]##_OS_##::
+  Name of the operating system of downloaded the container image. See
+  `firehpc images` for available values. This option is required.
+
+[.cli-opt]#*-c, --custom*=#[.cli-optval]##_CUSTOM_##::
+  Path to directory with custom Ansible variables to override default variables
+  provided in FireHPC. The given path must contain a [.path]#`group_vars/`# or a
+  [.path]#`host_vars/`# directory with files supported by Ansible.
+--
+
+[.cli-opt]#*images*#::
+
+  List available operating systems and the URL of the corresponding container
+  images to download.
+
+[.cli-opt]#*ssh*#::
+
+  Open a shell or run a command on a container through SSH.
++
+--
+This command requires at least one argument to specify the destination container
+in the format [LOGIN@]CONTAINER.ZONE (ex: `admin.hpc` or `john@login.hpc`).
+Additional arguments are treated as a command to execute on container with its
+own arguments. Without additional arguments, an interactive shell is launched in
+the container.
+--
+
+[.cli-opt]#*status*#::
+
+  Report the status of an emulated cluster in a zone. It gives the list of
+  running containers and the randomly generated user accounts for the cluster in
+  this zone.
++
+--
+This command accepts the following options:
+
+[.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
+  Name of the zone. This option is required.
+--
+
+== Exit status
+
+*0*::
+  `firehpc` has processed command with success.
+
+*1*::
+  `firehpc` encountered an error.
+
+== Resources
+
+FireHPC web site: https://github.com/rackslab/firehpc
+
+== Copying
+
+Copyright (C) 2023 {author}. +
+
+FireHPC is distributed under the terms of the GNU General Public License v3.0
+or later (GPLv3+).
