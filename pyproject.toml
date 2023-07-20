@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "FireHPC"
+version = "0.0.1"
+description = "Instantly fire up container-based emulated HPC cluster"
+license = {text = "GPLv3+"}
+requires-python = ">=3.9"
+keywords = ["slurm", "hpc", "cluster", "container", "ansible"]
+authors = [
+    {name = "Rémi Palancher", email = "remi@rackslab.io"},
+]
+dependencies = [
+    "ansible-runner",
+    "dasbus",
+    "Faker",
+    "jinja2",
+    "PyYAML",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Systems Administration",
+]
+readme = "README.md"
+
+[project.scripts]
+firehpc = 'firehpc.exec:FireHPCExec.run'
+
+[tool.setuptools.packages.find]
+include = ['firehpc*']
+
+[project.urls]
+"Homepage" = "https://github.com/rackslab/firehpc"
+"Bug Tracker" = "https://github.com/rackslab/firehpc/issues"
+
+[tool.black]
+target-version = ['py39']
+color = 1
+
+[tool.ruff]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = ["E", "F"]
+target-version = "py39"
