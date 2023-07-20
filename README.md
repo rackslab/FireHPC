@@ -118,9 +118,7 @@ gpg: Total number processed: 1
 gpg:               imported: 1
 ```
 
-https://github.com/systemd/systemd/issues/21397
-
-On Debian 12, start and enable `systemd-networkd` service:
+Start and enable `systemd-networkd` service:
 
 ```
 $ sudo systemctl start systemd-networkd.service
