@@ -15,5 +15,5 @@ and this project adheres to
 
 ## [1.0.0] - 2023-07-20
 
-[unreleased]: https://github.com/rackslab/firehpc/compare/v1.0.0-beta...HEAD
-[1.0.0]: https://github.com/rackslab/firehpc/releases/tag/v1.0.0-beta
+[unreleased]: https://github.com/rackslab/firehpc/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/rackslab/firehpc/releases/tag/v1.0.0
