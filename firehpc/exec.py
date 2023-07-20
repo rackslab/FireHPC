@@ -28,9 +28,7 @@ from .settings import RuntimeSettings
 from .cluster import EmulatedCluster
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
-from .containers import ContainersManager
 from .images import OSImagesSources
-from .users import UsersDirectory
 from .log import TTYFormatter
 
 logger = logging.getLogger(__name__)

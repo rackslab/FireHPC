@@ -19,10 +19,9 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-
+from typing import TYPE_CHECKING
 from pathlib import Path
 import shutil
-import time
 import logging
 
 import ansible_runner
@@ -32,10 +31,13 @@ from .templates import Templater
 from .users import UsersDirectory
 from .containers import (
     ContainersManager,
-    Container,
     ContainerImage,
     StorageService,
 )
+
+if TYPE_CHECKING:
+    from .settings import RuntimeSettings
+    from .images import OSImagesSources
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +113,8 @@ class EmulatedCluster:
                 dest_custom_path = self.conf_dir / subdir
                 if orig_custom_path.exists():
                     logger.info(
-                        "Copying custom variables directory %s in configuration directory",
+                        "Copying custom variables directory %s in configuration "
+                        "directory",
                         orig_custom_path,
                     )
                     shutil.copytree(orig_custom_path, dest_custom_path)

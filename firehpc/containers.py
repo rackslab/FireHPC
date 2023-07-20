@@ -82,7 +82,7 @@ class StorageService(UnitService):
 class ImageImporter(DBusObject):
     INTERFACE = "org.freedesktop.import1"
 
-    def __init__(self, url: str, name: str) -> ImagesImporter:
+    def __init__(self, url: str, name: str) -> ImageImporter:
         super().__init__("/org/freedesktop/import1")
         self.url = url
         self.name = name

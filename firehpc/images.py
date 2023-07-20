@@ -18,9 +18,13 @@
 # along with FireHPC.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
+from typing import TYPE_CHECKING
 import logging
 
 import yaml
+
+if TYPE_CHECKING:
+    from .settings import RuntimeSettings
 
 logger = logging.getLogger(__name__)
 
