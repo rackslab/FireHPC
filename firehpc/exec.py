@@ -23,7 +23,7 @@ import sys
 import os
 from pathlib import Path
 
-from .version import __version__
+from .version import get_version
 from .settings import RuntimeSettings
 from .cluster import EmulatedCluster
 from .ssh import SSHClient
@@ -58,7 +58,7 @@ class FireHPCExec:
             '-v',
             '--version',
             action='version',
-            version='FireHPC ' + __version__,
+            version='FireHPC ' + get_version(),
         )
         parser.add_argument(
             '--debug',

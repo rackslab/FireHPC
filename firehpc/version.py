@@ -17,4 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with FireHPC.  If not, see <https://www.gnu.org/licenses/>.
 
-__version__ = '0.1.0'
+import pkg_resources
+
+def get_version():
+    return pkg_resources.get_distribution('firehpc').version
