@@ -38,9 +38,7 @@ class Singleton(type):
 
     def __call__(cls, *args, **kwargs):
         if cls not in Singleton.__instances:
-            Singleton.__instances[cls] = super(Singleton, cls).__call__(
-                *args, **kwargs
-            )
+            Singleton.__instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return Singleton.__instances[cls]
 
 
@@ -93,19 +91,15 @@ class ImageImporter(DBusObject):
         self.transfer_id = None
         self.error = None
 
-    def _transfer_new_handler(
-        self, transfer_id: str, transfer_path: str
-    ) -> None:
+    def _transfer_new_handler(self, transfer_id: str, transfer_path: str) -> None:
         logger.debug("transfer started: %s", transfer_id)
 
     def _transfer_removed_handler(
         self, transfer_id: str, transfer_path: str, result: str
     ) -> None:
-        logger.debug(
-            "transfer removed: %s %s (%s)", transfer_id, transfer_path, result
-        )
+        logger.debug("transfer removed: %s %s (%s)", transfer_id, transfer_path, result)
         if transfer_id == self.transfer_id:
-            if result == 'done':
+            if result == "done":
                 logger.info("Image %s is successfully imported", self.name)
             else:
                 self.error = result
@@ -121,9 +115,9 @@ class ImageImporter(DBusObject):
         waiter = threading.Thread(target=self._waiter)
         waiter.start()
         logger.info("Downloading image %s from URL %s", self.name, self.url)
-        self.transfer_id = self.proxy.PullRaw(
-            self.url, self.name, "signature", False
-        )[0]
+        self.transfer_id = self.proxy.PullRaw(self.url, self.name, "signature", False)[
+            0
+        ]
         logger.debug("Waiting for transfer to terminate…")
         self.terminated_transfer.wait()
         self.loop.quit()
@@ -170,9 +164,7 @@ class ClusterStateModifier(DBusObject):
         self.loop.run()
 
     def start(self, containers: list) -> None:
-        self.must_start = [
-            f"{container}.{self.zone}" for container in containers
-        ]
+        self.must_start = [f"{container}.{self.zone}" for container in containers]
         if not len(self.must_start):
             logger.info("No container to start")
             return
@@ -318,14 +310,11 @@ class ContainersManager(DBusObject):
         return [
             Container.from_machine(machine)
             for machine in self.proxy.ListMachines()
-            if machine[0].endswith(f".{self.zone}")
-            and machine[1] == 'container'
+            if machine[0].endswith(f".{self.zone}") and machine[1] == "container"
         ]
 
     def container(self, name) -> Container:
-        return Container.from_machine_path(
-            self.proxy.GetMachine(f"{name}.{self.zone}")
-        )
+        return Container.from_machine_path(self.proxy.GetMachine(f"{name}.{self.zone}"))
 
     def images(self) -> list:
         return [

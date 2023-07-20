@@ -29,14 +29,14 @@ class SSHClient:
 
     def exec(self, args):
         cmd = [
-            'ssh',
-            '-o',
+            "ssh",
+            "-o",
             f"UserKnownHostsFile={self.cluster.zone_dir}/ssh/known_hosts",
-            '-i',
+            "-i",
             f"{self.cluster.zone_dir}/ssh/id_rsa",
         ]
         # connect with root user by default
-        if '@' not in args[0]:
-            cmd += ['-l', 'root']
+        if "@" not in args[0]:
+            cmd += ["-l", "root"]
         cmd += args
         run(cmd)

@@ -39,10 +39,7 @@ logger = logging.getLogger(__name__)
 def default_state_dir():
     """Returns the default path to the user state directory, through
     XDG_STATE_HOME environment variable if it is set."""
-    return (
-        Path(os.getenv('XDG_STATE_HOME', '~/.local/state')).expanduser()
-        / 'firehpc'
-    )
+    return Path(os.getenv("XDG_STATE_HOME", "~/.local/state")).expanduser() / "firehpc"
 
 
 class FireHPCExec:
@@ -52,52 +49,52 @@ class FireHPCExec:
 
     def __init__(self):
         parser = argparse.ArgumentParser(
-            description='Instantly fire up container-based emulated HPC cluster.'
+            description="Instantly fire up container-based emulated HPC cluster."
         )
         parser.add_argument(
-            '-v',
-            '--version',
-            action='version',
-            version='FireHPC ' + get_version(),
+            "-v",
+            "--version",
+            action="version",
+            version="FireHPC " + get_version(),
         )
         parser.add_argument(
-            '--debug',
-            action='store_true',
+            "--debug",
+            action="store_true",
             help="Enable debug mode",
         )
         parser.add_argument(
-            '--show-libs-logs',
-            action='store_true',
+            "--show-libs-logs",
+            action="store_true",
             help="Show external libraries logs",
         )
         parser.add_argument(
-            '--state',
+            "--state",
             help="Directory to store cluster state (default: %(default)s)",
             type=Path,
             default=default_state_dir(),
         )
         subparsers = parser.add_subparsers(
-            help='Action to perform',
-            dest='action',
+            help="Action to perform",
+            dest="action",
             required=True,
         )
 
         # deploy command
-        parser_deploy = subparsers.add_parser('deploy', help='Deploy cluster')
+        parser_deploy = subparsers.add_parser("deploy", help="Deploy cluster")
         parser_deploy.add_argument(
-            '--os',
+            "--os",
             help="Operating system to deploy",
-            choices=['debian11', 'rocky8'],
+            choices=["debian11", "rocky8"],
             required=True,
         )
         parser_deploy.add_argument(
-            '--zone',
+            "--zone",
             help="Name of the zone to deploy",
             required=True,
         )
         parser_deploy.add_argument(
-            '-c',
-            '--custom',
+            "-c",
+            "--custom",
             help="Path of variables directories to customize FireHPC default",
             type=Path,
         )
@@ -105,41 +102,39 @@ class FireHPCExec:
 
         # conf command
         parser_conf = subparsers.add_parser(
-            'conf', help='Deploy configuration on cluster'
+            "conf", help="Deploy configuration on cluster"
         )
         parser_conf.add_argument(
-            '--zone',
+            "--zone",
             help="Name of the zone on which configuration is deployed",
             required=True,
         )
         parser_conf.add_argument(
-            '-c',
-            '--custom',
+            "-c",
+            "--custom",
             help="Path of variables directories to customize FireHPC default",
             type=Path,
         )
         parser_conf.add_argument(
-            '--with-bootstrap',
-            action='store_true',
+            "--with-bootstrap",
+            action="store_true",
             help="Run configuration bootstrap",
         )
         parser_conf.set_defaults(func=self._execute_conf)
 
         # ssh command
-        parser_ssh = subparsers.add_parser(
-            'ssh', help='Connect to cluster zone by SSH'
-        )
+        parser_ssh = subparsers.add_parser("ssh", help="Connect to cluster zone by SSH")
         parser_ssh.add_argument(
-            'args',
+            "args",
             help="Destination node and arguments of SSH connection",
-            nargs='+',
+            nargs="+",
         )
         parser_ssh.set_defaults(func=self._execute_ssh)
 
         # clean command
-        parser_clean = subparsers.add_parser('clean', help='Clean cluster zone')
+        parser_clean = subparsers.add_parser("clean", help="Clean cluster zone")
         parser_clean.add_argument(
-            '--zone',
+            "--zone",
             help="Name of the zone to clean",
             required=True,
         )
@@ -147,19 +142,17 @@ class FireHPCExec:
 
         # status command
         parser_status = subparsers.add_parser(
-            'status', help='Status of cluster in zone'
+            "status", help="Status of cluster in zone"
         )
         parser_status.add_argument(
-            '--zone',
+            "--zone",
             help="Name of the zone",
             required=True,
         )
         parser_status.set_defaults(func=self._execute_status)
 
         # images command
-        parser_images = subparsers.add_parser(
-            'images', help='List available OS images'
-        )
+        parser_images = subparsers.add_parser("images", help="List available OS images")
         parser_images.set_defaults(func=self._execute_images)
 
         self.args = parser.parse_args()
@@ -184,7 +177,7 @@ class FireHPCExec:
         formatter = TTYFormatter(self.args.debug)
         handler.setFormatter(formatter)
         if not self.args.show_libs_logs:
-            lib_filter = logging.Filter('firehpc')  # filter out all libs logs
+            lib_filter = logging.Filter("firehpc")  # filter out all libs logs
             handler.addFilter(lib_filter)
         root_logger.addHandler(handler)
 
@@ -211,16 +204,14 @@ class FireHPCExec:
         )
 
     def _execute_ssh(self):
-        if '.' not in self.args.args[0]:
+        if "." not in self.args.args[0]:
             logger.critical(
                 "Format of ssh command first argument is not valid, it must be "
                 "destination node with format: [login@]node.zone"
             )
             sys.exit(1)
-        zone = self.args.args[0].split('.')[1]
-        cluster = EmulatedCluster(
-            self.settings, zone, None, self.args.state, None
-        )
+        zone = self.args.args[0].split(".")[1]
+        cluster = EmulatedCluster(self.settings, zone, None, self.args.state, None)
         ssh = SSHClient(cluster)
         ssh.exec(self.args.args)
 

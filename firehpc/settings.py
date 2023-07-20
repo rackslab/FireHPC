@@ -25,25 +25,25 @@ logger = logging.getLogger(__name__)
 
 
 class RuntimeSettingsAnsible:
-    SECTION = 'ansible'
+    SECTION = "ansible"
 
     def __init__(self, config):
-        self.path = Path(config.get(self.SECTION, 'path'))
-        self.args = config.get(self.SECTION, 'args')
+        self.path = Path(config.get(self.SECTION, "path"))
+        self.args = config.get(self.SECTION, "args")
 
 
 class RuntimeSettingsImages:
-    SECTION = 'images'
+    SECTION = "images"
 
     def __init__(self, config):
-        self.sources = Path(config.get(self.SECTION, 'sources'))
+        self.sources = Path(config.get(self.SECTION, "sources"))
 
 
 class RuntimeSettings:
     """Settings from configuration files."""
 
-    VENDOR_PATH = Path('/usr/share/firehpc/firehpc.ini')
-    SITE_PATH = Path('/etc/firehpc/firehpc.ini')
+    VENDOR_PATH = Path("/usr/share/firehpc/firehpc.ini")
+    SITE_PATH = Path("/etc/firehpc/firehpc.ini")
 
     def __init__(self):
         _config = configparser.ConfigParser(
@@ -54,9 +54,7 @@ class RuntimeSettings:
         logger.debug("Loading vendor configuration file %s", self.VENDOR_PATH)
         _config.read_file(open(self.VENDOR_PATH))
         if self.SITE_PATH.exists():
-            logger.debug(
-                "Loading site specific configuration file %s", self.SITE_PATH
-            )
+            logger.debug("Loading site specific configuration file %s", self.SITE_PATH)
             _config.read_file(open(self.SITE_PATH))
 
         self.ansible = RuntimeSettingsAnsible(_config)

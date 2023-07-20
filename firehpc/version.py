@@ -19,5 +19,6 @@
 
 import pkg_resources
 
+
 def get_version():
-    return pkg_resources.get_distribution('firehpc').version
+    return pkg_resources.get_distribution("firehpc").version

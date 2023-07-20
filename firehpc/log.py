@@ -56,11 +56,11 @@ class TTYFormatter(logging.Formatter):
 
         _msg = record.getMessage()
         style = LOG_LEVEL_ANSI_STYLES[record.levelno]
-        prefix = ''
+        prefix = ""
         if self.debug:
             prefix = "{level:8s}⸬{where:30s} ↦ ".format(
-                level='[' + record.levelname + ']',
-                where=record.name + ':' + str(record.lineno),
+                level="[" + record.levelname + "]",
+                where=record.name + ":" + str(record.lineno),
             )
         elif record.levelno >= logging.INFO:
             # prefix with level if over info

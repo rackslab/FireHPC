@@ -27,9 +27,7 @@ logger = logging.getLogger(__name__)
 
 class OSImagesSources:
     def __init__(self, settings: RuntimeSettings) -> OSImagesSources:
-        logger.debug(
-            "Loading OS images sources file %s", settings.images.sources
-        )
+        logger.debug("Loading OS images sources file %s", settings.images.sources)
         with open(settings.images.sources) as fh:
             self.sources = yaml.safe_load(fh)
 

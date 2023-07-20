@@ -35,9 +35,7 @@ class UserEntry:
 
     @property
     def email(self):
-        return (
-            f"{self.firstname.lower()}.{self.lastname.lower()}@{self.zone}.hpc"
-        )
+        return f"{self.firstname.lower()}.{self.lastname.lower()}@{self.zone}.hpc"
 
     def dump(self):
         return {
@@ -49,7 +47,7 @@ class UserEntry:
 
     @classmethod
     def load(cls, zone: str, user: dict) -> UserEntry:
-        return cls(user['firstname'], user['lastname'], zone)
+        return cls(user["firstname"], user["lastname"], zone)
 
 
 class UsersDirectory:
