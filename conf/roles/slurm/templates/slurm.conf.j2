@@ -10,6 +10,9 @@ AccountingStorageEnforce=qos,limits,associations  # default: none
 AuthAltTypes=auth/jwt
 AuthAltParameters=jwt_key={{ slurm_jwt_key_path }}
 {% endif %}
+{% for key, value in slurm_params.items() %}
+{{ key }}={{ value }}
+{% endfor %}
 
 NodeName=cn[1-2] Procs=2 State=UNKNOWN
 PartitionName=normal Nodes=cn[1-2] Default=YES MaxTime=INFINITE State=UP

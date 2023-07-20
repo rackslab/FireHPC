@@ -12,6 +12,7 @@ slurm_local_jwt_key_file: jwt_hs256.key  # dummy
 slurm_db_password: "{{ lookup('file', '{{ slurm_local_mariadb_password_file }}', errors='ignore') }}"
 slurm_users: []
 slurm_account: scientists
+slurm_params: {}
 
 # When disabled, slurm REST API service is not deployed.
 slurm_with_slurmrestd: True
