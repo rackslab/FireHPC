@@ -6,3 +6,6 @@ common_local_ca_dir: ca  # dummy
 common_local_ca_password_file: "{{ common_local_ca_dir }}/ca.password"
 common_local_ca_key_file: "{{ common_local_ca_dir }}/key.pem"
 common_local_ca_cert_file: "{{ common_local_ca_dir }}/ca.crt"
+common_with_devs_repos: false
+common_devs_derivatives:
+- main

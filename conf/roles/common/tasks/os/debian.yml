@@ -21,3 +21,20 @@
         repo: "deb [signed-by=/usr/share/keyrings/hpckit.asc arch=amd64] https://hpck.it/deb {{ ansible_distribution_release }} {{ common_hpckit_derivatives|join(' ') }}"
         state: present
         filename: hpckit
+
+# Add Rackslab development deb packages repositories
+- name: Add Rackslab development deb packages repository
+  block:
+
+    - name: Download Rackslab development packages repository keyring
+      ansible.builtin.get_url:
+        url: https://build.rackslab.io/devs/keyring.asc
+        dest: /usr/share/keyrings/devs.asc
+
+    - name: Add Rackslab development repository into sources list
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/devs.asc arch=amd64] https://build.rackslab.io/devs/deb {{ ansible_distribution_release }} {{ common_devs_derivatives|join(' ') }}"
+        state: present
+        filename: hpckit
+
+  when: common_with_devs_repos
