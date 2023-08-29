@@ -1,0 +1,5 @@
+---
+- name: Ensure Slurm-web packages are installed
+  ansible.builtin.package:
+    name: "{{ slurmweb_packages }}"
+    state: latest

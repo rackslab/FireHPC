@@ -6,4 +6,8 @@
     - sssd
     - { role: users, when: "'login' in group_names" }
     - slurm
+    - role: slurmweb
+      when:
+      - "'admin' in group_names"
+      - slurmweb_enabled
     - { role: mpi, when: mpi_nodes }

@@ -1,0 +1,4 @@
+---
+slurmweb_enabled: false
+slurmweb_packages:
+- slurm-web

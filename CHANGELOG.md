@@ -9,8 +9,11 @@ and this project adheres to
 ## [unreleased]
 ### Added
 - Support for debian12 (Debian bookworm) in OS images sources YAML file.
-- conf: Optional support of Rackslab developement deb repositories, disabled by
-  default.
+- conf:
+  - Optional support of Rackslab developement deb repositories, disabled by
+    default.
+  - slurmweb role to install and setup Slurmweb, optional and disabled by
+    default.
 
 ### Changed
 - Removed extra directory from source tree. It used to contain ansible
