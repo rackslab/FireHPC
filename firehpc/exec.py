@@ -82,7 +82,6 @@ class FireHPCExec:
         parser_deploy.add_argument(
             "--os",
             help="Operating system to deploy",
-            choices=["debian11", "rocky8"],
             required=True,
         )
         parser_deploy.add_argument(
@@ -181,6 +180,10 @@ class FireHPCExec:
 
     def _execute_deploy(self):
         images = OSImagesSources(self.settings)
+        if not images.supported(self.args.os):
+            logger.critical("OS %s is not supported", self.args.os)
+            logger.info("Run `firehpc images` to get the list of supported OS")
+            sys.exit(1)
         cluster = EmulatedCluster(
             self.settings,
             self.args.zone,

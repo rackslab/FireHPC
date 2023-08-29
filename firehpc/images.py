@@ -35,6 +35,9 @@ class OSImagesSources:
         with open(settings.images.sources) as fh:
             self.sources = yaml.safe_load(fh)
 
+    def supported(self, os: str) -> bool:
+        return os in self.sources.keys()
+
     def url(self, os: str) -> str:
         return self.sources[os]
 

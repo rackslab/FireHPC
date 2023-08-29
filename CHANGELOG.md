@@ -15,6 +15,10 @@ and this project adheres to
   machinectl connection plugin as Git submodule. This dependency is now injected
   in FireHPC as a package supplementary source in packages built by Fatbuildr.
 
+### Fixed
+- Check OS images argument in CLI against values available in OS images YAML
+  file instead of hard-coded argparse choices.
+
 ## [1.0.0] - 2023-07-20
 
 [unreleased]: https://github.com/rackslab/firehpc/compare/v1.0.0...HEAD
