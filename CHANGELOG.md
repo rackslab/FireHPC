@@ -7,6 +7,8 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
+### Added
+- Add support for debian12 (Debian bookworm) in OS images sources YAML file.
 
 ### Changed
 - Removed extra directory from source tree. It used to contain ansible
