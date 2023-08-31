@@ -91,8 +91,9 @@
 
 - name: Create account in slurmdbd
   ansible.builtin.command:
-    cmd: "sacctmgr --immediate create account name={{ slurm_account }} cluster={{ slurm_cluster }}"
-  when: slurm_account not in slurmdbd_accounts.stdout_lines
+    cmd: "sacctmgr --immediate create account name={{ item.name }} cluster={{ slurm_cluster }} parent={{ item.parent }}"
+  when: item.name not in slurmdbd_accounts.stdout_lines
+  loop: "{{ slurm_accounts }}"
 
 - name: Get current slurmdbd users
   ansible.builtin.command:
@@ -101,6 +102,6 @@
 
 - name: Create users in slurmdbd
   ansible.builtin.command:
-    cmd: "sacctmgr --immediate create user name={{ item }} cluster={{ slurm_cluster }} account={{ slurm_account }}"
+    cmd: "sacctmgr --immediate create user name={{ item }} cluster={{ slurm_cluster }} account={{ slurm_accounts | selectattr('users', 'search', item) | map(attribute='name') | first }}"
   when: item not in slurmdbd_users.stdout_lines
-  with_items: "{{ slurm_users }}"
+  loop: "{{ slurm_users }}"

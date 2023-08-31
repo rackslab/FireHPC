@@ -24,4 +24,7 @@ slurm_local_munge_key_file: "{{ fhpc_zone_state_dir }}/munge/munge.key"
 slurm_local_mariadb_password_file: "{{ fhpc_zone_state_dir }}/mariadb/mariadb.password"
 slurm_local_jwt_key_file: "{{ fhpc_zone_state_dir }}/slurm/jwt_hs256.key"
 slurm_users: "{{ fhpc_users | map(attribute='login') | list }}"
-slurm_account: "{{ fhpc_users_group }}"
+slurm_accounts:
+- name: "{{ fhpc_users_group }}"
+  parent: root
+  users: "{{ fhpc_users | map(attribute='login') | list }}"

@@ -14,6 +14,8 @@ and this project adheres to
     default.
   - slurmweb role to install and setup Slurmweb, optional and disabled by
     default.
+  - Support multiple Slurm accounts definitions with hierarchy and control of
+    users membership.
 
 ### Changed
 - Removed extra directory from source tree. It used to contain ansible
