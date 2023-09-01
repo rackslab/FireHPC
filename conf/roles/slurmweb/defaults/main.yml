@@ -2,3 +2,5 @@
 slurmweb_enabled: false
 slurmweb_packages:
 - slurm-web
+slurmweb_settings_defaults: {}
+slurmweb_settings: {}

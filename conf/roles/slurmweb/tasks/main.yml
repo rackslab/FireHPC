@@ -3,3 +3,11 @@
   ansible.builtin.package:
     name: "{{ slurmweb_packages }}"
     state: latest
+
+- name: Deploy Slurm-web agent configuration file
+  ansible.builtin.template:
+    src: agent.ini.j2
+    dest: /etc/slurm-web/agent.ini
+    owner: root
+    group: root
+    mode: 0644
