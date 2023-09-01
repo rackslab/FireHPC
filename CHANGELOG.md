@@ -9,6 +9,7 @@ and this project adheres to
 ## [unreleased]
 ### Added
 - Support for debian12 (Debian bookworm) in OS images sources YAML file.
+- cli: Support for tags to filter deployed configuration tasks.
 - conf:
   - Optional support of Rackslab developement deb repositories, disabled by
     default.

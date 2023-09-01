@@ -89,7 +89,11 @@ class EmulatedCluster:
         manager.start(["admin", "login", "cn1", "cn2"])
 
     def conf(
-        self, reinit: bool = True, bootstrap: bool = True, custom: Path = None
+        self,
+        reinit: bool = True,
+        bootstrap: bool = True,
+        custom: Path = None,
+        tags: Optional[list[str]] = None,
     ) -> conf:
         if self.conf_dir.exists() and reinit:
             logger.debug("Removing existing configuration directory %s", self.conf_dir)
@@ -148,6 +152,10 @@ class EmulatedCluster:
                 fh.write(yaml.dump(extravars))
 
         cmdline = f"{self.settings.ansible.args} --extra-vars @{self.extravars_path}"
+
+        if tags is not None and len(tags):
+            cmdline += f" --tags {','.join(tags)}"
+
         playbooks = ["site"]
         if bootstrap:
             playbooks.insert(0, "bootstrap")

@@ -113,6 +113,11 @@ class FireHPCExec:
             type=Path,
         )
         parser_conf.add_argument(
+            "--tags",
+            help="Configuration tags to deploy",
+            nargs="*",
+        )
+        parser_conf.add_argument(
             "--with-bootstrap",
             action="store_true",
             help="Run configuration bootstrap",
@@ -202,6 +207,7 @@ class FireHPCExec:
             reinit=False,
             bootstrap=self.args.with_bootstrap,
             custom=self.args.custom,
+            tags=self.args.tags,
         )
 
     def _execute_ssh(self):
