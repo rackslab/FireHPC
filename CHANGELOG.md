@@ -17,6 +17,7 @@ and this project adheres to
     default.
   - Support multiple Slurm accounts definitions with hierarchy and control of
     users membership.
+  - Add tags on all roles.
 - docs: Mention conf --tags option in manpage.
 
 ### Changed

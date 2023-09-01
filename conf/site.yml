@@ -1,13 +1,23 @@
 - hosts: all
   remote_user: root
   roles:
-    - common
-    - { role: ldap, when: "'admin' in group_names" }
-    - sssd
-    - { role: users, when: "'login' in group_names" }
-    - slurm
+    - role: common
+      tags: [ common ]
+    - role: ldap
+      when: "'admin' in group_names"
+      tags: [ ldap ]
+    - role: sssd
+      tags: [ sssd ]
+    - role: users
+      when: "'login' in group_names"
+      tags: [ users ]
+    - role: slurm
+      tags: [ slurm ]
     - role: slurmweb
       when:
       - "'admin' in group_names"
       - slurmweb_enabled
-    - { role: mpi, when: mpi_nodes }
+      tags: [ slurmweb ]
+    - role: mpi
+      when: mpi_nodes
+      tags: [ mpi ]
