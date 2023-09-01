@@ -3,6 +3,7 @@ fhpc_local_ssh_dir: "{{ fhpc_zone_state_dir }}/ssh"
 fhpc_local_ca_dir: "{{ fhpc_zone_state_dir }}/ca"
 fhpc_ldap_server: admin
 fhpc_users_group: scientists
+fhpc_slurmrestd_socket: /run/slurmrestd/slurmrestd.socket
 
 # roles variables
 common_local_ca_dir: "{{ fhpc_local_ca_dir }}"
@@ -24,7 +25,12 @@ slurm_local_munge_key_file: "{{ fhpc_zone_state_dir }}/munge/munge.key"
 slurm_local_mariadb_password_file: "{{ fhpc_zone_state_dir }}/mariadb/mariadb.password"
 slurm_local_jwt_key_file: "{{ fhpc_zone_state_dir }}/slurm/jwt_hs256.key"
 slurm_users: "{{ fhpc_users | map(attribute='login') | list }}"
+slurm_restd_socket: "{{ fhpc_slurmrestd_socket }}"
 slurm_accounts:
 - name: "{{ fhpc_users_group }}"
   parent: root
   users: "{{ fhpc_users | map(attribute='login') | list }}"
+slurmweb_slurmrestd_socket: "{{ fhpc_slurmrestd_socket }}"
+slurmweb_settings_defaults:
+  slurmrestd:
+    socket: "{{ fhpc_slurmrestd_socket }}"
