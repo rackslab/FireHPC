@@ -90,6 +90,11 @@ This command accepts the following options:
   provided in FireHPC. The given path must contain a [.path]#`group_vars/`# or a
   [.path]#`host_vars/`# directory with files supported by Ansible.
 
+[.cli-opt]#--tags*=#[.cli-optval]##TAGS ...]##::
+  Select for deployment the Ansible tasks assigned with these tags. Multiple
+  tags can be given. Tasks are selected when they are assigned at least one of
+  the tags.
+
 [.cli-opt]#*--with-bootstrap*#::
   Execute configuration _bootstrap_ phase, additionally to the _deployment_
   phase. By default, only the _deployment_ phase is run.

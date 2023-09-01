@@ -17,6 +17,7 @@ and this project adheres to
     default.
   - Support multiple Slurm accounts definitions with hierarchy and control of
     users membership.
+- docs: Mention conf --tags option in manpage.
 
 ### Changed
 - Removed extra directory from source tree. It used to contain ansible
