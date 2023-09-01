@@ -18,6 +18,7 @@ and this project adheres to
   - Support multiple Slurm accounts definitions with hierarchy and control of
     users membership.
   - Add tags on all roles.
+  - Add variable for slurmrestd socket path in slurm role.
 - docs: Mention conf --tags option in manpage.
 
 ### Changed
