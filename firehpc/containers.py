@@ -22,6 +22,8 @@ from datetime import datetime
 import signal
 import threading
 import time
+import socket
+import ipaddress
 import logging
 
 from dasbus.connection import SystemMessageBus
@@ -207,6 +209,34 @@ class Container(DBusObject):
         # Mimic behaviour of machinectl poweroff that send SIGRTMIN+4 to system
         # manager (1st process) in container to trigger clean poweroff.
         self.proxy.Kill("leader", signal.SIGRTMIN + 4)
+
+    def addresses(self) -> list[str]:
+        """Return the list of network addresses (ipv4 and ipv6) assigned to the
+        container."""
+        result = []
+        # machine1 DBus interface returns a sequence of pairs: the 1st element is the
+        # address type and the 2nd element is a tuple with address all bytes as separate
+        # integers.
+        for address in self.proxy.GetAddresses():
+            if address[0] == int(socket.AF_INET):
+                # Join all bytes with . to build an IPv4 address
+                result.append(ipaddress.IPv4Address(".".join(map(str, address[1]))))
+            elif address[0] == int(socket.AF_INET6):
+                # Join with : all 2 bytes converted a string of hex values
+                result.append(
+                    ipaddress.IPv6Address(
+                        ":".join(
+                            [f"{a:x}{b:x}" for a, b in zip(*[iter(address[1])] * 2)]
+                        )
+                    )
+                )
+            else:
+                logger.error(
+                    "Unsupported socket type %d for address of container %s",
+                    address[0],
+                    self.name,
+                )
+        return result
 
     @staticmethod
     def start(zone, name) -> None:
