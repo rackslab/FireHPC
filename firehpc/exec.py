@@ -30,6 +30,7 @@ from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
 from .images import OSImagesSources
 from .log import TTYFormatter
+from .dumpers import DumperFactory
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +152,11 @@ class FireHPCExec:
             help="Name of the zone",
             required=True,
         )
+        parser_status.add_argument(
+            "--json",
+            action="store_true",
+            help="Report cluster status in JSON format",
+        )
         parser_status.set_defaults(func=self._execute_status)
 
         # images command
@@ -232,7 +238,11 @@ class FireHPCExec:
         cluster = EmulatedCluster(
             self.settings, self.args.zone, None, self.args.state, None
         )
-        cluster.status()
+        print(
+            DumperFactory.get("json" if self.args.json else "console").dump(
+                cluster.status()
+            )
+        )
 
     def _execute_images(self):
         images = OSImagesSources(self.settings)

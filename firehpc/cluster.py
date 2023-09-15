@@ -19,7 +19,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from pathlib import Path
 import shutil
 import logging
@@ -38,21 +38,16 @@ from .containers import (
 if TYPE_CHECKING:
     from .settings import RuntimeSettings
     from .images import OSImagesSources
+    from .containers import Container
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class ClusterStatus:
     containers: list[Container]
     users: UsersDirectory
 
-    def dump(self):
-        print("containers:")
-        for container in self.containers:
-            print(f"  {container.name} is running")
-        print("users:")
-        for user in self.users:
-            print(f"  {user.login:15s} ({user.firstname} {user.lastname})")
 
 @dataclass
 class EmulatedCluster:
@@ -206,10 +201,9 @@ class EmulatedCluster:
         storage = StorageService(self.zone)
         storage.stop()
 
-    def status(self) -> None:
+    def status(self) -> ClusterStatus:
         containers = ContainersManager(self.zone).running()
         with open(self.extravars_path) as fh:
             content = yaml.safe_load(fh)
         users = UsersDirectory.load(self.zone, content["fhpc_users"])
-        status = ClusterStatus(containers, users)
-        status.dump()
+        return ClusterStatus(containers, users)
