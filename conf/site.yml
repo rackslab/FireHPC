@@ -3,6 +3,8 @@
   roles:
     - role: common
       tags: [ common ]
+    - role: ssh
+      tags: [ ssh ]
     - role: ldap
       when: "'admin' in group_names"
       tags: [ ldap ]

@@ -30,8 +30,13 @@ and this project adheres to
 - Removed extra directory from source tree. It used to contain ansible
   machinectl connection plugin as Git submodule. This dependency is now injected
   in FireHPC as a package supplementary source in packages built by Fatbuildr.
-- conf: Declare SSH host keys valid for both containers FQDN and short hostname
-  in system known hosts file.
+- conf:
+  - Declare SSH host keys valid for both containers FQDN and short hostname
+    in system known hosts file.
+  - Split ssh role in 3 steps: localkeys for local bootstrap, bootstrap to
+    initialize files on containers with machinectl and main for normal
+    operations with SSH (known_hosts, SSH root keys).
+
 
 ### Fixed
 - Check OS images argument in CLI against values available in OS images YAML

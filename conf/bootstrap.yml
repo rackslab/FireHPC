@@ -19,5 +19,8 @@
 
 - hosts: all
   connection: machinectl
-  roles:
-    - ssh
+  tasks:
+  - name: Deploy basic SSH files
+    import_role:
+      name: ssh
+      tasks_from: bootstrap
