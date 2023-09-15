@@ -41,6 +41,18 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+@dataclass
+class ClusterStatus:
+    containers: list[Container]
+    users: UsersDirectory
+
+    def dump(self):
+        print("containers:")
+        for container in self.containers:
+            print(f"  {container.name} is running")
+        print("users:")
+        for user in self.users:
+            print(f"  {user.login:15s} ({user.firstname} {user.lastname})")
 
 @dataclass
 class EmulatedCluster:
@@ -196,12 +208,8 @@ class EmulatedCluster:
 
     def status(self) -> None:
         containers = ContainersManager(self.zone).running()
-        print("containers:")
-        for container in containers:
-            print(f"  {container.name} is running")
         with open(self.extravars_path) as fh:
             content = yaml.safe_load(fh)
         users = UsersDirectory.load(self.zone, content["fhpc_users"])
-        print("users:")
-        for user in users:
-            print(f"  {user.login:15s} ({user.firstname} {user.lastname})")
+        status = ClusterStatus(containers, users)
+        status.dump()
