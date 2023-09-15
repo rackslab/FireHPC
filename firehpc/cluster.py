@@ -48,6 +48,12 @@ class ClusterStatus:
     containers: list[Container]
     users: UsersDirectory
 
+    def _generic(self):
+        return {
+            "containers": [container.name for container in self.containers],
+            "users": self.users._generic(),
+        }
+
 
 @dataclass
 class EmulatedCluster:
@@ -161,7 +167,7 @@ class EmulatedCluster:
             extravars = {
                 "fhpc_zone_state_dir": str(self.zone_dir),
                 "fhpc_zone": self.zone,
-                "fhpc_users": UsersDirectory(10, self.zone).dump(),
+                "fhpc_users": UsersDirectory(10, self.zone)._generic(),
             }
             with open(self.extravars_path, "w+") as fh:
                 fh.write(yaml.dump(extravars))

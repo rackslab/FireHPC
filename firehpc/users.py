@@ -37,7 +37,7 @@ class UserEntry:
     def email(self):
         return f"{self.firstname.lower()}.{self.lastname.lower()}@{self.zone}.hpc"
 
-    def dump(self):
+    def _generic(self):
         return {
             "login": self.login,
             "firstname": self.firstname,
@@ -64,8 +64,8 @@ class UsersDirectory:
         for user in self.db:
             yield user
 
-    def dump(self):
-        return [user.dump() for user in self.db]
+    def _generic(self):
+        return [user._generic() for user in self.db]
 
     @classmethod
     def load(cls, zone: str, users: list) -> UsersDirectory:

@@ -25,18 +25,8 @@ from ..users import UserEntry
 
 class GenericJSONEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, ClusterStatus):
-            return {
-                "containers": [container.name for container in obj.containers],
-                "users": [self.default(user) for user in obj.users],
-            }
-        elif isinstance(obj, UserEntry):
-            return {
-                "login": obj.login,
-                "firstname": obj.firstname,
-                "lastname": obj.lastname,
-                "email": obj.email,
-            }
+        if isinstance(obj, ClusterStatus) or isinstance(obj, UserEntry):
+            return obj._generic()
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
 
