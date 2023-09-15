@@ -29,6 +29,8 @@ and this project adheres to
 ### Fixed
 - Check OS images argument in CLI against values available in OS images YAML
   file instead of hard-coded argparse choices.
+- conf: Open slurmd spool directory permissions to all users for running batch
+  jobs scripts.
 
 ## [1.0.0] - 2023-07-20
 

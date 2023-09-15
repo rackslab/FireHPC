@@ -5,7 +5,7 @@
     state: directory
     owner: slurm
     group: slurm
-    mode: '0700'
+    mode: 0755
 
 - name: Install slurm compute specific packages
   ansible.builtin.package:
