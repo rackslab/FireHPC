@@ -13,6 +13,7 @@ slurm_db_password: "{{ lookup('file', '{{ slurm_local_mariadb_password_file }}',
 slurm_users: []
 slurm_accounts: []
 slurm_params: {}
+slurmdbd_params: {}
 
 # When disabled, slurm REST API service is not deployed.
 slurm_with_slurmrestd: True

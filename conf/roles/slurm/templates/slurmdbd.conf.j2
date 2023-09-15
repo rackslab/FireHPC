@@ -7,3 +7,6 @@ StorageUser=slurm                    # must be specified
 AuthAltTypes=auth/jwt
 AuthAltParameters=jwt_key={{ slurm_jwt_key_path }}
 {% endif %}
+{% for key, value in slurmdbd_params.items() %}
+{{ key }}={{ value }}
+{% endfor %}

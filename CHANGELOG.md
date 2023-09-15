@@ -19,6 +19,7 @@ and this project adheres to
     users membership.
   - Add tags on all roles.
   - Add variable for slurmrestd socket path in slurm role.
+  - Support optional additional slurmdbd parameters.
 - docs: Mention conf --tags option in manpage.
 
 ### Changed
