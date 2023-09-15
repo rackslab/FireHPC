@@ -137,6 +137,14 @@ class EmulatedCluster:
                     )
                 )
 
+        # variable fhpc_addresses
+        containers_addresses = {}
+        containers = ContainersManager(self.zone).running()
+        for container in containers:
+            containers_addresses[container.name] = [
+                str(address) for address in container.addresses()
+            ]
+
         # Unless already existing, generate custom.yml file with variables and
         # add option to ansible-playbook command line to load this file as a
         # source of extra variables. The file should not be regenerated every
@@ -165,6 +173,7 @@ class EmulatedCluster:
                 private_data_dir=self.conf_dir,
                 playbook=f"{self.settings.ansible.path}/{playbook}.yml",
                 cmdline=cmdline,
+                extravars={"fhpc_addresses": containers_addresses},
             )
 
         for generated_dir in ["artifacts", "env"]:

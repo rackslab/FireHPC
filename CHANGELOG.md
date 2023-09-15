@@ -9,6 +9,8 @@ and this project adheres to
 ## [unreleased]
 ### Added
 - Support for debian12 (Debian bookworm) in OS images sources YAML file.
+- Introduce fhpc_addresses extra variable, a hash with containers as keys and
+  the list of IP addresses as values.
 - cli: Support for tags to filter deployed configuration tasks.
 - conf:
   - Optional support of Rackslab developement deb repositories, disabled by
