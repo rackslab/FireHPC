@@ -2,6 +2,7 @@
 fhpc_local_ssh_dir: "{{ fhpc_zone_state_dir }}/ssh"
 fhpc_local_ca_dir: "{{ fhpc_zone_state_dir }}/ca"
 fhpc_ldap_server: admin
+fhpc_ldap_base: "dc=cluster,dc={{ fhpc_zone }}"
 fhpc_users_group: scientists
 fhpc_slurmrestd_socket: /run/slurmrestd/slurmrestd.socket
 
@@ -16,7 +17,7 @@ ldap_domain: "cluster.{{ fhpc_zone }}"
 ldap_email_domain: "cluster.{{ fhpc_zone }}"
 ldap_users: "{{ fhpc_users }}"
 ldap_users_group: "{{ fhpc_users_group }}"
-sssd_ldap_base: "dc=cluster,dc={{ fhpc_zone }}"
+sssd_ldap_base: "{{ fhpc_ldap_base }}"
 sssd_ldap_server: "{{ fhpc_ldap_server }}"
 users_ssh_host_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_defs: "{{ fhpc_users }}"
@@ -34,3 +35,7 @@ slurmweb_slurmrestd_socket: "{{ fhpc_slurmrestd_socket }}"
 slurmweb_settings_defaults:
   slurmrestd:
     socket: "{{ fhpc_slurmrestd_socket }}"
+  ldap:
+    uri: "ldap://{{ fhpc_ldap_server }}/"
+    user_base: "ou=people,{{ fhpc_ldap_base }}"
+    group_base: "ou=groups,{{ fhpc_ldap_base }}"
