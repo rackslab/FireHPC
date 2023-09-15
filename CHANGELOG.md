@@ -22,6 +22,7 @@ and this project adheres to
   - Add tags on all roles.
   - Add variable for slurmrestd socket path in slurm role.
   - Support optional additional slurmdbd parameters.
+  - Deploy SSH root private and public keys on admin.
 - docs: Mention conf --tags option in manpage.
 
 ### Changed

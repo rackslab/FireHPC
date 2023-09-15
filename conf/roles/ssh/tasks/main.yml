@@ -48,6 +48,18 @@
     group: root
     mode: '0600'
 
+- name: Deploy SSH root keys on admin node
+  ansible.builtin.copy:
+    src: "{{ ssh_key_dir }}/{{ item }}"
+    dest: "/root/.ssh/{{ item }}"
+    owner: root
+    group: root
+    mode: '0600'
+  loop:
+  - id_rsa
+  - id_rsa.pub
+  when: "'admin' in group_names"
+
 - name: Deploy SSH system known_hosts
   ansible.builtin.copy:
     src: "{{ ssh_key_dir }}/known_hosts"
