@@ -21,6 +21,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from ..cluster import ClusterStatus
+from ..errors import FireHPCRuntimeError
 
 if TYPE_CHECKING:
     from ..users import UserEntry
@@ -50,3 +51,4 @@ class ConsoleDumper:
     def dump(obj: Any) -> str:
         if isinstance(obj, ClusterStatus):
             return ClusterStatusConsoleDumper.dump(obj)
+        raise FireHPCRuntimeError(f"Unsupported type {type(obj)} to dump on console")
