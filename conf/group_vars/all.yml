@@ -8,6 +8,7 @@ fhpc_slurmrestd_socket: /run/slurmrestd/slurmrestd.socket
 
 # roles variables
 common_local_ca_dir: "{{ fhpc_local_ca_dir }}"
+common_ip_addresses: "{{ fhpc_addresses }}"
 ssh_key_dir: "{{ fhpc_local_ssh_dir }}"
 ldap_local_ca_dir: "{{ fhpc_local_ca_dir }}"
 ldap_server_hostname: "{{ fhpc_ldap_server }}"
