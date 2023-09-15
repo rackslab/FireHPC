@@ -26,7 +26,9 @@ and this project adheres to
   - Support optional additional slurmdbd parameters.
   - Deploy SSH root private and public keys on admin.
   - Generate /etc/hosts with all zone IP addresses and hostnames.
-- docs: Mention conf --tags option in manpage.
+- docs:
+  - Mention conf --tags option in manpage.
+  - Mention status --json option in manpage.
 
 ### Changed
 - Removed extra directory from source tree. It used to contain ansible

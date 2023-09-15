@@ -151,6 +151,9 @@ This command accepts the following options:
 
 [.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
   Name of the zone. This option is required.
+
+[.cli-opt]#*--json*#::
+  Report cluster status in JSON format.
 --
 
 == Exit status
