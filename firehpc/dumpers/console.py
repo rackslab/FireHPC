@@ -17,19 +17,24 @@
 # You should have received a copy of the GNU General Public License
 # along with FireHPC.  If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
 
 from ..cluster import ClusterStatus
+
+if TYPE_CHECKING:
+    from ..users import UserEntry
 
 
 class UserEntryConsoleDumper:
     @staticmethod
-    def dump(obj):
+    def dump(obj: UserEntry) -> str:
         return f"{obj.login:15s} ({obj.firstname} {obj.lastname})"
 
 
 class ClusterStatusConsoleDumper:
     @staticmethod
-    def dump(obj):
+    def dump(obj: ClusterStatus) -> str:
         result = ""
         result += "containers:\n"
         for container in obj.containers:
@@ -42,6 +47,6 @@ class ClusterStatusConsoleDumper:
 
 class ConsoleDumper:
     @staticmethod
-    def dump(obj):
+    def dump(obj: Any) -> str:
         if isinstance(obj, ClusterStatus):
             return ClusterStatusConsoleDumper.dump(obj)
