@@ -11,6 +11,8 @@ and this project adheres to
 - Support for debian12 (Debian bookworm) in OS images sources YAML file.
 - Introduce fhpc_addresses extra variable, a hash with containers as keys and
   the list of IP addresses as values.
+- Possibility to run command with SSH paramiko library in addition to ssh binary
+  executable. 
 - cli:
   - Support for tags to filter deployed configuration tasks.
   - Report cluster status in JSON format with --json option.

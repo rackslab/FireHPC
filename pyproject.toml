@@ -17,6 +17,7 @@ dependencies = [
     "dasbus",
     "Faker",
     "jinja2",
+    "paramiko",
     "PyYAML",
 ]
 classifiers = [
