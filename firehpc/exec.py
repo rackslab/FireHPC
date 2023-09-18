@@ -20,11 +20,11 @@
 import argparse
 import logging
 import sys
-import os
 from pathlib import Path
 
 from .version import get_version
 from .settings import RuntimeSettings
+from .state import default_state_dir
 from .cluster import EmulatedCluster
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
@@ -33,12 +33,6 @@ from .log import TTYFormatter
 from .dumpers import DumperFactory
 
 logger = logging.getLogger(__name__)
-
-
-def default_state_dir():
-    """Returns the default path to the user state directory, through
-    XDG_STATE_HOME environment variable if it is set."""
-    return Path(os.getenv("XDG_STATE_HOME", "~/.local/state")).expanduser() / "firehpc"
 
 
 class FireHPCExec:
