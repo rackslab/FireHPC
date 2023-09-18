@@ -32,6 +32,7 @@ readme = "README.md"
 
 [project.scripts]
 firehpc = 'firehpc.exec:FireHPCExec.run'
+fhpc-emulate-slurm-usage = 'firehpc.emulator:FireHPCUsageEmulator.run'
 
 [tool.setuptools.packages.find]
 include = ['firehpc*']
