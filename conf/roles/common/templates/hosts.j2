@@ -1,0 +1,5 @@
+{% for container, addresses in common_ip_addresses.items() %}
+{% for address in addresses %}
+{{ address }} {{ container.split('.')[0] }} {{ container }}
+{% endfor %}
+{% endfor %}

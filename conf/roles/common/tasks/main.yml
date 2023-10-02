@@ -17,13 +17,12 @@
     state: latest
 
 - name: Define hosts file
-  ansible.builtin.lineinfile:
-    dest: /etc/hosts
-    line: "{{ item.1 }} {{ item.0.host.split('.')[0] }} {{ item.0.host }}"
-    state: present
-    create: true
+  ansible.builtin.template:
+    src: hosts.j2
+    dest: "/etc/hosts"
+    owner: root
+    group: root
     mode: 0644
-  loop: "{{ common_ip_addresses | dict2items(key_name='host', value_name='addresses') | subelements('addresses') }}"
 
 - name: Deploy CA certificate
   ansible.builtin.copy:
