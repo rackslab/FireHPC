@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [unreleased]
 ### Added
+- Integration with [RacksDB](https://github.com/rackslab/RacksDB) to extract
+  emulated cluster topology (#1).
 - Support for debian12 (Debian bookworm) in OS images sources YAML file.
 - Introduce fhpc_addresses extra variable, a hash with containers as keys and
   the list of IP addresses as values.

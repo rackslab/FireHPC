@@ -36,6 +36,7 @@ from .containers import (
 )
 
 if TYPE_CHECKING:
+    from racksdb import RacksDB
     from .settings import RuntimeSettings
     from .images import OSImagesSources
     from .containers import Container
@@ -73,7 +74,7 @@ class EmulatedCluster:
     def extravars_path(self) -> Path:
         return self.conf_dir / "custom.yml"
 
-    def deploy(self, os: str, images: OSImagesSources) -> None:
+    def deploy(self, os: str, images: OSImagesSources, db: RacksDB) -> None:
 
         if not self.state.exists():
             logger.debug("Creating state directory %s", self.state)
@@ -82,25 +83,31 @@ class EmulatedCluster:
             logger.debug("Creating zone state directory %s", self.zone_dir)
             self.zone_dir.mkdir()
 
+        infrastructure = db.infrastructures[self.zone]
+
+        admin_node = infrastructure.nodes.filter(tags=["admin"]).first()
         admin_image = ContainerImage.download(
             self.zone,
             images.url(os),
-            f"admin.{self.zone}",
+            f"{admin_node.name}.{self.zone}",
         )
         manager = ContainersManager(self.zone)
-
-        for host in ["login", "cn1", "cn2"]:
-            logger.info("Cloning admin container image for %s.%s", host, self.zone)
-            admin_image.clone(f"{host}.{self.zone}")
+        for node in infrastructure.nodes:
+            if "admin" not in node.tags:
+                logger.info(
+                    "Cloning admin container image for %s.%s", node.name, self.zone
+                )
+                admin_image.clone(f"{node.name}.{self.zone}")
 
         logger.info("Starting zone storage service %s", self.zone)
         storage = StorageService(self.zone)
         storage.start()
 
-        manager.start(["admin", "login", "cn1", "cn2"])
+        manager.start([node.name for node in infrastructure.nodes])
 
     def conf(
         self,
+        db: RacksDB,
         reinit: bool = True,
         bootstrap: bool = True,
         custom: Path = None,
@@ -145,6 +152,7 @@ class EmulatedCluster:
                         self.settings.ansible.path / f"{template}.j2",
                         state=self.zone_dir,
                         zone=self.zone,
+                        infrastructure=db.infrastructures[self.zone],
                     )
                 )
 

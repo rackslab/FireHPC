@@ -2,10 +2,16 @@ all:
   children:
     admin:
       hosts:
-        admin.{{ zone }}:
+{% for node in infrastructure.nodes.filter(tags=["admin"]) %}
+        {{ node.name }}.{{ zone }}:
+{% endfor %}
     login:
       hosts:
-        login.{{ zone }}:
+{% for node in infrastructure.nodes.filter(tags=["login"]) %}
+        {{ node.name }}.{{ zone }}:
+{% endfor %}
     compute:
       hosts:
-        cn[1:2].{{ zone }}:
+{% for node in infrastructure.nodes.filter(tags=["compute"]) %}
+        {{ node.name }}.{{ zone }}:
+{% endfor %}

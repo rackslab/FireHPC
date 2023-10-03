@@ -22,6 +22,8 @@ import logging
 import sys
 from pathlib import Path
 
+from racksdb import RacksDB
+
 from .version import get_version
 from .settings import RuntimeSettings
 from .state import default_state_dir
@@ -75,6 +77,18 @@ class FireHPCExec:
         # deploy command
         parser_deploy = subparsers.add_parser("deploy", help="Deploy cluster")
         parser_deploy.add_argument(
+            "--db",
+            help="Path to RacksDB database (default: %(default)s)",
+            type=Path,
+            default=RacksDB.DEFAULT_DB,
+        )
+        parser_deploy.add_argument(
+            "--schema",
+            help="Path to RacksDB schema (default: %(default)s)",
+            type=Path,
+            default=RacksDB.DEFAULT_SCHEMA,
+        )
+        parser_deploy.add_argument(
             "--os",
             help="Operating system to deploy",
             required=True,
@@ -95,6 +109,18 @@ class FireHPCExec:
         # conf command
         parser_conf = subparsers.add_parser(
             "conf", help="Deploy configuration on cluster"
+        )
+        parser_conf.add_argument(
+            "--db",
+            help="Path to RacksDB database (default: %(default)s)",
+            type=Path,
+            default=RacksDB.DEFAULT_DB,
+        )
+        parser_conf.add_argument(
+            "--schema",
+            help="Path to RacksDB schema (default: %(default)s)",
+            type=Path,
+            default=RacksDB.DEFAULT_SCHEMA,
         )
         parser_conf.add_argument(
             "--zone",
@@ -183,23 +209,28 @@ class FireHPCExec:
             handler.addFilter(lib_filter)
         root_logger.addHandler(handler)
 
+    def _load_racksdb(self):
+        return RacksDB.load(db=self.args.db, schema=self.args.schema)
+
     def _execute_deploy(self):
         images = OSImagesSources(self.settings)
         if not images.supported(self.args.os):
             logger.critical("OS %s is not supported", self.args.os)
             logger.info("Run `firehpc images` to get the list of supported OS")
             sys.exit(1)
+        db = self._load_racksdb()
         cluster = EmulatedCluster(
             self.settings,
             self.args.zone,
             self.args.state,
         )
-        cluster.deploy(self.args.os, images)
-        cluster.conf(custom=self.args.custom)
+        cluster.deploy(self.args.os, images, db)
+        cluster.conf(db, custom=self.args.custom)
 
     def _execute_conf(self):
         cluster = EmulatedCluster(self.settings, self.args.zone, self.args.state)
         cluster.conf(
+            self._load_racksdb(),
             reinit=False,
             bootstrap=self.args.with_bootstrap,
             custom=self.args.custom,

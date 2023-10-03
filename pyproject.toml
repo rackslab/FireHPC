@@ -19,6 +19,7 @@ dependencies = [
     "jinja2",
     "paramiko",
     "PyYAML",
+    "RacksDB",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
