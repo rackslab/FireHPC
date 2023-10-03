@@ -44,7 +44,8 @@ and this project adheres to
   - Split ssh role in 3 steps: localkeys for local bootstrap, bootstrap to
     initialize files on containers with machinectl and main for normal
     operations with SSH (known_hosts, SSH root keys).
-
+  - Replace hardcoded admin hosts by selection of first admin group member for
+    LDAP server hostname.
 
 ### Fixed
 - Check OS images argument in CLI against values available in OS images YAML
