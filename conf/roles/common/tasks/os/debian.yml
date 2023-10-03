@@ -35,6 +35,6 @@
       ansible.builtin.apt_repository:
         repo: "deb [signed-by=/usr/share/keyrings/devs.asc arch=amd64] https://build.rackslab.io/devs/deb {{ ansible_distribution_release }} {{ common_devs_derivatives|join(' ') }}"
         state: present
-        filename: hpckit
+        filename: devs
 
   when: common_with_devs_repos
