@@ -2,6 +2,7 @@
 slurm_profile: client  # default profile in the slurm cluster for the current node
 slurm_uid: 432  # picked randomly among 100-499
 slurm_gid: 432  # picked randomly among 100-499
+slurm_server: admin
 slurm_cluster: hpc
 slurm_local_munge_key_file: munge.key  # dummy
 slurm_local_mariadb_password_file: mariadb.password  # dummy
