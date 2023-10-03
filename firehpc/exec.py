@@ -192,17 +192,13 @@ class FireHPCExec:
         cluster = EmulatedCluster(
             self.settings,
             self.args.zone,
-            self.args.os,
             self.args.state,
-            images,
         )
-        cluster.deploy()
+        cluster.deploy(self.args.os, images)
         cluster.conf(custom=self.args.custom)
 
     def _execute_conf(self):
-        cluster = EmulatedCluster(
-            self.settings, self.args.zone, None, self.args.state, None
-        )
+        cluster = EmulatedCluster(self.settings, self.args.zone, self.args.state)
         cluster.conf(
             reinit=False,
             bootstrap=self.args.with_bootstrap,
@@ -218,20 +214,16 @@ class FireHPCExec:
             )
             sys.exit(1)
         zone = self.args.args[0].split(".")[1]
-        cluster = EmulatedCluster(self.settings, zone, None, self.args.state, None)
+        cluster = EmulatedCluster(self.settings, zone, self.args.state)
         ssh = SSHClient(cluster)
         ssh.exec(self.args.args)
 
     def _execute_clean(self):
-        cluster = EmulatedCluster(
-            self.settings, self.args.zone, None, self.args.state, None
-        )
+        cluster = EmulatedCluster(self.settings, self.args.zone, self.args.state)
         cluster.clean()
 
     def _execute_status(self):
-        cluster = EmulatedCluster(
-            self.settings, self.args.zone, None, self.args.state, None
-        )
+        cluster = EmulatedCluster(self.settings, self.args.zone, self.args.state)
         print(
             DumperFactory.get("json" if self.args.json else "console").dump(
                 cluster.status()

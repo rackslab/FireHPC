@@ -55,13 +55,11 @@ class ClusterStatus:
         }
 
 
-@dataclass
 class EmulatedCluster:
-    settings: RuntimeSettings
-    zone: str
-    os: str
-    state: Path
-    images: OSImagesSources
+    def __init__(self, settings: RuntimeSettings, zone: str, state: Path):
+        self.settings = settings
+        self.zone = zone
+        self.state = state
 
     @property
     def zone_dir(self) -> Path:
@@ -75,7 +73,7 @@ class EmulatedCluster:
     def extravars_path(self) -> Path:
         return self.conf_dir / "custom.yml"
 
-    def deploy(self) -> None:
+    def deploy(self, os: str, images: OSImagesSources) -> None:
 
         if not self.state.exists():
             logger.debug("Creating state directory %s", self.state)
@@ -86,7 +84,7 @@ class EmulatedCluster:
 
         admin_image = ContainerImage.download(
             self.zone,
-            self.images.url(self.os),
+            images.url(os),
             f"admin.{self.zone}",
         )
         manager = ContainersManager(self.zone)

@@ -82,7 +82,7 @@ class FireHPCUsageEmulator:
         self.settings = RuntimeSettings()
         try:
             self.cluster = EmulatedCluster(
-                self.settings, self.args.zone, None, self.args.state, None
+                self.settings, self.args.zone, self.args.state
             )
             self.ssh = SSHClient(self.cluster, asbin=False)
             self._run_emulation()
