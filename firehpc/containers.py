@@ -210,32 +210,42 @@ class Container(DBusObject):
         # manager (1st process) in container to trigger clean poweroff.
         self.proxy.Kill("leader", signal.SIGRTMIN + 4)
 
-    def addresses(self) -> list[str]:
+    def addresses(self, wait: bool = True) -> list[str]:
         """Return the list of network addresses (ipv4 and ipv6) assigned to the
-        container."""
+        container. When wait is True, the method waits until the list of IP addresses is
+        not empty."""
         result = []
         # machine1 DBus interface returns a sequence of pairs: the 1st element is the
         # address type and the 2nd element is a tuple with address all bytes as separate
         # integers.
-        for address in self.proxy.GetAddresses():
-            if address[0] == int(socket.AF_INET):
-                # Join all bytes with . to build an IPv4 address
-                result.append(ipaddress.IPv4Address(".".join(map(str, address[1]))))
-            elif address[0] == int(socket.AF_INET6):
-                # Join with : all 2 bytes converted a string of hex values
-                result.append(
-                    ipaddress.IPv6Address(
-                        ":".join(
-                            [f"{a:x}{b:x}" for a, b in zip(*[iter(address[1])] * 2)]
+        while True:
+            for address in self.proxy.GetAddresses():
+                if address[0] == int(socket.AF_INET):
+                    # Join all bytes with . to build an IPv4 address
+                    result.append(ipaddress.IPv4Address(".".join(map(str, address[1]))))
+                elif address[0] == int(socket.AF_INET6):
+                    # Join with : all 2 bytes converted a string of hex values
+                    result.append(
+                        ipaddress.IPv6Address(
+                            ":".join(
+                                [f"{a:x}{b:x}" for a, b in zip(*[iter(address[1])] * 2)]
+                            )
                         )
                     )
-                )
+                else:
+                    logger.error(
+                        "Unsupported socket type %d for address of container %s",
+                        address[0],
+                        self.name,
+                    )
+            if len(result) or not wait:
+                break  # stop main while loop
             else:
-                logger.error(
-                    "Unsupported socket type %d for address of container %s",
-                    address[0],
+                logger.debug(
+                    "IP addresses of containers %s are not available, retrying…",
                     self.name,
                 )
+                time.sleep(1)
         return result
 
     @staticmethod
