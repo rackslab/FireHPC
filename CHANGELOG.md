@@ -19,9 +19,9 @@ and this project adheres to
   executable.
 - cli:
   - Support for tags to filter deployed configuration tasks.
-  - Report cluster status in JSON format with --json option.
-  - Introduce fhpc-emulate-slurmu command to emulate random usage of Slurm
-    cluster.
+  - Report cluster status in JSON format with `--json` option.
+  - Introduce `fhpc-emulate-slurm-usage` command to emulate random usage of
+    Slurm cluster.
 - conf:
   - Optional support of Rackslab developement deb repositories, disabled by
     default.
@@ -36,9 +36,12 @@ and this project adheres to
   - Generate /etc/hosts with all zone IP addresses and hostnames.
   - Add `nodeset_fold` and `nodeset_expand` Jinja2 filters.
 - docs:
-  - Mention `conf` command `--db`, `--schema` and `--tags` options in manpage.
-  - Mention `deploy` command `--db` and `--schema` options in manpage.
-  - Mention `status` command `--json` option in manpage.
+  - Mention `conf` command `--db`, `--schema` and `--tags` options in
+    `firehpc(1)` manpage.
+  - Mention `deploy` command `--db` and `--schema` options in `firehpc(1)`
+    manpage.
+  - Mention `status` command `--json` option in `firehpc(1)` manpage.
+  - Add manpage for `fhpc-emulate-slurm-usage`
 
 ### Changed
 - Removed extra directory from source tree. It used to contain ansible
