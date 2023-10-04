@@ -36,8 +36,9 @@ and this project adheres to
   - Generate /etc/hosts with all zone IP addresses and hostnames.
   - Add `nodeset_fold` and `nodeset_expand` Jinja2 filters.
 - docs:
-  - Mention conf --tags option in manpage.
-  - Mention status --json option in manpage.
+  - Mention `conf` command `--db`, `--schema` and `--tags` options in manpage.
+  - Mention `deploy` command `--db` and `--schema` options in manpage.
+  - Mention `status` command `--json` option in manpage.
 
 ### Changed
 - Removed extra directory from source tree. It used to contain ansible

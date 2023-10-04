@@ -82,6 +82,17 @@ This command accepts the following options:
 --
 This command accepts the following options:
 
+[.cli-opt]#*--db*=#[.cli-optval]##_DB_##:: Path to RacksDB database that
+  contains cluster description. The database is expected to contain an
+  infrastructure whose name is the emulated cluster name with one node that is
+  assigned the _admin_ tag, at least one node that is assigned the _login_ tag
+  and at least one node that is assigned the _compute_ tag. Default:
+  [.path]#`/var/lib/racksdb`#.
+
+[.cli-opt]#*--schema*=#[.cli-optval]##_SCHEMA_##:: Path to RacksDB database
+  schema. This option should not required for normal users.
+  Default: [.path]#`/usr/share/racksdb/schema.yml`#.
+
 [.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
   Name of the zone to configure. This option is required.
 
@@ -109,6 +120,17 @@ This command accepts the following options:
 +
 --
 This command accepts the following options:
+
+[.cli-opt]#*--db*=#[.cli-optval]##_DB_##:: Path to RacksDB database that
+  contains cluster description. The database is expected to contain an
+  infrastructure whose name is the emulated cluster name with one node that is
+  assigned the _admin_ tag, at least one node that is assigned the _login_ tag
+  and at least one node that is assigned the _compute_ tag. Default:
+  [.path]#`/var/lib/racksdb`.
+
+[.cli-opt]#*--schema*=#[.cli-optval]##_SCHEMA_##:: Path to RacksDB database
+  schema. This option should not required for normal users.
+  Default: [.path]#`/usr/share/racksdb/schema.yml`
 
 [.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
   Name of the zone to configure. This option is required.
