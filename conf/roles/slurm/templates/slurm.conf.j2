@@ -14,5 +14,5 @@ AuthAltParameters=jwt_key={{ slurm_jwt_key_path }}
 {{ key }}={{ value }}
 {% endfor %}
 
-NodeName=cn[1-2] Procs=2 State=UNKNOWN
-PartitionName=normal Nodes=cn[1-2] Default=YES MaxTime=INFINITE State=UP
+NodeName={{ slurm_compute_nodes | nodeset_fold }} Procs=2 State=UNKNOWN
+PartitionName=normal Nodes={{ slurm_compute_nodes | nodeset_fold }} Default=YES MaxTime=INFINITE State=UP

@@ -11,8 +11,10 @@ and this project adheres to
 - Integration with [RacksDB](https://github.com/rackslab/RacksDB) to extract
   emulated cluster topology (#1).
 - Support for debian12 (Debian bookworm) in OS images sources YAML file.
-- Introduce fhpc_addresses extra variable, a hash with containers as keys and
-  the list of IP addresses as values.
+- Introduce `fhpc_addresses` and `fhpc_nodes` extra variables. The first is a
+  hash with containers as keys and the list of IP addresses as values. The
+  second is also a hash with node tags as keys and the list of nodes assigned
+  with the tag in values.
 - Possibility to run command with SSH paramiko library in addition to ssh binary
   executable.
 - cli:
@@ -32,6 +34,7 @@ and this project adheres to
   - Support optional additional slurmdbd parameters.
   - Deploy SSH root private and public keys on admin.
   - Generate /etc/hosts with all zone IP addresses and hostnames.
+  - Add `nodeset_fold` and `nodeset_expand` Jinja2 filters.
 - docs:
   - Mention conf --tags option in manpage.
   - Mention status --json option in manpage.
@@ -48,6 +51,7 @@ and this project adheres to
     operations with SSH (known_hosts, SSH root keys).
   - Replace hardcoded admin hosts by selection of first admin group member for
     LDAP server hostname and Slurm server.
+  - Generate Slurm nodes and partitions based RacksDB database content.
 
 ### Fixed
 - Check OS images argument in CLI against values available in OS images YAML

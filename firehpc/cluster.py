@@ -141,6 +141,7 @@ class EmulatedCluster:
                     )
                     shutil.copytree(orig_custom_path, dest_custom_path)
 
+        infrastructure = db.infrastructures[self.zone]
         for template in ["ansible.cfg", "hosts"]:
             logger.debug(
                 "Generating configuration file %s from template",
@@ -152,7 +153,7 @@ class EmulatedCluster:
                         self.settings.ansible.path / f"{template}.j2",
                         state=self.zone_dir,
                         zone=self.zone,
-                        infrastructure=db.infrastructures[self.zone],
+                        infrastructure=infrastructure,
                     )
                 )
 
@@ -163,6 +164,10 @@ class EmulatedCluster:
             containers_addresses[container.name] = [
                 str(address) for address in container.addresses()
             ]
+        # variable fhpc_nodes
+        nodes = {}
+        for tag in ["admin", "login", "compute"]:
+            nodes[tag] = [node.name for node in infrastructure.nodes.filter(tags=[tag])]
 
         # Unless already existing, generate custom.yml file with variables and
         # add option to ansible-playbook command line to load this file as a
@@ -192,7 +197,7 @@ class EmulatedCluster:
                 private_data_dir=self.conf_dir,
                 playbook=f"{self.settings.ansible.path}/{playbook}.yml",
                 cmdline=cmdline,
-                extravars={"fhpc_addresses": containers_addresses},
+                extravars={"fhpc_addresses": containers_addresses, "fhpc_nodes": nodes},
             )
 
         for generated_dir in ["artifacts", "env"]:
