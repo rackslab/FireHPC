@@ -42,7 +42,7 @@ are started.
   Show this help message and exit.
 
 [.cli-opt]#*-v, --version*#::
-  Show RacksDB version number and exit.
+  Show FireHPC version number and exit.
 
 [.cli-opt]#*--debug*#::
   Enable debug mode with more messages in output.
@@ -51,8 +51,8 @@ are started.
   Show external libraries logs additionally to FireHPC internal logs.
 
 [.cli-opt]#*--state*=#[.cli-optval]##_STATE_##::
-  Path FireHPC state directory where generated files (keys, certificates, users,
-  etc) are stored before deployment in containers. Default value is
+  Path to FireHPC state directory where generated files (keys, certificates,
+  users, etc) are stored before deployment in containers. Default value is
   [.path]#`~/.local/state/firehpc`#. If _$XDG_STATE_HOME_ environment variable
   is defined, its value appended with _firehpc_ subfolder is considered the new
   default.

@@ -54,6 +54,7 @@ and this project adheres to
   file instead of hard-coded argparse choices.
 - conf: Open slurmd spool directory permissions to all users for running batch
   jobs scripts.
+- docs: Grammatical error and typos in `firehpc(1)` manpage
 
 ## [1.0.0] - 2023-07-20
 
