@@ -17,6 +17,7 @@ and this project adheres to
   with the tag in values.
 - Possibility to run command with SSH paramiko library in addition to ssh binary
   executable.
+- Add example RacksDB database.
 - cli:
   - Support for tags to filter deployed configuration tasks.
   - Report cluster status in JSON format with `--json` option.

@@ -1,0 +1,64 @@
+types:
+  nodes:
+  - id: container
+    model: systemd-nspawn container
+    height: 1u
+    width: full
+    cpu:
+      cores: 8
+      model: Emulated CPU
+      sockets: 1
+    ram:
+      dimm: 2
+      size: 8GB
+    storage:
+    - model: Samsung 980 Pro
+      size: 256GB
+      type: nvme
+    netifs:
+    - bandwidth: 1Gb
+      type: ethernet
+  racks:
+  - id: standard
+    height: 1867mm
+    width: 600mm
+    depth: 914mm
+    slots: 42u
+
+datacenters:
+- name: racksdb
+  rooms:
+  - name: tiny
+    dimensions:
+      depth: 4m
+      width: 8m
+    rows:
+    - name: R1
+      position:
+        depth: 1.5m
+        width: 1.5m
+      racks:
+      - name: R1-A[01-02]
+        type: standard
+
+infrastructures:
+- name: emulator
+  description: HPC cluster
+  layout:
+  - rack: R1-A01
+    nodes:
+    - name: cn[01-02]
+      slot: 5
+      type: container
+      tags:
+      - compute
+    - name: login
+      slot: 8
+      type: container
+      tags:
+      - login
+    - name: admin
+      slot: 10
+      type: container
+      tags:
+      - admin
