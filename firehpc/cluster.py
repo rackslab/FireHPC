@@ -74,7 +74,9 @@ class EmulatedCluster:
     def extravars_path(self) -> Path:
         return self.conf_dir / "custom.yml"
 
-    def deploy(self, os: str, images: OSImagesSources, db: RacksDB) -> None:
+    def deploy(
+        self, os: str, images: OSImagesSources, db: RacksDB, emulator_mode: bool
+    ) -> None:
 
         if not self.state.exists():
             logger.debug("Creating state directory %s", self.state)
@@ -91,19 +93,23 @@ class EmulatedCluster:
             images.url(os),
             f"{admin_node.name}.{self.zone}",
         )
-        manager = ContainersManager(self.zone)
-        for node in infrastructure.nodes:
-            if "admin" not in node.tags:
-                logger.info(
-                    "Cloning admin container image for %s.%s", node.name, self.zone
-                )
-                admin_image.clone(f"{node.name}.{self.zone}")
+        if not emulator_mode:
+            for node in infrastructure.nodes:
+                if "admin" not in node.tags:
+                    logger.info(
+                        "Cloning admin container image for %s.%s", node.name, self.zone
+                    )
+                    admin_image.clone(f"{node.name}.{self.zone}")
 
         logger.info("Starting zone storage service %s", self.zone)
         storage = StorageService(self.zone)
         storage.start()
 
-        manager.start([node.name for node in infrastructure.nodes])
+        manager = ContainersManager(self.zone)
+        if emulator_mode:
+            manager.start([admin_node.name])
+        else:
+            manager.start([node.name for node in infrastructure.nodes])
 
     def conf(
         self,
@@ -112,6 +118,7 @@ class EmulatedCluster:
         bootstrap: bool = True,
         custom: Path = None,
         tags: Optional[list[str]] = None,
+        emulator_mode: bool = False,
     ) -> conf:
         if self.conf_dir.exists() and reinit:
             logger.debug("Removing existing configuration directory %s", self.conf_dir)
@@ -154,6 +161,7 @@ class EmulatedCluster:
                         state=self.zone_dir,
                         zone=self.zone,
                         infrastructure=infrastructure,
+                        emulator_mode=emulator_mode,
                     )
                 )
 
@@ -197,7 +205,11 @@ class EmulatedCluster:
                 private_data_dir=self.conf_dir,
                 playbook=f"{self.settings.ansible.path}/{playbook}.yml",
                 cmdline=cmdline,
-                extravars={"fhpc_addresses": containers_addresses, "fhpc_nodes": nodes},
+                extravars={
+                    "fhpc_addresses": containers_addresses,
+                    "fhpc_nodes": nodes,
+                    "fhpc_emulator_mode": emulator_mode,
+                },
             )
 
         for generated_dir in ["artifacts", "env"]:

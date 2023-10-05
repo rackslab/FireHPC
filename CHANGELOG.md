@@ -11,16 +11,20 @@ and this project adheres to
 - Integration with [RacksDB](https://github.com/rackslab/RacksDB) to extract
   emulated cluster topology (#1).
 - Support for debian12 (Debian bookworm) in OS images sources YAML file.
-- Introduce `fhpc_addresses` and `fhpc_nodes` extra variables. The first is a
-  hash with containers as keys and the list of IP addresses as values. The
-  second is also a hash with node tags as keys and the list of nodes assigned
-  with the tag in values.
+- Introduce `fhpc_addresses`, `fhpc_nodes`, `fhpc_emulator_mode` extra
+  variables. The first is a hash with containers as keys and the list of IP
+  addresses as values. The second is also a hash with node tags as keys and the
+  list of nodes assigned with the tag in values. The third is a boolean set to
+  true when `--slurm-emulator` option is set on `firehpc` command line.
 - Possibility to run command with SSH paramiko library in addition to ssh binary
   executable.
 - Add example RacksDB database.
 - cli:
   - Support for tags to filter deployed configuration tasks.
   - Report cluster status in JSON format with `--json` option.
+  - Add `--slurm-emulator` option to deploy and configure a cluster with
+    emulated Slurm cluster nodes (only one admin node with up to 64k virtual
+    compute nodes).
   - Introduce `fhpc-emulate-slurm-usage` command to emulate random usage of
     Slurm cluster.
 - conf:

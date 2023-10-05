@@ -104,6 +104,11 @@ class FireHPCExec:
             help="Path of variables directories to customize FireHPC default",
             type=Path,
         )
+        parser_deploy.add_argument(
+            "--slurm-emulator",
+            help="Enable Slurm emulator mode",
+            action="store_true",
+        )
         parser_deploy.set_defaults(func=self._execute_deploy)
 
         # conf command
@@ -142,6 +147,11 @@ class FireHPCExec:
             "--with-bootstrap",
             action="store_true",
             help="Run configuration bootstrap",
+        )
+        parser_conf.add_argument(
+            "--slurm-emulator",
+            help="Enable Slurm emulator mode",
+            action="store_true",
         )
         parser_conf.set_defaults(func=self._execute_conf)
 
@@ -219,13 +229,11 @@ class FireHPCExec:
             logger.info("Run `firehpc images` to get the list of supported OS")
             sys.exit(1)
         db = self._load_racksdb()
-        cluster = EmulatedCluster(
-            self.settings,
-            self.args.zone,
-            self.args.state,
+        cluster = EmulatedCluster(self.settings, self.args.zone, self.args.state)
+        cluster.deploy(self.args.os, images, db, self.args.slurm_emulator)
+        cluster.conf(
+            db, custom=self.args.custom, emulator_mode=self.args.slurm_emulator
         )
-        cluster.deploy(self.args.os, images, db)
-        cluster.conf(db, custom=self.args.custom)
 
     def _execute_conf(self):
         cluster = EmulatedCluster(self.settings, self.args.zone, self.args.state)
@@ -235,6 +243,7 @@ class FireHPCExec:
             bootstrap=self.args.with_bootstrap,
             custom=self.args.custom,
             tags=self.args.tags,
+            emulator_mode=self.args.slurm_emulator,
         )
 
     def _execute_ssh(self):
