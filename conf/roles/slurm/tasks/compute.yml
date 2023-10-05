@@ -9,7 +9,7 @@
 
 - name: Install slurm compute specific packages
   ansible.builtin.package:
-    name: "{{ slurm_compute_packages }}"
+    name: "{{ slurm_emulator | ternary(slurm_emulator_compute_packages, slurm_compute_packages) }}"
     state: latest
 
 # This is required on redhat based distributions as the service is not

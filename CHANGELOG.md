@@ -40,6 +40,7 @@ and this project adheres to
   - Deploy SSH root private and public keys on admin.
   - Generate /etc/hosts with all zone IP addresses and hostnames.
   - Add `nodeset_fold` and `nodeset_expand` Jinja2 filters.
+  - Support Slurm emulation with fully virtual nodes (up to 64k).
 - docs:
   - Mention `conf` command `--db`, `--schema` and `--tags` options in
     `firehpc(1)` manpage.

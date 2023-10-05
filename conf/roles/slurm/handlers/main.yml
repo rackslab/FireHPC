@@ -3,24 +3,29 @@
   ansible.builtin.service:
     name: slurmctld
     state: restarted
-  when: slurm_profile == "server"
+  when: slurm_profiles['server'] in group_names
 
 - name: Restart slurmrestd
   ansible.builtin.service:
     name: slurmrestd
     state: restarted
-  when: slurm_profile == "server"
+  when:
+  - slurm_profiles['server'] in group_names
+  - slurm_with_slurmrestd
 
 - name: Restart slurmdbd
   ansible.builtin.service:
     name: slurmdbd
     state: restarted
+  when: slurm_profiles['server'] in group_names
 
+# slurmd service is deployed and must be restard on compute nodes or the single
+# server node when slurm_emulator is true.
 - name: Restart slurmd
   ansible.builtin.service:
     name: slurmd
     state: restarted
-  when: slurm_profile == "compute"
+  when: slurm_profiles['compute'] in group_names or slurm_emulator
 
 - name: Restart munge
   ansible.builtin.service:

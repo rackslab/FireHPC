@@ -24,7 +24,7 @@
 
 - name: Install slurm common packages
   ansible.builtin.package:
-    name: "{{ slurm_common_packages }}"
+    name: "{{ slurm_emulator | ternary(slurm_emulator_common_packages, slurm_common_packages) }}"
     state: latest
 
 - name: Create slurm configuration directory
@@ -63,6 +63,12 @@
     state: started
     enabled: yes
 
-- name: "Run slurm {{ slurm_profile }} specific tasks"
-  ansible.builtin.include_tasks: "{{ slurm_profile }}.yml"
-  when: slurm_profile != "client"
+# Each profile is applied in the group associated the keys or slurm_profiles
+# hash or all the profiles are applied on the unique server node when
+# slurm_emulator is true.
+- name: "Run slurm profiles specific tasks"
+  ansible.builtin.include_tasks: "{{ slurm_profile.key }}.yml"
+  when: slurm_profile.value in group_names or slurm_emulator
+  loop: "{{ slurm_profiles | dict2items }}"
+  loop_control:
+    loop_var: slurm_profile

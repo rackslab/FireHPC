@@ -9,6 +9,11 @@ slurm_restd_packages:
   - slurmrestd
 slurm_compute_packages:
   - slurmd
+slurm_emulator_common_packages:
+  - slurm-emulator
+  - munge
+slurm_emulator_server_packages: []
+slurm_emulator_compute_packages: []
 slurm_state_save_loc: /var/lib/slurm/slurmctld
 slurm_slurmd_spool_dir: /var/lib/slurm/slurmd
 slurm_jwt_key_path: /var/lib/slurm/jwt_hs256.key

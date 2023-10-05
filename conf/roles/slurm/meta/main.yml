@@ -6,4 +6,4 @@ dependencies:
         host: localhost
         password: "{{ slurm_db_password }}"
         priv: slurm_acct_db.*:ALL
-    when: slurm_profile == 'server'
+    when: slurm_profiles['server'] in group_names

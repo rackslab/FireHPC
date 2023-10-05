@@ -18,12 +18,12 @@
 
 - name: Install slurm server specific packages
   ansible.builtin.package:
-    name: "{{ slurm_server_packages }}"
+    name: "{{ slurm_emulator | ternary(slurm_emulator_server_packages, slurm_server_packages) }}"
     state: latest
 
 - name: Install slurmrestd
   ansible.builtin.package:
-    name: "{{ slurm_restd_packages }}"
+    name: "{{ slurm_emulator | ternary(slurm_emulator_server_packages, slurm_restd_packages) }}"
     state: latest
   when: slurm_with_slurmrestd
 

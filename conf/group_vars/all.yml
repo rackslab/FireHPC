@@ -23,7 +23,14 @@ sssd_ldap_server: "{{ fhpc_ldap_server }}"
 users_ssh_host_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_defs: "{{ fhpc_users }}"
 users_group: "{{ fhpc_users_group }}"
+slurm_emulator: "{{ fhpc_emulator_mode }}"
 slurm_server: "{{ groups['admin'][0] }}"
+# This hash associates slurm profiles in keys with a group of nodes on which the
+# the profile must be applied when slurm_emulator is false. When slurm_emulator
+# is true, all slurm profiles are applied on the single admin node.
+slurm_profiles:
+  compute: compute
+  server: admin
 slurm_local_munge_key_file: "{{ fhpc_zone_state_dir }}/munge/munge.key"
 slurm_local_mariadb_password_file: "{{ fhpc_zone_state_dir }}/mariadb/mariadb.password"
 slurm_local_jwt_key_file: "{{ fhpc_zone_state_dir }}/slurm/jwt_hs256.key"
