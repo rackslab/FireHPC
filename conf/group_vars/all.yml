@@ -49,3 +49,5 @@ slurmweb_settings_defaults:
     uri: "ldap://{{ fhpc_ldap_server }}/"
     user_base: "ou=people,{{ fhpc_ldap_base }}"
     group_base: "ou=groups,{{ fhpc_ldap_base }}"
+# MPI is deployed on both login and compute nodes
+mpi_nodes: "{{ 'login' in group_names or 'compute' in group_names }}"
