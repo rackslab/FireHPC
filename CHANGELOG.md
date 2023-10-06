@@ -68,8 +68,11 @@ and this project adheres to
 ### Fixed
 - Check OS images argument in CLI against values available in OS images YAML
   file instead of hard-coded argparse choices.
-- conf: Open slurmd spool directory permissions to all users for running batch
-  jobs scripts.
+- conf:
+  - Open slurmd spool directory permissions to all users for running batch
+    jobs scripts.
+  - Manage home directories ownership and permissions, in addition to some their
+    content.
 - docs: Grammatical error and typos in `firehpc(1)` manpage
 
 ## [1.0.0] - 2023-07-20

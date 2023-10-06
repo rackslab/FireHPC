@@ -2,6 +2,15 @@
 # Generate users SSH keys and authorized_keys. It operates on login node only
 # as the /home is shared between nodes.
 
+- name: Create user home directory
+  ansible.builtin.file:
+    path: "/home/{{ item.login }}"
+    state: directory
+    mode: 0700
+    owner: "{{ item.login }}"
+    group: "{{ users_group }}"
+  loop: "{{ users_defs }}"
+
 - name: Create user SSH directory
   ansible.builtin.file:
     path: "/home/{{ item.login }}/.ssh"
