@@ -17,7 +17,7 @@ The purposes are the following:
 
 FireHPC aims to emulate HPC clusters with multiple distributions. It supports
 running multiple emulated HPC clusters in parallel on the same host, each
-cluster running in its dedicated zone.
+cluster running in its dedicated virtual network.
 
 The following services are automatically deployed in the emulated cluster:
 
@@ -161,11 +161,19 @@ so the `mymachines` service can resolve IP addresses of container names:
 Without this modification, the `mymachines` service is basically ignored by the
 _return_ action on `resolve` service. For reference, see `nss-mymachines(8)`.
 
-With your regular user, run FireHPC with a zone name and an OS in arguments. For
-example:
+For a quick start, copy the simple example RacksDB database:
 
 ```
-$ firehpc deploy --zone hpc --os debian11
+$ cp /usr/share/doc/firehpc/examples/db/racksdb.yml racksdb.yml
+```
+
+This file can optionally be modified to add nodes or change hostnames.
+
+With your regular user, run FireHPC with a cluster name and an OS in arguments.
+For example:
+
+```
+$ firehpc deploy --db racksdb.yml --cluster hpc --os debian11
 ```
 
 The available OS are reported by this command:
@@ -177,7 +185,7 @@ $ firehpc images
 When it is deployed, check the status of the emulated cluster:
 
 ```
-$ firehpc status --zone hpc
+$ firehpc status --cluster hpc
 ```
 
 This reports the started containers and the randomly generated user accounts.
@@ -216,10 +224,10 @@ You can also try Slurm REST API:
 [<user>@login ~]$ curl -H "X-SLURM-USER-NAME: ${USER}" -H "X-SLURM-USER-TOKEN: ${SLURM_JWT}" http://admin:6820/slurm/v0.0.39/nodes
 ```
 
-When you are done, you can clean up everything for a zone with this command:
+When you are done, you can clean up everything for a cluster with this command:
 
 ```
-$ firehpc clean --zone hpc
+$ firehpc clean --cluster hpc
 ```
 
 ## Authors
