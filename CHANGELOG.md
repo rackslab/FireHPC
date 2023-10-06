@@ -69,6 +69,7 @@ and this project adheres to
 ### Fixed
 - Check OS images argument in CLI against values available in OS images YAML
   file instead of hard-coded argparse choices.
+- Storage service stop and removal.
 - conf:
   - Open slurmd spool directory permissions to all users for running batch
     jobs scripts.

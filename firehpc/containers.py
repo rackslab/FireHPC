@@ -68,7 +68,7 @@ class UnitService(DBusObject):
         self.proxy.StartUnit(f"{self.name}.service", "fail")
 
     def stop(self):
-        self.proxy.StartUnit(f"{self.name}.service", "fail")
+        self.proxy.StopUnit(f"{self.name}.service", "fail")
 
 
 class ContainerService(UnitService):
