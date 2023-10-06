@@ -16,8 +16,8 @@ firehpc - Fire up container-based emulated HPC cluster
 
 FireHPC deploys emulated HPC clusters with containers, virtual network and
 virtual shared storage service. Multiple emulated clusters can be deployed on
-the same host in distinct zones. The emulated nodes are automatically setup with
-Ansible playbooks. Deployed services include:
+the same host in distinct virtual networks. The emulated nodes are automatically
+setup with Ansible playbooks. Deployed services include:
 
 * Slurm workload manager
 * SlurmDBD accounting with MariaDB backend
@@ -66,18 +66,18 @@ Commands are listed in lexicographical order.
 [.cli-opt]#*clean*#::
 
   Stop and clean and emulated HPC clusters, with the following steps: stop
-  containers, remove container images and stop storage service in a zone.
+  containers, remove container images and stop storage service of a cluster.
 +
 --
 This command accepts the following options:
 
-[.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
-  Name of the zone to clean. This option is required.
+[.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
+  Name of the cluster to clean. This option is required.
 --
 
 [.cli-opt]#*conf*#::
 
-  Re-deploy the configuration on a started emulated cluster in a zone.
+  Re-deploy the configuration on a started emulated cluster.
 +
 --
 This command accepts the following options:
@@ -93,8 +93,8 @@ This command accepts the following options:
   schema. This option should not required for normal users.
   Default: [.path]#`/usr/share/racksdb/schema.yml`#.
 
-[.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
-  Name of the zone to configure. This option is required.
+[.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
+  Name of the cluster to configure. This option is required.
 
 [.cli-opt]#*-c, --custom*=#[.cli-optval]##_CUSTOM_##::
   Path to directory with custom Ansible variables to override default variables
@@ -132,8 +132,8 @@ This command accepts the following options:
   schema. This option should not required for normal users.
   Default: [.path]#`/usr/share/racksdb/schema.yml`
 
-[.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
-  Name of the zone to configure. This option is required.
+[.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
+  Name of the cluster to configure. This option is required.
 
 [.cli-opt]#*--os*=#[.cli-optval]##_OS_##::
   Name of the operating system of downloaded the container image. See
@@ -156,7 +156,7 @@ This command accepts the following options:
 +
 --
 This command requires at least one argument to specify the destination container
-in the format [LOGIN@]CONTAINER.ZONE (ex: `admin.hpc` or `john@login.hpc`).
+in the format [LOGIN@]CONTAINER.CLUSTER (ex: `admin.hpc` or `john@login.hpc`).
 Additional arguments are treated as a command to execute on container with its
 own arguments. Without additional arguments, an interactive shell is launched in
 the container.
@@ -164,15 +164,14 @@ the container.
 
 [.cli-opt]#*status*#::
 
-  Report the status of an emulated cluster in a zone. It gives the list of
-  running containers and the randomly generated user accounts for the cluster in
-  this zone.
+  Report the status of an emulated cluster. It gives the list of running
+  containers and the randomly generated user accounts for the cluster.
 +
 --
 This command accepts the following options:
 
-[.cli-opt]#*--zone*=#[.cli-optval]##_ZONE_##::
-  Name of the zone. This option is required.
+[.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
+  Name of the cluster. This option is required.
 
 [.cli-opt]#*--json*#::
   Report cluster status in JSON format.

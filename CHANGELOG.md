@@ -64,6 +64,7 @@ and this project adheres to
   - Replace hardcoded admin hosts by selection of first admin group member for
     LDAP server hostname and Slurm server.
   - Generate Slurm nodes and partitions based RacksDB database content.
+- docs: Update after zone→cluster rename in CLI options.
 
 ### Fixed
 - Check OS images argument in CLI against values available in OS images YAML

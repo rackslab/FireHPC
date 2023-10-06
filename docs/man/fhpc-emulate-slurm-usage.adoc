@@ -10,7 +10,7 @@ fhpc-emulate-slurm-usage - Emulate real usage of Slurm on FireHPC cluster
 
 == Synopsis
 
-[.cli-opt]#*fhpc-emulate-slurm-usage*# `[_GENERAL OPTIONS_] ZONE`
+[.cli-opt]#*fhpc-emulate-slurm-usage*# `[_GENERAL OPTIONS_] CLUSTER`
 
 == Description
 
