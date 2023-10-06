@@ -57,18 +57,18 @@ class ClusterStatus:
 
 
 class EmulatedCluster:
-    def __init__(self, settings: RuntimeSettings, zone: str, state: Path):
+    def __init__(self, settings: RuntimeSettings, name: str, state: Path):
         self.settings = settings
-        self.zone = zone
+        self.name = name
         self.state = state
 
     @property
-    def zone_dir(self) -> Path:
-        return self.state / self.zone
+    def cluster_dir(self) -> Path:
+        return self.state / self.name
 
     @property
     def conf_dir(self) -> Path:
-        return self.zone_dir / "conf"
+        return self.cluster_dir / "conf"
 
     @property
     def extravars_path(self) -> Path:
@@ -81,31 +81,31 @@ class EmulatedCluster:
         if not self.state.exists():
             logger.debug("Creating state directory %s", self.state)
             self.state.mkdir(parents=True)
-        if not self.zone_dir.exists():
-            logger.debug("Creating zone state directory %s", self.zone_dir)
-            self.zone_dir.mkdir()
+        if not self.cluster_dir.exists():
+            logger.debug("Creating cluster state directory %s", self.cluster_dir)
+            self.cluster_dir.mkdir()
 
-        infrastructure = db.infrastructures[self.zone]
+        infrastructure = db.infrastructures[self.name]
 
         admin_node = infrastructure.nodes.filter(tags=["admin"]).first()
         admin_image = ContainerImage.download(
-            self.zone,
+            self.name,
             images.url(os),
-            f"{admin_node.name}.{self.zone}",
+            f"{admin_node.name}.{self.name}",
         )
         if not emulator_mode:
             for node in infrastructure.nodes:
                 if "admin" not in node.tags:
                     logger.info(
-                        "Cloning admin container image for %s.%s", node.name, self.zone
+                        "Cloning admin container image for %s.%s", node.name, self.name
                     )
-                    admin_image.clone(f"{node.name}.{self.zone}")
+                    admin_image.clone(f"{node.name}.{self.name}")
 
-        logger.info("Starting zone storage service %s", self.zone)
-        storage = StorageService(self.zone)
+        logger.info("Starting cluster storage service %s", self.name)
+        storage = StorageService(self.name)
         storage.start()
 
-        manager = ContainersManager(self.zone)
+        manager = ContainersManager(self.name)
         if emulator_mode:
             manager.start([admin_node.name])
         else:
@@ -148,7 +148,7 @@ class EmulatedCluster:
                     )
                     shutil.copytree(orig_custom_path, dest_custom_path)
 
-        infrastructure = db.infrastructures[self.zone]
+        infrastructure = db.infrastructures[self.name]
         for template in ["ansible.cfg", "hosts"]:
             logger.debug(
                 "Generating configuration file %s from template",
@@ -158,8 +158,8 @@ class EmulatedCluster:
                 fh.write(
                     Templater().frender(
                         self.settings.ansible.path / f"{template}.j2",
-                        state=self.zone_dir,
-                        zone=self.zone,
+                        state=self.cluster_dir,
+                        cluster=self.name,
                         infrastructure=infrastructure,
                         emulator_mode=emulator_mode,
                     )
@@ -167,7 +167,7 @@ class EmulatedCluster:
 
         # variable fhpc_addresses
         containers_addresses = {}
-        containers = ContainersManager(self.zone).running()
+        containers = ContainersManager(self.name).running()
         for container in containers:
             containers_addresses[container.name] = [
                 str(address) for address in container.addresses()
@@ -184,9 +184,9 @@ class EmulatedCluster:
         # successive runs.
         if not self.extravars_path.exists():
             extravars = {
-                "fhpc_zone_state_dir": str(self.zone_dir),
-                "fhpc_zone": self.zone,
-                "fhpc_users": UsersDirectory(10, self.zone)._generic(),
+                "fhpc_cluster_state_dir": str(self.cluster_dir),
+                "fhpc_cluster": self.name,
+                "fhpc_users": UsersDirectory(10, self.name)._generic(),
             }
             with open(self.extravars_path, "w+") as fh:
                 fh.write(yaml.dump(extravars))
@@ -218,7 +218,7 @@ class EmulatedCluster:
             shutil.rmtree(generated_path)
 
     def clean(self) -> None:
-        manager = ContainersManager(self.zone)
+        manager = ContainersManager(self.name)
 
         manager.stop()
 
@@ -226,13 +226,13 @@ class EmulatedCluster:
             logger.info("Removing image %s", image.name)
             image.remove()
 
-        logger.info("Stopping zone storage service")
-        storage = StorageService(self.zone)
+        logger.info("Stopping cluster storage service")
+        storage = StorageService(self.name)
         storage.stop()
 
     def status(self) -> ClusterStatus:
-        containers = ContainersManager(self.zone).running()
+        containers = ContainersManager(self.name).running()
         with open(self.extravars_path) as fh:
             content = yaml.safe_load(fh)
-        users = UsersDirectory.load(self.zone, content["fhpc_users"])
+        users = UsersDirectory.load(self.name, content["fhpc_users"])
         return ClusterStatus(containers, users)

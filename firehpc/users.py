@@ -27,7 +27,7 @@ from faker import Faker
 class UserEntry:
     firstname: str
     lastname: str
-    zone: str
+    cluster: str
 
     @property
     def login(self):
@@ -35,7 +35,7 @@ class UserEntry:
 
     @property
     def email(self):
-        return f"{self.firstname.lower()}.{self.lastname.lower()}@{self.zone}.hpc"
+        return f"{self.firstname.lower()}.{self.lastname.lower()}@{self.cluster}.hpc"
 
     def _generic(self):
         return {
@@ -46,17 +46,17 @@ class UserEntry:
         }
 
     @classmethod
-    def load(cls, zone: str, user: dict) -> UserEntry:
-        return cls(user["firstname"], user["lastname"], zone)
+    def load(cls, cluster: str, user: dict) -> UserEntry:
+        return cls(user["firstname"], user["lastname"], cluster)
 
 
 class UsersDirectory:
-    def __init__(self, size: int, zone: str) -> UsersDirectory:
+    def __init__(self, size: int, cluster: str) -> UsersDirectory:
         self.size = size
         self.db = list()
         fake = Faker()
         self.db = [
-            UserEntry(fake.first_name(), fake.last_name(), zone)
+            UserEntry(fake.first_name(), fake.last_name(), cluster)
             for _ in range(self.size)
         ]
 
@@ -68,8 +68,8 @@ class UsersDirectory:
         return [user._generic() for user in self.db]
 
     @classmethod
-    def load(cls, zone: str, users: list) -> UsersDirectory:
-        directory = cls(0, zone)
+    def load(cls, cluster: str, users: list) -> UsersDirectory:
+        directory = cls(0, cluster)
         for user in users:
-            directory.db.append(UserEntry.load(zone, user))
+            directory.db.append(UserEntry.load(cluster, user))
         return directory

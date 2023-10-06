@@ -1,13 +1,13 @@
 #!/bin/bash
 
 ACTION=${1}
-ZONE=${2}
-ZONE_DIR=/var/lib/firehpc/${ZONE}
+CLUSTER=${2}
+CLUSTER_DIR=/var/lib/firehpc/${CLUSTER}
 
 if [ $ACTION == "start" ]; then
-    mkdir ${ZONE_DIR} ${ZONE_DIR}/home
+    mkdir ${CLUSTER_DIR} ${CLUSTER_DIR}/home
 elif [ $ACTION == "stop" ]; then
-    rm -rf ${ZONE_DIR}
+    rm -rf ${CLUSTER_DIR}
 else
     logger --tag firehpc-storage-wrapper --priority local0.error unsupported action ${ACTION}
 fi

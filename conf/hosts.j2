@@ -3,17 +3,17 @@ all:
     admin:
       hosts:
 {% for node in infrastructure.nodes.filter(tags=["admin"]) %}
-        {{ node.name }}.{{ zone }}:
+        {{ node.name }}.{{ cluster }}:
 {% endfor %}
 {% if not emulator_mode %}
     login:
       hosts:
 {% for node in infrastructure.nodes.filter(tags=["login"]) %}
-        {{ node.name }}.{{ zone }}:
+        {{ node.name }}.{{ cluster }}:
 {% endfor %}
     compute:
       hosts:
 {% for node in infrastructure.nodes.filter(tags=["compute"]) %}
-        {{ node.name }}.{{ zone }}:
+        {{ node.name }}.{{ cluster }}:
 {% endfor %}
 {% endif %}

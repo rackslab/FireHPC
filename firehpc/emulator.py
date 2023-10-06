@@ -73,8 +73,8 @@ class FireHPCUsageEmulator:
             default=default_state_dir(),
         )
         parser.add_argument(
-            "zone",
-            help="Zone to run usage emulation.",
+            "cluster",
+            help="Cluster to run usage emulation.",
         )
 
         self.args = parser.parse_args()
@@ -82,7 +82,7 @@ class FireHPCUsageEmulator:
         self.settings = RuntimeSettings()
         try:
             self.cluster = EmulatedCluster(
-                self.settings, self.args.zone, self.args.state
+                self.settings, self.args.cluster, self.args.state
             )
             self.ssh = SSHClient(self.cluster, asbin=False)
             self._run_emulation()
@@ -134,25 +134,25 @@ class FireHPCUsageEmulator:
 
     def _get_nodes(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
-            [f"admin.{self.args.zone}", "scontrol", "show", "nodes", "--json"]
+            [f"admin.{self.args.cluster}", "scontrol", "show", "nodes", "--json"]
         )
         return [node["name"] for node in json.loads(stdout)["nodes"]]
 
     def _get_partitions(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
-            [f"admin.{self.args.zone}", "scontrol", "show", "partitions", "--json"]
+            [f"admin.{self.args.cluster}", "scontrol", "show", "partitions", "--json"]
         )
         return [partition["name"] for partition in json.loads(stdout)["partitions"]]
 
     def _get_qos(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
-            [f"admin.{self.args.zone}", "sacctmgr", "show", "qos", "--json"]
+            [f"admin.{self.args.cluster}", "sacctmgr", "show", "qos", "--json"]
         )
         return [qos["name"] for qos in json.loads(stdout)["QOS"]]
 
     def _get_pending_jobs(self):
         stdout, stderr = self.ssh.exec(
-            [f"admin.{self.args.zone}", "squeue", "--state", "pending", "--json"]
+            [f"admin.{self.args.cluster}", "squeue", "--state", "pending", "--json"]
         )
         return [
             job["job_id"]
@@ -169,7 +169,7 @@ class FireHPCUsageEmulator:
         )
         self.ssh.exec(
             [
-                f"{user.login}@login.{self.args.zone}",
+                f"{user.login}@login.{self.args.cluster}",
                 "sbatch",
                 "-q",
                 qos,

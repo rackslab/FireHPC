@@ -72,13 +72,13 @@ class UnitService(DBusObject):
 
 
 class ContainerService(UnitService):
-    def __init__(self, zone, name):
-        super().__init__(f"firehpc-container@{zone}:{name}")
+    def __init__(self, cluster, name):
+        super().__init__(f"firehpc-container@{cluster}:{name}")
 
 
 class StorageService(UnitService):
-    def __init__(self, zone):
-        super().__init__(f"firehpc-storage@{zone}")
+    def __init__(self, cluster):
+        super().__init__(f"firehpc-storage@{cluster}")
 
 
 class ImageImporter(DBusObject):
@@ -132,9 +132,9 @@ class ImageImporter(DBusObject):
 class ClusterStateModifier(DBusObject):
     INTERFACE = "org.freedesktop.machine1"
 
-    def __init__(self, zone: str) -> ClusterStateModifier:
+    def __init__(self, cluster: str) -> ClusterStateModifier:
         super().__init__("/org/freedesktop/machine1")
-        self.zone = zone
+        self.cluster = cluster
         self.loop = EventLoop()
         self.terminated_start = threading.Event()
         self.terminated_stop = threading.Event()
@@ -166,7 +166,7 @@ class ClusterStateModifier(DBusObject):
         self.loop.run()
 
     def start(self, containers: list) -> None:
-        self.must_start = [f"{container}.{self.zone}" for container in containers]
+        self.must_start = [f"{container}.{self.cluster}" for container in containers]
         if not len(self.must_start):
             logger.info("No container to start")
             return
@@ -174,8 +174,8 @@ class ClusterStateModifier(DBusObject):
         waiter = threading.Thread(target=self._waiter)
         waiter.start()
         for container in containers:
-            logger.info("Starting container %s.%s", container, self.zone)
-            Container.start(self.zone, container)
+            logger.info("Starting container %s.%s", container, self.cluster)
+            Container.start(self.cluster, container)
         logger.info("Waiting for containers to start…")
         self.terminated_start.wait()
         logger.info("All containers are successfully started")
@@ -249,8 +249,8 @@ class Container(DBusObject):
         return result
 
     @staticmethod
-    def start(zone, name) -> None:
-        service = ContainerService(zone, name)
+    def start(cluster, name) -> None:
+        service = ContainerService(cluster, name)
         service.start()
 
     @classmethod
@@ -333,41 +333,43 @@ class ContainerImage(DBusObject):
         )
 
     @staticmethod
-    def download(zone: str, url: str, name: str) -> ContainerImage:
+    def download(cluster: str, url: str, name: str) -> ContainerImage:
         importer = ImageImporter(url, name)
         importer.transfer()
-        return ContainersManager(zone).image(name)
+        return ContainersManager(cluster).image(name)
 
 
 class ContainersManager(DBusObject):
     INTERFACE = "org.freedesktop.machine1"
 
-    def __init__(self, zone: str) -> ContainersManager:
+    def __init__(self, cluster: str) -> ContainersManager:
         super().__init__("/org/freedesktop/machine1")
-        self.zone = zone
+        self.cluster = cluster
 
     def running(self) -> list:
         return [
             Container.from_machine(machine)
             for machine in self.proxy.ListMachines()
-            if machine[0].endswith(f".{self.zone}") and machine[1] == "container"
+            if machine[0].endswith(f".{self.cluster}") and machine[1] == "container"
         ]
 
     def container(self, name) -> Container:
-        return Container.from_machine_path(self.proxy.GetMachine(f"{name}.{self.zone}"))
+        return Container.from_machine_path(
+            self.proxy.GetMachine(f"{name}.{self.cluster}")
+        )
 
     def images(self) -> list:
         return [
             ContainerImage.from_machine_image(image)
             for image in self.proxy.ListImages()
-            if image[0].endswith(f".{self.zone}")
+            if image[0].endswith(f".{self.cluster}")
         ]
 
     def image(self, name) -> ContainerImage:
         return ContainerImage.from_machine_image_path(self.proxy.GetImage(name))
 
     def start(self, containers: list):
-        ClusterStateModifier(self.zone).start(containers)
+        ClusterStateModifier(self.cluster).start(containers)
 
     def stop(self):
-        ClusterStateModifier(self.zone).stop(self.running())
+        ClusterStateModifier(self.cluster).stop(self.running())

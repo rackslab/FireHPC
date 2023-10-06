@@ -38,7 +38,7 @@ and this project adheres to
   - Add variable for slurmrestd socket path in slurm role.
   - Support optional additional slurmdbd parameters.
   - Deploy SSH root private and public keys on admin.
-  - Generate /etc/hosts with all zone IP addresses and hostnames.
+  - Generate /etc/hosts with all cluster IP addresses and hostnames.
   - Add `nodeset_fold` and `nodeset_expand` Jinja2 filters.
   - Support Slurm emulation with fully virtual nodes (up to 64k).
 - docs:
@@ -50,6 +50,8 @@ and this project adheres to
   - Add manpage for `fhpc-emulate-slurm-usage`
 
 ### Changed
+- Replaced notion of zone in favor of cluster, both in CLI options and
+  configuration variables names.
 - Removed extra directory from source tree. It used to contain ansible
   machinectl connection plugin as Git submodule. This dependency is now injected
   in FireHPC as a package supplementary source in packages built by Fatbuildr.
