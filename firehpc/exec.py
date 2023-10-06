@@ -173,6 +173,26 @@ class FireHPCExec:
         )
         parser_clean.set_defaults(func=self._execute_clean)
 
+        # start command
+        parser_start = subparsers.add_parser(
+            "start", help="Start an already deployed cluster"
+        )
+        parser_start.add_argument(
+            "--cluster",
+            help="Name of the cluster to start",
+            required=True,
+        )
+        parser_start.set_defaults(func=self._execute_start)
+
+        # stop command
+        parser_stop = subparsers.add_parser("stop", help="Stop a cluster")
+        parser_stop.add_argument(
+            "--cluster",
+            help="Name of the cluster to stop",
+            required=True,
+        )
+        parser_stop.set_defaults(func=self._execute_stop)
+
         # status command
         parser_status = subparsers.add_parser("status", help="Status of cluster")
         parser_status.add_argument(
@@ -243,6 +263,14 @@ class FireHPCExec:
             tags=self.args.tags,
             emulator_mode=self.args.slurm_emulator,
         )
+
+    def _execute_start(self):
+        cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+        cluster.start()
+
+    def _execute_stop(self):
+        cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+        cluster.stop()
 
     def _execute_ssh(self):
         if "." not in self.args.args[0]:

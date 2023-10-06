@@ -230,6 +230,25 @@ class EmulatedCluster:
         storage = StorageService(self.name)
         storage.stop()
 
+    def start(self) -> None:
+        manager = ContainersManager(self.name)
+        # Search for the list of available images.
+        containers = [image.name for image in manager.images()]
+        # Look for the running container and start the other.
+        running = [container.name for container in manager.running()]
+        manager.start(
+            [
+                # The name of the cluster must be removed from container name.
+                container.rsplit(".", 1)[0]
+                for container in containers
+                if container not in running
+            ]
+        )
+
+    def stop(self) -> None:
+        manager = ContainersManager(self.name)
+        manager.stop()
+
     def status(self) -> ClusterStatus:
         containers = ContainersManager(self.name).running()
         with open(self.extravars_path) as fh:

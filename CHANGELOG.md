@@ -27,6 +27,8 @@ and this project adheres to
     compute nodes).
   - Introduce `fhpc-emulate-slurm-usage` command to emulate random usage of
     Slurm cluster.
+  - Add `start` and `stop` commands to respectively start and stop all
+    containers of an emulated cluster.
 - conf:
   - Optional support of Rackslab developement deb repositories, disabled by
     default.
