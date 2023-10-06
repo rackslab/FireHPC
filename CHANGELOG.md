@@ -49,6 +49,7 @@ and this project adheres to
   - Mention `deploy` command `--db` and `--schema` options in `firehpc(1)`
     manpage.
   - Mention `status` command `--json` option in `firehpc(1)` manpage.
+  - Mention new `start` and `stop` commands in `firehpc(1)` manpage.
   - Add manpage for `fhpc-emulate-slurm-usage`
 
 ### Changed
