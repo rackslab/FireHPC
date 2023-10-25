@@ -18,6 +18,7 @@
 - name: Create certificate signing request (CSR) for LDAP certificate
   community.crypto.openssl_csr_pipe:
     privatekey_path: "{{ ldap_local_tls_key_file }}"
+    common_name: "{{ ldap_server_hostname }}"
     subject_alt_name:
       - "DNS:{{ ldap_server_hostname }}"
   register: csr

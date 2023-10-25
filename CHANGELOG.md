@@ -78,6 +78,7 @@ and this project adheres to
     jobs scripts.
   - Manage home directories ownership and permissions, in addition to some their
     content.
+  - Add missing common name in LDAP x509 TLS/SSL certificate.
 - docs: Grammatical error and typos in `firehpc(1)` manpage
 
 ## [1.0.0] - 2023-07-20
