@@ -153,6 +153,11 @@ This command accepts the following options:
   Enable Slurm emulator mode. In this mode, FireHPC spawns only one _admin_
   container and install a specific version of Slurm compiled to support
   emulation of arbitrary large number of fakes nodes.
+
+[.cli-opt]#*--users*=#[.cli-optval]##_CLUSTER_##::
+  Instead of randomly generating a new users directory, extract users directory
+  from another existing cluster. This is useful to create the have the same user
+  accounts on several clusters.
 --
 
 [.cli-opt]#*images*#::

@@ -57,6 +57,7 @@ and this project adheres to
   - Add manpage for `fhpc-emulate-slurm-usage`
   - Mention `conf` and `deploy` commands `--slurm-emulator` option in
     `firehpc(1)` manpage.
+  - Mention `deploy` command `--users` option in `firehpc(1)` manpage.
 
 ### Changed
 - Replaced notion of zone in favor of cluster, both in CLI options and
