@@ -19,12 +19,16 @@ and this project adheres to
 - Possibility to run command with SSH paramiko library in addition to ssh binary
   executable.
 - Add example RacksDB database.
+- Add possibility to deploy users directory extracted from another existing
+  cluster to have the same user accounts on multiple clusters eventually.
 - cli:
   - Support for tags to filter deployed configuration tasks.
   - Report cluster status in JSON format with `--json` option.
   - Add `--slurm-emulator` option to deploy and configure a cluster with
     emulated Slurm cluster nodes (only one admin node with up to 64k virtual
     compute nodes).
+  - Add `--users` option on deploy command to extract users directory from
+    another existing cluster.
   - Introduce `fhpc-emulate-slurm-usage` command to emulate random usage of
     Slurm cluster.
   - Add `start` and `stop` commands to respectively start and stop all

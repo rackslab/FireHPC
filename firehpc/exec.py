@@ -109,6 +109,10 @@ class FireHPCExec:
             help="Enable Slurm emulator mode",
             action="store_true",
         )
+        parser_deploy.add_argument(
+            "--users",
+            help="Extract users directory from another emulated cluster",
+        )
         parser_deploy.set_defaults(func=self._execute_deploy)
 
         # conf command
@@ -248,9 +252,22 @@ class FireHPCExec:
             sys.exit(1)
         db = self._load_racksdb()
         cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+
+        # If user specified another cluster name to extract its users directory, load
+        # this users directory.
+        users_directory = None
+        if self.args.users:
+            logger.info("Extracting users directory from cluster %s", self.args.users)
+            users_directory = EmulatedCluster(
+                self.settings, self.args.users, self.args.state
+            ).users_directory
+
         cluster.deploy(self.args.os, images, db, self.args.slurm_emulator)
         cluster.conf(
-            db, custom=self.args.custom, emulator_mode=self.args.slurm_emulator
+            db,
+            custom=self.args.custom,
+            emulator_mode=self.args.slurm_emulator,
+            users_directory=users_directory,
         )
 
     def _execute_conf(self):

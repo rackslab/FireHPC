@@ -34,6 +34,7 @@ from .containers import (
     ContainerImage,
     StorageService,
 )
+from .errors import FireHPCRuntimeError
 
 if TYPE_CHECKING:
     from racksdb import RacksDB
@@ -74,8 +75,24 @@ class EmulatedCluster:
     def extravars_path(self) -> Path:
         return self.conf_dir / "custom.yml"
 
+    @property
+    def users_directory(self) -> UsersDirectory:
+        try:
+            with open(self.extravars_path) as fh:
+                content = yaml.safe_load(fh)
+        except FileNotFoundError:
+            raise FireHPCRuntimeError(
+                f"Unable to find cluster {self.name} extra variables file "
+                f"{self.extravars_path}"
+            )
+        return UsersDirectory.load(self.name, content["fhpc_users"])
+
     def deploy(
-        self, os: str, images: OSImagesSources, db: RacksDB, emulator_mode: bool
+        self,
+        os: str,
+        images: OSImagesSources,
+        db: RacksDB,
+        emulator_mode: bool,
     ) -> None:
 
         if not self.state.exists():
@@ -119,6 +136,7 @@ class EmulatedCluster:
         custom: Path = None,
         tags: Optional[list[str]] = None,
         emulator_mode: bool = False,
+        users_directory: Optional[UsersDirectory] = None,
     ) -> conf:
         if self.conf_dir.exists() and reinit:
             logger.debug("Removing existing configuration directory %s", self.conf_dir)
@@ -183,10 +201,15 @@ class EmulatedCluster:
         # times to make randomly generated data (eg. users) persistent over
         # successive runs.
         if not self.extravars_path.exists():
+            if users_directory is None:
+                # Generate new random users directory
+                logger.info("Generating new random users directory")
+                users_directory = UsersDirectory(10, self.name)
+
             extravars = {
                 "fhpc_cluster_state_dir": str(self.cluster_dir),
                 "fhpc_cluster": self.name,
-                "fhpc_users": UsersDirectory(10, self.name)._generic(),
+                "fhpc_users": users_directory._generic(),
             }
             with open(self.extravars_path, "w+") as fh:
                 fh.write(yaml.dump(extravars))
@@ -251,7 +274,4 @@ class EmulatedCluster:
 
     def status(self) -> ClusterStatus:
         containers = ContainersManager(self.name).running()
-        with open(self.extravars_path) as fh:
-            content = yaml.safe_load(fh)
-        users = UsersDirectory.load(self.name, content["fhpc_users"])
-        return ClusterStatus(containers, users)
+        return ClusterStatus(containers, self.users_directory)
