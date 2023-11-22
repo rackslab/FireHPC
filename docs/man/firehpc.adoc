@@ -109,6 +109,11 @@ This command accepts the following options:
 [.cli-opt]#*--with-bootstrap*#::
   Execute configuration _bootstrap_ phase, additionally to the _deployment_
   phase. By default, only the _deployment_ phase is run.
+
+[.cli-opt]#*--slurm-emulator*#[.cli-optval]::
+  Enable Slurm emulator mode. In this mode, FireHPC configures only one _admin_
+  container and with a specific version of Slurm compiled to support emulation
+  of arbitrary large number of fakes nodes.
 --
 
 [.cli-opt]#*deploy*#::
@@ -143,6 +148,11 @@ This command accepts the following options:
   Path to directory with custom Ansible variables to override default variables
   provided in FireHPC. The given path must contain a [.path]#`group_vars/`# or a
   [.path]#`host_vars/`# directory with files supported by Ansible.
+
+[.cli-opt]#*--slurm-emulator*#[.cli-optval]::
+  Enable Slurm emulator mode. In this mode, FireHPC spawns only one _admin_
+  container and install a specific version of Slurm compiled to support
+  emulation of arbitrary large number of fakes nodes.
 --
 
 [.cli-opt]#*images*#::

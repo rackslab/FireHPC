@@ -51,6 +51,8 @@ and this project adheres to
   - Mention `status` command `--json` option in `firehpc(1)` manpage.
   - Mention new `start` and `stop` commands in `firehpc(1)` manpage.
   - Add manpage for `fhpc-emulate-slurm-usage`
+  - Mention `conf` and `deploy` commands `--slurm-emulator` option in
+    `firehpc(1)` manpage.
 
 ### Changed
 - Replaced notion of zone in favor of cluster, both in CLI options and
