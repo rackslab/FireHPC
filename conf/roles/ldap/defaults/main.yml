@@ -5,6 +5,7 @@ ldap_user_password: secret
 ldap_email_domain: cluster.local  # dummy
 ldap_users: []  # dummy
 ldap_users_group: users  # dummy
+ldap_secondary_groups: {}  # dummy
 ldap_local_admin_password_file:  ldap.password  # dummy
 # The lookup errors are ignored because the variable is loaded by boostrap
 # tasks file (in bootstrap playbook) before it generates the file. This way, a

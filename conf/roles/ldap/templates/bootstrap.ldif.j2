@@ -22,6 +22,18 @@ gidNumber: {{ ldap_first_gid }}
 objectClass: top
 objectClass: posixGroup
 
+{% for group in ldap_secondary_groups %}
+dn: cn={{ group.name }},ou=groups,{{ ldap_base }}
+cn: {{ group.name }}
+gidNumber: {{ ldap_first_gid + loop.index }}
+objectClass: top
+objectClass: posixGroup
+{% for user in group.users %}
+memberUid: {{ user}}
+{% endfor %}
+
+{% endfor %}
+
 {% for user in ldap_users %}
 dn: uid={{ user.login }},ou=people,{{ ldap_base }}
 objectClass: person
