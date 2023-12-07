@@ -6,16 +6,19 @@ Rackslab: https://rackslab.io
 
 == Name
 
-fhpc-emulate-slurm-usage - Emulate real usage of Slurm on FireHPC cluster
+fhpc-emulate-slurm-usage - Emulate real usage of Slurm on FireHPC clusters
 
 == Synopsis
 
-[.cli-opt]#*fhpc-emulate-slurm-usage*# `[_GENERAL OPTIONS_] CLUSTER`
+[.cli-opt]#*fhpc-emulate-slurm-usage*# `[_GENERAL OPTIONS_] CLUSTER [CLUSTER …]`
 
 == Description
 
 This utility emulates real cluster usage by submitting random Slurm jobs with
-all users accounts on FireHPC emulated cluster.
+all users accounts on FireHPC emulated clusters.
+
+Multiple cluster names can be provided in arguments, `fhpc-emulate-slurm-usage`
+launches jobs on clusters in parallel.
 
 == General Options
 
