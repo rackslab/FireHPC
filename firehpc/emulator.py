@@ -26,6 +26,7 @@ import sys
 import json
 import random
 import time
+import threading
 
 from .version import get_version
 from .settings import RuntimeSettings
@@ -39,6 +40,98 @@ if TYPE_CHECKING:
     from .users import UserEntry
 
 logger = logging.getLogger(__name__)
+
+
+class ClusterJobsLoader:
+    def __init__(self, cluster: EmulatedCluster):
+        self.cluster = cluster
+        self.ssh = SSHClient(self.cluster, asbin=False)
+        self.stop = False
+
+    def run(self) -> None:
+        logger.info("cluster %s: started running jobs loader", self.cluster.name)
+        status = self.cluster.status()
+
+        nodes = self._get_nodes()
+        logger.info("Found nodes: %s", nodes)
+        partitions = self._get_partitions()
+        logger.info("Found partitions: %s", partitions)
+        qos = self._get_qos()
+        logger.info("Found QOS: %s", qos)
+
+        while not self.stop:
+            pending_jobs = self._get_pending_jobs()
+            if len(pending_jobs) >= len(nodes) * 10:
+                logger.debug(
+                    "cluster %s: Waiting for pending jobs to run…", self.cluster.name
+                )
+                time.sleep(5)
+            else:
+                nb_submit = len(nodes) * 10 - len(pending_jobs)
+                logger.info(
+                    "cluster %s: %s new jobs to submit", self.cluster.name, nb_submit
+                )
+                while nb_submit:
+                    user = random.choice(status.users.db)
+                    self._launch_job(user, qos[0], partitions[0])
+                    nb_submit -= 1
+
+        logger.info("cluster %s: jobs loader is stopping", self.cluster.name)
+
+    def _get_nodes(self) -> list[str]:
+        stdout, stderr = self.ssh.exec(
+            [f"admin.{self.cluster.name}", "scontrol", "show", "nodes", "--json"]
+        )
+        return [node["name"] for node in json.loads(stdout)["nodes"]]
+
+    def _get_partitions(self) -> list[str]:
+        stdout, stderr = self.ssh.exec(
+            [f"admin.{self.cluster.name}", "scontrol", "show", "partitions", "--json"]
+        )
+        return [partition["name"] for partition in json.loads(stdout)["partitions"]]
+
+    def _get_qos(self) -> list[str]:
+        stdout, stderr = self.ssh.exec(
+            [f"admin.{self.cluster.name}", "sacctmgr", "show", "qos", "--json"]
+        )
+        return [qos["name"] for qos in json.loads(stdout)["QOS"]]
+
+    def _get_pending_jobs(self):
+        stdout, stderr = self.ssh.exec(
+            [f"admin.{self.cluster.name}", "squeue", "--state", "pending", "--json"]
+        )
+        return [
+            job["job_id"]
+            for job in json.loads(stdout)["jobs"]
+            if job["job_state"] == "PENDING"
+        ]
+
+    def _launch_job(self, user: UserEntry, qos: str, partition: str) -> None:
+        logger.info(
+            "cluster %s: submitting job for user %s on partition %s with QOS %s",
+            self.cluster.name,
+            user.login,
+            qos,
+            partition,
+        )
+        # If there is only one container, consider the cluster is using emulator mode
+        # and submit job on admin node. Otherwise, submit job on login node.
+        if len(self.cluster.status().containers) == 1:
+            dest = "admin"
+        else:
+            dest = "login"
+        self.ssh.exec(
+            [
+                f"{user.login}@{dest}.{self.cluster.name}",
+                "sbatch",
+                "-q",
+                qos,
+                "-p",
+                partition,
+                "--wrap",
+                "/usr/bin/sleep 360",
+            ]
+        )
 
 
 class FireHPCUsageEmulator:
@@ -73,24 +166,39 @@ class FireHPCUsageEmulator:
             default=default_state_dir(),
         )
         parser.add_argument(
-            "cluster",
+            "clusters",
+            metavar="cluster",
             help="Cluster to run usage emulation.",
+            nargs="+",
         )
 
         self.args = parser.parse_args()
         self._setup_logger()
-        self.settings = RuntimeSettings()
+        settings = RuntimeSettings()
+        loaders = []
+        threads = []
         try:
-            self.cluster = EmulatedCluster(
-                self.settings, self.args.cluster, self.args.state
-            )
-            self.ssh = SSHClient(self.cluster, asbin=False)
-            self._run_emulation()
+            for _cluster in self.args.clusters:
+                loader = ClusterJobsLoader(
+                    EmulatedCluster(settings, _cluster, self.args.state)
+                )
+                thread = threading.Thread(target=loader.run)
+                loaders.append(loader)
+                threads.append(thread)
+                thread.start()
+            # wait for any thread
+            threads[0].join()
         except FireHPCRuntimeError as e:
             logger.critical(str(e))
             sys.exit(1)
         except KeyboardInterrupt:
-            logger.info("Stopping emulation")
+            logger.info("Received keyboard interrupt, setting loader stop flag.")
+            for loader in loaders:
+                loader.stop = True
+            logger.info("Waiting for loader threads to stop…")
+            for thread in threads:
+                thread.join()
+            logger.info("Cluster jobs loader is stopped.")
 
     def _setup_logger(self) -> None:
         if self.args.debug:
@@ -108,74 +216,3 @@ class FireHPCUsageEmulator:
             lib_filter = logging.Filter("firehpc")  # filter out all libs logs
             handler.addFilter(lib_filter)
         root_logger.addHandler(handler)
-
-    def _run_emulation(self) -> None:
-        status = self.cluster.status()
-
-        nodes = self._get_nodes()
-        logger.info("Found nodes: %s", nodes)
-        partitions = self._get_partitions()
-        logger.info("Found partitions: %s", partitions)
-        qos = self._get_qos()
-        logger.info("Found QOS: %s", qos)
-
-        while True:
-            pending_jobs = self._get_pending_jobs()
-            if len(pending_jobs) >= len(nodes) * 10:
-                logger.debug("Waiting for pending jobs to run…")
-                time.sleep(5)
-            else:
-                nb_submit = len(nodes) * 10 - len(pending_jobs)
-                logger.info("%s new jobs to submit", nb_submit)
-                while nb_submit:
-                    user = random.choice(status.users.db)
-                    self._launch_job(user, qos[0], partitions[0])
-                    nb_submit -= 1
-
-    def _get_nodes(self) -> list[str]:
-        stdout, stderr = self.ssh.exec(
-            [f"admin.{self.args.cluster}", "scontrol", "show", "nodes", "--json"]
-        )
-        return [node["name"] for node in json.loads(stdout)["nodes"]]
-
-    def _get_partitions(self) -> list[str]:
-        stdout, stderr = self.ssh.exec(
-            [f"admin.{self.args.cluster}", "scontrol", "show", "partitions", "--json"]
-        )
-        return [partition["name"] for partition in json.loads(stdout)["partitions"]]
-
-    def _get_qos(self) -> list[str]:
-        stdout, stderr = self.ssh.exec(
-            [f"admin.{self.args.cluster}", "sacctmgr", "show", "qos", "--json"]
-        )
-        return [qos["name"] for qos in json.loads(stdout)["QOS"]]
-
-    def _get_pending_jobs(self):
-        stdout, stderr = self.ssh.exec(
-            [f"admin.{self.args.cluster}", "squeue", "--state", "pending", "--json"]
-        )
-        return [
-            job["job_id"]
-            for job in json.loads(stdout)["jobs"]
-            if job["job_state"] == "PENDING"
-        ]
-
-    def _launch_job(self, user: UserEntry, qos: str, partition: str) -> None:
-        logger.info(
-            "Submitting job for user %s on partition %s with QOS %s",
-            user.login,
-            qos,
-            partition,
-        )
-        self.ssh.exec(
-            [
-                f"{user.login}@login.{self.args.cluster}",
-                "sbatch",
-                "-q",
-                qos,
-                "-p",
-                partition,
-                "--wrap",
-                "/usr/bin/sleep 360",
-            ]
-        )
