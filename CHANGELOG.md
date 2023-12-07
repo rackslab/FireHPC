@@ -48,6 +48,7 @@ and this project adheres to
   - Add `nodeset_fold` and `nodeset_expand` Jinja2 filters.
   - Support Slurm emulation with fully virtual nodes (up to 64k).
   - Support optional secondary groups in LDAP directory.
+  - Add possibility to deploy Redis server on admin host.
 - docs:
   - Mention `conf` command `--db`, `--schema` and `--tags` options in
     `firehpc(1)` manpage.

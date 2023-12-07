@@ -22,6 +22,11 @@
       - "'admin' in group_names"
       - slurmweb_enabled
       tags: [ slurmweb ]
+    - role: redis
+      when:
+      - "'admin' in group_names"
+      - redis_enabled
+      tags: [ redis ]
     - role: mpi
       when: mpi_nodes
       tags: [ mpi ]

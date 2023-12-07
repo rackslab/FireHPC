@@ -1,0 +1,6 @@
+---
+redis_enable: false
+redis_packages:
+- redis-server
+redis_local_password_file: redis.password  # dummy
+redis_password: "{{ lookup('file', '{{ redis_local_password_file }}', errors='ignore') }}"

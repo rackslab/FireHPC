@@ -1,0 +1,12 @@
+---
+- name: Create local Redis directory
+  ansible.builtin.file:
+    path: "{{ redis_local_password_file | dirname }}"
+    state: directory
+    recurse: true
+
+- name: Generate Redis password file
+  ansible.builtin.copy:
+    content: "{{ lookup('community.general.random_string', length=16, special=false) }}" # avoid special character
+    dest: "{{ redis_local_password_file }}"
+    force: no  # do not overwrite the password if it has already been generated

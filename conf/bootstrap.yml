@@ -16,6 +16,10 @@
     include_role:
       name: ldap
       tasks_from: bootstrap
+  - name: Generate Redis password
+    include_role:
+      name: redis
+      tasks_from: bootstrap
 
 - hosts: all
   connection: machinectl

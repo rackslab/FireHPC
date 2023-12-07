@@ -1,0 +1,21 @@
+---
+- name: Install redis packages
+  ansible.builtin.package:
+    name: "{{ redis_packages }}"
+    state: latest
+
+- name: Comment restricted bind line
+  ansible.builtin.lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: 'bind 127.0.0.1 -::1'
+    line: '# bind 127.0.0.1 -::1'
+  notify:
+  - Restart redis server
+
+- name: Add requirepass
+  ansible.builtin.lineinfile:
+    path: /etc/redis/redis.conf
+    regexp: 'requirepass \+$'
+    line: "requirepass {{ redis_password }}"
+  notify:
+  - Restart redis server
