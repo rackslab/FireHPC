@@ -21,6 +21,9 @@ and this project adheres to
 - Add example RacksDB database.
 - Add possibility to deploy users directory extracted from another existing
   cluster to have the same user accounts on multiple clusters eventually.
+- Generate and manage groups tree internally. Groups definitions are exported to
+  ansible with `fhpc_groups` extra variable and can be dumped with
+  `firehpc status` command.
 - cli:
   - Support for tags to filter deployed configuration tasks.
   - Report cluster status in JSON format with `--json` option.

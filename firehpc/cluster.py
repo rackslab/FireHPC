@@ -48,12 +48,13 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ClusterStatus:
     containers: list[Container]
-    users: UsersDirectory
+    directory: UsersDirectory
 
     def _generic(self):
         return {
             "containers": [container.name for container in self.containers],
-            "users": self.users._generic(),
+            "users": self.directory._users_generic(),
+            "groups": self.directory._groups_generic(),
         }
 
 
@@ -85,7 +86,9 @@ class EmulatedCluster:
                 f"Unable to find cluster {self.name} extra variables file "
                 f"{self.extravars_path}"
             )
-        return UsersDirectory.load(self.name, content["fhpc_users"])
+        return UsersDirectory.load(
+            self.name, content["fhpc_users"], content["fhpc_groups"]
+        )
 
     def deploy(
         self,
@@ -209,7 +212,8 @@ class EmulatedCluster:
             extravars = {
                 "fhpc_cluster_state_dir": str(self.cluster_dir),
                 "fhpc_cluster": self.name,
-                "fhpc_users": users_directory._generic(),
+                "fhpc_users": users_directory._users_generic(),
+                "fhpc_groups": users_directory._groups_generic(),
             }
             with open(self.extravars_path, "w+") as fh:
                 fh.write(yaml.dump(extravars))

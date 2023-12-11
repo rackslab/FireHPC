@@ -24,13 +24,22 @@ from ..cluster import ClusterStatus
 from ..errors import FireHPCRuntimeError
 
 if TYPE_CHECKING:
-    from ..users import UserEntry
+    from ..users import UserEntry, GroupEntry
 
 
 class UserEntryConsoleDumper:
     @staticmethod
     def dump(obj: UserEntry) -> str:
         return f"{obj.login:15s} ({obj.firstname} {obj.lastname})"
+
+
+class GroupEntryConsoleDumper:
+    @staticmethod
+    def dump(obj: GroupEntry) -> str:
+        return (
+            f"{obj.name:15s}: [parent: {obj.parent}]\n"
+            f"    members: {', '.join([member.login for member in obj.members])}"
+        )
 
 
 class ClusterStatusConsoleDumper:
@@ -41,8 +50,11 @@ class ClusterStatusConsoleDumper:
         for container in obj.containers:
             result += f"  {container.name} is running\n"
         result += "users:\n"
-        for user in obj.users:
+        for user in obj.directory:
             result += f"  {UserEntryConsoleDumper.dump(user)}\n"
+        result += "groups:\n"
+        for group in obj.directory.groups:
+            result += f"  {GroupEntryConsoleDumper.dump(group)}\n"
         return result
 
 
