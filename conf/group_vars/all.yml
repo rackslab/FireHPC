@@ -3,7 +3,7 @@ fhpc_local_ssh_dir: "{{ fhpc_cluster_state_dir }}/ssh"
 fhpc_local_ca_dir: "{{ fhpc_cluster_state_dir }}/ca"
 fhpc_ldap_server: "{{ groups['admin'][0] }}"
 fhpc_ldap_base: "dc=cluster,dc={{ fhpc_cluster }}"
-fhpc_users_group: scientists
+fhpc_primary_group: "{{ fhpc_groups[0].name }}"
 fhpc_slurmrestd_socket: /run/slurmrestd/slurmrestd.socket
 
 # roles variables
@@ -17,12 +17,12 @@ ldap_base: "dc=cluster,dc={{ fhpc_cluster }}"
 ldap_domain: "cluster.{{ fhpc_cluster }}"
 ldap_email_domain: "cluster.{{ fhpc_cluster }}"
 ldap_users: "{{ fhpc_users }}"
-ldap_users_group: "{{ fhpc_users_group }}"
+ldap_groups: "{{ fhpc_groups }}"
 sssd_ldap_base: "{{ fhpc_ldap_base }}"
 sssd_ldap_server: "{{ fhpc_ldap_server }}"
 users_ssh_host_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_defs: "{{ fhpc_users }}"
-users_group: "{{ fhpc_users_group }}"
+users_group: "{{ fhpc_primary_group }}"
 slurm_emulator: "{{ fhpc_emulator_mode }}"
 slurm_server: "{{ groups['admin'][0] }}"
 # This hash associates slurm profiles in keys with a group of nodes on which the
@@ -36,10 +36,7 @@ slurm_local_mariadb_password_file: "{{ fhpc_cluster_state_dir }}/mariadb/mariadb
 slurm_local_jwt_key_file: "{{ fhpc_cluster_state_dir }}/slurm/jwt_hs256.key"
 slurm_users: "{{ fhpc_users | map(attribute='login') | list }}"
 slurm_restd_socket: "{{ fhpc_slurmrestd_socket }}"
-slurm_accounts:
-- name: "{{ fhpc_users_group }}"
-  parent: root
-  users: "{{ fhpc_users | map(attribute='login') | list }}"
+slurm_accounts: "{{ fhpc_groups }}"
 slurm_compute_nodes: "{{ fhpc_nodes['compute'] }}"
 slurmweb_slurmrestd_socket: "{{ fhpc_slurmrestd_socket }}"
 slurmweb_settings_defaults:

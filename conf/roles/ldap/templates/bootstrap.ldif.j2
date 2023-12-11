@@ -16,24 +16,19 @@ dn: ou=groups,{{ ldap_base }}
 ou: groups
 objectClass: organizationalUnit
 
-dn: cn={{ ldap_users_group }},ou=groups,{{ ldap_base }}
-cn: {{ ldap_users_group }}
-gidNumber: {{ ldap_first_gid }}
-objectClass: top
-objectClass: posixGroup
-
-{% for group in ldap_secondary_groups %}
+{% for group in ldap_groups %}
 dn: cn={{ group.name }},ou=groups,{{ ldap_base }}
 cn: {{ group.name }}
-gidNumber: {{ ldap_first_gid + loop.index }}
+gidNumber: {{ ldap_first_gid + loop.index0 }}
 objectClass: top
 objectClass: posixGroup
-{% for user in group.users %}
-memberUid: {{ user}}
+{% if loop.index0 != 0 %}
+{% for member in group.members %}
+memberUid: {{ member }}
 {% endfor %}
+{% endif %}
 
 {% endfor %}
-
 {% for user in ldap_users %}
 dn: uid={{ user.login }},ou=people,{{ ldap_base }}
 objectClass: person

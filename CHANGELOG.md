@@ -36,6 +36,8 @@ and this project adheres to
     Slurm cluster.
   - Add `start` and `stop` commands to respectively start and stop all
     containers of an emulated cluster.
+  - Use `fhpc_groups` for default `slurm_accounts` variable value and to define
+    LDAP groups.
 - conf:
   - Optional support of Rackslab developement deb repositories, disabled by
     default.

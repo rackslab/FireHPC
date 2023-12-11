@@ -102,6 +102,6 @@
 
 - name: Create users in slurmdbd
   ansible.builtin.command:
-    cmd: "sacctmgr --immediate create user name={{ item }} cluster={{ slurm_cluster }} account={{ slurm_accounts | selectattr('users', 'search', item) | map(attribute='name') | first }}"
+    cmd: "sacctmgr --immediate create user name={{ item }} cluster={{ slurm_cluster }} account={{ slurm_accounts | selectattr('members', 'search', item) | map(attribute='name') | last }}"
   when: item not in slurmdbd_users.stdout_lines
   loop: "{{ slurm_users }}"
