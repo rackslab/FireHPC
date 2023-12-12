@@ -72,7 +72,7 @@ class ClusterJobsLoader:
                     "cluster %s: %s new jobs to submit", self.cluster.name, nb_submit
                 )
                 while nb_submit:
-                    user = random.choice(status.users.db)
+                    user = random.choice(status.directory.users)
                     self._launch_job(user, qos[0], partitions[0])
                     nb_submit -= 1
 
