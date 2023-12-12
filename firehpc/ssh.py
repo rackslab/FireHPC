@@ -66,27 +66,32 @@ class SSHClient:
             logger.debug("Running SSH command: %s", shlex.join(cmd))
             run(cmd)
         else:
-            if args[0] not in self.clients:
-                client = paramiko.SSHClient()
-                logger.debug("Loading SSH hosts keys from %s", self.known_hosts)
-                client.load_host_keys(self.known_hosts)
-                logger.debug("Connecting client to %s@%s", username, hostname)
-                client.connect(
-                    hostname,
-                    username=username,
-                    key_filename=self.private_key,
-                )
-                self.clients[args[0]] = client
-            else:
-                client = self.clients.get(args[0])
+            try:
+                if args[0] not in self.clients:
+                    client = paramiko.SSHClient()
+                    logger.debug("Loading SSH hosts keys from %s", self.known_hosts)
+                    client.load_host_keys(self.known_hosts)
+                    logger.debug("Connecting client to %s@%s", username, hostname)
+                    client.connect(
+                        hostname,
+                        username=username,
+                        key_filename=self.private_key,
+                    )
+                    self.clients[args[0]] = client
+                else:
+                    client = self.clients.get(args[0])
 
-            if len(args) < 2:
+                if len(args) < 2:
+                    raise FireHPCRuntimeError(
+                        "Command to execute must be provided in SSHClient.exec in "
+                        "library mode"
+                    )
+
+                cmd = shlex.join(args[1:])
+                logger.debug("Running SSH command with library: %s", cmd)
+                stdin, stdout, stderr = client.exec_command(cmd)
+                return stdout.read(), stderr.read()
+            except paramiko.ssh_exception.SSHException as err:
                 raise FireHPCRuntimeError(
-                    "Command to execute must be provided in SSHClient.exec in library "
-                    "mode"
-                )
-
-            cmd = shlex.join(args[1:])
-            logger.debug("Running SSH command with library: %s", cmd)
-            stdin, stdout, stderr = client.exec_command(cmd)
-            return stdout.read(), stderr.read()
+                    f"SSH error while running command '{cmd}': {str(err)}"
+                ) from err
