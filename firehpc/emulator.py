@@ -52,59 +52,90 @@ class ClusterJobsLoader:
         logger.info("cluster %s: started running jobs loader", self.cluster.name)
         status = self.cluster.status()
 
-        nodes = self._get_nodes()
-        logger.info("Found nodes: %s", nodes)
-        partitions = self._get_partitions()
-        logger.info("Found partitions: %s", partitions)
-        qos = self._get_qos()
-        logger.info("Found QOS: %s", qos)
+        try:
+            nodes = self._get_nodes()
+            logger.info("Found nodes: %s", nodes)
+            partitions = self._get_partitions()
+            logger.info("Found partitions: %s", partitions)
+            qos = self._get_qos()
+            logger.info("Found QOS: %s", qos)
 
-        while not self.stop:
-            pending_jobs = self._get_pending_jobs()
-            if len(pending_jobs) >= len(nodes) * 10:
-                logger.debug(
-                    "cluster %s: Waiting for pending jobs to run…", self.cluster.name
-                )
-                time.sleep(5)
-            else:
-                nb_submit = len(nodes) * 10 - len(pending_jobs)
-                logger.info(
-                    "cluster %s: %s new jobs to submit", self.cluster.name, nb_submit
-                )
-                while nb_submit:
-                    user = random.choice(status.directory.users)
-                    self._launch_job(user, qos[0], partitions[0])
-                    nb_submit -= 1
-
+            while not self.stop:
+                pending_jobs = self._get_pending_jobs()
+                if len(pending_jobs) >= len(nodes) * 10:
+                    logger.debug(
+                        "cluster %s: Waiting for pending jobs to run…",
+                        self.cluster.name,
+                    )
+                    time.sleep(5)
+                else:
+                    nb_submit = len(nodes) * 10 - len(pending_jobs)
+                    logger.info(
+                        "cluster %s: %s new jobs to submit",
+                        self.cluster.name,
+                        nb_submit,
+                    )
+                    while nb_submit:
+                        user = random.choice(status.directory.users)
+                        self._launch_job(user, qos[0], partitions[0])
+                        nb_submit -= 1
+        except FireHPCRuntimeError as err:
+            logger.critical(
+                "cluster %s: emulator thread failed with error: %s",
+                self.cluster.name,
+                str(err),
+            )
         logger.info("cluster %s: jobs loader is stopping", self.cluster.name)
 
     def _get_nodes(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
             [f"admin.{self.cluster.name}", "scontrol", "show", "nodes", "--json"]
         )
-        return [node["name"] for node in json.loads(stdout)["nodes"]]
+        try:
+            return [node["name"] for node in json.loads(stdout)["nodes"]]
+        except json.decoder.JSONDecodeError as err:
+            raise FireHPCRuntimeError(
+                f"Unable to retrieve nodes from cluster {self.cluster.name}: {str(err)}"
+            ) from err
 
     def _get_partitions(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
             [f"admin.{self.cluster.name}", "scontrol", "show", "partitions", "--json"]
         )
-        return [partition["name"] for partition in json.loads(stdout)["partitions"]]
+        try:
+            return [partition["name"] for partition in json.loads(stdout)["partitions"]]
+        except json.decoder.JSONDecodeError as err:
+            raise FireHPCRuntimeError(
+                f"Unable to retrieve partitions from cluster {self.cluster.name}: "
+                f"{str(err)}"
+            ) from err
 
     def _get_qos(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
             [f"admin.{self.cluster.name}", "sacctmgr", "show", "qos", "--json"]
         )
-        return [qos["name"] for qos in json.loads(stdout)["QOS"]]
+        try:
+            return [qos["name"] for qos in json.loads(stdout)["QOS"]]
+        except json.decoder.JSONDecodeError as err:
+            raise FireHPCRuntimeError(
+                f"Unable to retrieve qos from cluster {self.cluster.name}: {str(err)}"
+            ) from err
 
     def _get_pending_jobs(self):
         stdout, stderr = self.ssh.exec(
             [f"admin.{self.cluster.name}", "squeue", "--state", "pending", "--json"]
         )
-        return [
-            job["job_id"]
-            for job in json.loads(stdout)["jobs"]
-            if job["job_state"] == "PENDING"
-        ]
+        try:
+            return [
+                job["job_id"]
+                for job in json.loads(stdout)["jobs"]
+                if job["job_state"] == "PENDING"
+            ]
+        except json.decoder.JSONDecodeError as err:
+            raise FireHPCRuntimeError(
+                f"Unable to retrieve pending jobs from cluster {self.cluster.name}: "
+                f"{str(err)}"
+            ) from err
 
     def _launch_job(self, user: UserEntry, qos: str, partition: str) -> None:
         logger.info(
