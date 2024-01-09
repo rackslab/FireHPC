@@ -84,7 +84,7 @@ class UsersDirectory:
         ]
         if size > 4:
             self.groups = [
-                GroupEntry("users", self.users),
+                GroupEntry("scientists", self.users),
                 GroupEntry("admin", self.users[0:1]),
                 GroupEntry("biology", self.users[1 : int(size / 2)]),
                 GroupEntry("physic", self.users[int(size / 2) : size]),
