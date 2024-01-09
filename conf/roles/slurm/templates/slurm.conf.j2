@@ -10,6 +10,10 @@ AccountingStorageEnforce=qos,limits,associations  # default: none
 AuthAltTypes=auth/jwt
 AuthAltParameters=jwt_key={{ slurm_jwt_key_path }}
 {% endif %}
+{% if slurm_emulator %}
+{# Avoid cgroup on frontend node in emulator that would generate too many files/dirs in virtual FS #}
+ProctrackType=proctrack/linuxproc
+{% endif %}
 {% for key, value in slurm_params.items() %}
 {{ key }}={{ value }}
 {% endfor %}
