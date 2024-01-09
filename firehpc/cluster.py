@@ -258,6 +258,10 @@ class EmulatedCluster:
         storage.stop()
 
     def start(self) -> None:
+        logger.info("Starting cluster storage service %s", self.name)
+        storage = StorageService(self.name)
+        storage.start()
+
         manager = ContainersManager(self.name)
         # Search for the list of available images.
         containers = [image.name for image in manager.images()]
