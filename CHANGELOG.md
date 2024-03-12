@@ -92,6 +92,7 @@ and this project adheres to
   file instead of hard-coded argparse choices.
 - Storage service stop and removal.
 - Start storage service with container when cluster is started.
+- Retry SSH connections up to 3 times in case of failure.
 - conf:
   - Open slurmd spool directory permissions to all users for running batch
     jobs scripts.
