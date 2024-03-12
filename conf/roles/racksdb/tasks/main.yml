@@ -1,0 +1,14 @@
+---
+- name: Ensure RacksDB packages are installed
+  ansible.builtin.package:
+    name: "{{ racksdb_packages }}"
+    state: latest
+
+- name: Deploy RacksDB database
+  ansible.builtin.copy:
+    src: "{{ racksdb_database }}/"
+    dest: /var/lib/racksdb
+    owner: root
+    group: root
+    mode: 0644
+    directory_mode: 0755

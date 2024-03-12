@@ -42,8 +42,9 @@ and this project adheres to
 - conf:
   - Optional support of Rackslab developement deb repositories, disabled by
     default.
-  - slurmweb role to install and setup Slurmweb, optional and disabled by
-    default.
+  - Introduce _racksdb_ role to install RacksDB and deploy database content.
+  - Introduce _slurmweb_ role to install and setup Slurmweb, optional and
+    disabled by default.
   - Support multiple Slurm accounts definitions with hierarchy and control of
     users membership.
   - Add tags on all roles.

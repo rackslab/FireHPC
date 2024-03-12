@@ -17,6 +17,8 @@
       tags: [ users ]
     - role: slurm
       tags: [ slurm ]
+    - role: racksdb
+      tags: [ racksdb ]
     - role: slurmweb
       when:
       - "'admin' in group_names"

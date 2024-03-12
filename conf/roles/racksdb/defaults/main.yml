@@ -1,0 +1,4 @@
+racksdb_packages:
+- racksdb
+- racksdb-web
+racksdb_database: racksdb.yml  # dummy
