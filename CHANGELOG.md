@@ -37,8 +37,6 @@ and this project adheres to
     Slurm cluster.
   - Add `start` and `stop` commands to respectively start and stop all
     containers of an emulated cluster.
-  - Use `fhpc_groups` for default `slurm_accounts` variable value and to define
-    LDAP groups.
 - conf:
   - Optional support of Rackslab developement deb repositories, disabled by
     default.
@@ -56,6 +54,10 @@ and this project adheres to
   - Support Slurm emulation with fully virtual nodes (up to 64k).
   - Support optional secondary groups in LDAP directory.
   - Add possibility to deploy Redis server on admin host.
+  - Use `fhpc_groups` for default `slurm_accounts` variable value and to define
+    LDAP groups.
+  - Use `fhpc_db` for default `racksdb_database` variable value and to define
+    RacksDB database content.
 - docs:
   - Mention `conf` command `--db`, `--schema` and `--tags` options in
     `firehpc(1)` manpage.
