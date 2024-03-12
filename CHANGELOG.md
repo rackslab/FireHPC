@@ -11,11 +11,12 @@ and this project adheres to
 - Integration with [RacksDB](https://github.com/rackslab/RacksDB) to extract
   emulated cluster topology (#1).
 - Support for debian12 (Debian bookworm) in OS images sources YAML file.
-- Introduce `fhpc_addresses`, `fhpc_nodes`, `fhpc_emulator_mode` extra
-  variables. The first is a hash with containers as keys and the list of IP
-  addresses as values. The second is also a hash with node tags as keys and the
-  list of nodes assigned with the tag in values. The third is a boolean set to
-  true when `--slurm-emulator` option is set on `firehpc` command line.
+- Introduce `fhpc_addresses`, `fhpc_nodes`, `fhpc_emulator_mode` and `fhpc_db`
+  extra variables. The first is a hash with containers as keys and the list of
+  IP addresses as values. The second is also a hash with node tags as keys and
+  the list of nodes assigned with the tag in values. The third is a boolean set
+  to true when `--slurm-emulator` option is set on `firehpc` command line. The
+  fourth is the local absolute path to RacksDB database.
 - Possibility to run command with SSH paramiko library in addition to ssh binary
   executable.
 - Add example RacksDB database.

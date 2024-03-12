@@ -234,8 +234,9 @@ class EmulatedCluster:
                 cmdline=cmdline,
                 extravars={
                     "fhpc_addresses": containers_addresses,
-                    "fhpc_nodes": nodes,
+                    "fhpc_db": str(Path.cwd() / db._loader.path),
                     "fhpc_emulator_mode": emulator_mode,
+                    "fhpc_nodes": nodes,
                 },
             )
 
