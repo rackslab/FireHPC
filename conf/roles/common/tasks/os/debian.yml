@@ -38,3 +38,8 @@
         filename: devs
 
   when: common_with_devs_repos
+
+# Ensure APT repositories metadata is updated
+- name: Update apt repository metadata
+  ansible.builtin.apt:
+    update_cache: yes

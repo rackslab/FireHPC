@@ -95,6 +95,7 @@ and this project adheres to
     content.
   - Add missing common name in LDAP x509 TLS/SSL certificate.
   - Do not use cgroups with Slurm in emulator mode.
+  - Force update of APT repositories metadata.
 - docs: Grammatical error and typos in `firehpc(1)` manpage
 
 ## [1.0.0] - 2023-07-20
