@@ -18,7 +18,6 @@
 # along with FireHPC.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Union
 import logging
 import shlex
@@ -33,10 +32,7 @@ from .errors import FireHPCRuntimeError
 logger = logging.getLogger(__name__)
 
 
-@dataclass
 class SSHClient:
-    cluster: EmulatedCluster
-    asbin: bool = True
 
     def __init__(self, cluster: EmulatedCluster, asbin: bool = True):
         self.cluster = cluster
