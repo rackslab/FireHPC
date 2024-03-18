@@ -96,6 +96,7 @@ and this project adheres to
 - Wait some time before starting the second container to finish container
   private network setup and avoid the following container from erasing
   everything before completion.
+- Handle RacksDB format and schema errors with correct error message.
 - conf:
   - Open slurmd spool directory permissions to all users for running batch
     jobs scripts.

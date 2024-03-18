@@ -23,6 +23,7 @@ import sys
 from pathlib import Path
 
 from racksdb import RacksDB
+from racksdb.errors import RacksDBFormatError, RacksDBSchemaError
 
 from .version import get_version
 from .settings import RuntimeSettings
@@ -242,7 +243,11 @@ class FireHPCExec:
         root_logger.addHandler(handler)
 
     def _load_racksdb(self):
-        return RacksDB.load(db=self.args.db, schema=self.args.schema)
+        try:
+            return RacksDB.load(db=self.args.db, schema=self.args.schema)
+        except (RacksDBSchemaError, RacksDBFormatError) as err:
+            logger.critical("Unable to load RacksDB database: %s", err)
+            sys.exit(1)
 
     def _execute_deploy(self):
         images = OSImagesSources(self.settings)
