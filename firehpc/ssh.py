@@ -33,7 +33,6 @@ logger = logging.getLogger(__name__)
 
 
 class SSHClient:
-
     def __init__(self, cluster: EmulatedCluster, asbin: bool = True):
         self.cluster = cluster
         self.asbin = asbin
@@ -64,7 +63,7 @@ class SSHClient:
         else:
             retries = 0
             max_retries = 3
-            while(retries < max_retries):
+            while retries < max_retries:
                 try:
                     if args[0] not in self.clients:
                         client = paramiko.SSHClient()
