@@ -38,8 +38,8 @@ and this project adheres to
   - Add `start` and `stop` commands to respectively start and stop all
     containers of an emulated cluster.
 - conf:
-  - Optional support of Rackslab developement deb repositories, disabled by
-    default.
+  - Optional support of Rackslab developement Deb and RPM repositories, disabled
+    by default.
   - Introduce _racksdb_ role to install RacksDB and deploy database content.
   - Introduce _slurmweb_ role to install and setup Slurmweb, optional and
     disabled by default.
