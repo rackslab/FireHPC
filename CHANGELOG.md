@@ -93,6 +93,9 @@ and this project adheres to
 - Storage service stop and removal.
 - Start storage service with container when cluster is started.
 - Retry SSH connections up to 3 times in case of failure.
+- Wait some time before starting the second container to finish container
+  private network setup and avoid the following container from erasing
+  everything before completion.
 - conf:
   - Open slurmd spool directory permissions to all users for running batch
     jobs scripts.

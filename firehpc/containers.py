@@ -173,9 +173,17 @@ class ClusterStateModifier(DBusObject):
         logger.debug("Starting waiter thread")
         waiter = threading.Thread(target=self._waiter)
         waiter.start()
+        wait_first = True
         for container in containers:
             logger.info("Starting container %s.%s", container, self.cluster)
             Container.start(self.cluster, container)
+            # Wait some time before starting the second container to let systemd-nspawn
+            # and systemd-networkd setup cluster private network properly and avoid
+            # the following container from erasing everything before completion.
+            if wait_first and len(containers) > 1:
+                logger.debug("Waiting for network to setup for first container")
+                time.sleep(3)
+                wait_first = False
         logger.info("Waiting for containers to start…")
         self.terminated_start.wait()
         logger.info("All containers are successfully started")
