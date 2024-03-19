@@ -5,30 +5,50 @@
       tags: [ common ]
     - role: ssh
       tags: [ ssh ]
+
+- hosts: admin
+  remote_user: root
+  roles:
     - role: ldap
-      when: "'admin' in group_names"
       tags: [ ldap ]
+
+- hosts: all
+  remote_user: root
+  roles:
     - role: sssd
       tags: [ sssd ]
+
+- hosts: admin:login
+  remote_user: root
+  roles:
     # The users role must be executed on login node or on the single admin node
     # when fhpc_emulator_mode is enabled.
     - role: users
       when: fhpc_emulator_mode or "login" in group_names
       tags: [ users ]
+
+- hosts: all
+  remote_user: root
+  roles:
     - role: slurm
       tags: [ slurm ]
     - role: racksdb
       tags: [ racksdb ]
+
+- hosts: admin
+  remote_user: root
+  roles:
     - role: slurmweb
       when:
-      - "'admin' in group_names"
       - slurmweb_enabled
       tags: [ slurmweb ]
     - role: redis
       when:
-      - "'admin' in group_names"
       - redis_enabled
       tags: [ redis ]
+
+- hosts: login:compute
+  remote_user: root
+  roles:
     - role: mpi
-      when: mpi_nodes
       tags: [ mpi ]

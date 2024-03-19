@@ -85,6 +85,7 @@ and this project adheres to
   - Replace hardcoded admin hosts by selection of first admin group member for
     LDAP server hostname and Slurm server.
   - Generate Slurm nodes and partitions based RacksDB database content.
+  - Split playbook by sections with hosts targets to avoid many skipped tasks.
 - docs: Update after zone→cluster rename in CLI options.
 
 ### Fixed
