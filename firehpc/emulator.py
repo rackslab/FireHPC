@@ -155,10 +155,12 @@ class ClusterJobsLoader:
             [
                 f"{user.login}@{dest}.{self.cluster.name}",
                 "sbatch",
-                "-q",
+                "--qos",
                 qos,
-                "-p",
+                "--partition",
                 partition,
+                "--time",
+                "1:0:0",  # 1 hour
                 "--wrap",
                 "/usr/bin/sleep 360",
             ]
