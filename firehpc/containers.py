@@ -222,6 +222,8 @@ class Container(DBusObject):
         """Return the list of network addresses (ipv4 and ipv6) assigned to the
         container. When wait is True, the method waits until the list of IP addresses is
         not empty."""
+        found_v4 = False
+        found_v6 = False
         result = []
         # machine1 DBus interface returns a sequence of pairs: the 1st element is the
         # address type and the 2nd element is a tuple with address all bytes as separate
@@ -229,9 +231,11 @@ class Container(DBusObject):
         while True:
             for address in self.proxy.GetAddresses():
                 if address[0] == int(socket.AF_INET):
+                    found_v4 = True
                     # Join all bytes with . to build an IPv4 address
                     result.append(ipaddress.IPv4Address(".".join(map(str, address[1]))))
                 elif address[0] == int(socket.AF_INET6):
+                    found_v6 = True
                     # Join with : all 2 bytes converted a string of hex values
                     result.append(
                         ipaddress.IPv6Address(
@@ -246,11 +250,11 @@ class Container(DBusObject):
                         address[0],
                         self.name,
                     )
-            if len(result) or not wait:
+            if (found_v4 and found_v6) or not wait:
                 break  # stop main while loop
             else:
                 logger.debug(
-                    "IP addresses of containers %s are not available, retrying…",
+                    "IP addresses of containers %s are not yet available, retrying…",
                     self.name,
                 )
                 time.sleep(1)

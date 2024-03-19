@@ -97,6 +97,8 @@ and this project adheres to
   private network setup and avoid the following container from erasing
   everything before completion.
 - Handle RacksDB format and schema errors with correct error message.
+- Wait for both IPv4 and IPv6 addresses when retrieving container addresses, to
+  avoid retrieving only IPv6 before IPv4 address is finally available.
 - conf:
   - Open slurmd spool directory permissions to all users for running batch
     jobs scripts.
