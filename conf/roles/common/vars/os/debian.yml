@@ -7,5 +7,6 @@ common_packages:
   - rsync
   - man-db
   - less
+  - locales
 common_ca_system_dir: /usr/local/share/ca-certificates
 common_ca_update_cmd: update-ca-certificates

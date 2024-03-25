@@ -108,6 +108,7 @@ and this project adheres to
   - Add missing common name in LDAP x509 TLS/SSL certificate.
   - Do not use cgroups with Slurm in emulator mode.
   - Force update of APT repositories metadata.
+  - Install `en_US.UTF-8` locale on Debian, as well as done on RHEL by default.
 - docs: Grammatical error and typos in `firehpc(1)` manpage
 
 ## [1.0.0] - 2023-07-20
