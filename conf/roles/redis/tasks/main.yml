@@ -1,4 +1,8 @@
 ---
+- name: Gather OS specific variables
+  ansible.builtin.include_vars:
+    file: "os/{{ ansible_facts.os_family | lower }}.yml"
+
 - name: Install redis packages
   ansible.builtin.package:
     name: "{{ redis_packages }}"
@@ -6,16 +10,23 @@
 
 - name: Comment restricted bind line
   ansible.builtin.lineinfile:
-    path: /etc/redis/redis.conf
-    regexp: 'bind 127.0.0.1 -::1'
-    line: '# bind 127.0.0.1 -::1'
+    path: "{{ redis_conf_file }}"
+    regexp: 'bind 127.0.0.1(.*)'
+    line: '# bind 127.0.0.1\1'
+    backrefs: yes
   notify:
-  - Restart redis server
+  - Restart redis
 
 - name: Add requirepass
   ansible.builtin.lineinfile:
-    path: /etc/redis/redis.conf
+    path: "{{ redis_conf_file }}"
     regexp: 'requirepass \+$'
     line: "requirepass {{ redis_password }}"
   notify:
-  - Restart redis server
+  - Restart redis
+
+- name: Ensure Redis is started and enabled
+  ansible.builtin.systemd_service:
+    name: "{{ redis_service }}"
+    state: started
+    enabled: true
