@@ -110,6 +110,10 @@ and this project adheres to
   - Do not use cgroups with Slurm in emulator mode.
   - Force update of APT repositories metadata.
   - Install `en_US.UTF-8` locale on Debian, as well as done on RHEL by default.
+  - Set `systemd-networkd` DHCP client identifier to mac on RHEL to avoid
+    getting a different address than those obtained by NetworkManager at boot,
+    which eventually result in IPv4 adresses in `/etc/hosts` being removed from
+    network interfaces when initial leases reach their timeout.
 - docs: Grammatical error and typos in `firehpc(1)` manpage
 
 ## [1.0.0] - 2023-07-20
