@@ -1,0 +1,9 @@
+---
+argument_specs:
+  main:
+    short_description: Main entry point for the nginx role.
+    options:
+      nginx_default_site_template:
+        type: str
+        required: true
+        description: "Path to default site template"

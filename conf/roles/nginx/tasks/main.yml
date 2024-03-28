@@ -1,0 +1,24 @@
+---
+- name: Gather OS specific variables
+  ansible.builtin.include_vars:
+    file: "os/{{ ansible_facts.os_family | lower }}.yml"
+
+- name: Install nginx packages
+  ansible.builtin.package:
+    name: "{{ nginx_packages }}"
+    state: latest
+
+- name: Setup default site
+  ansible.builtin.template:
+    src: "{{ nginx_default_site_template }}"
+    dest: "{{ nginx_conf_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart nginx
+
+- name: Ensure nginx service is started
+  ansible.builtin.service:
+    name: nginx
+    state: started

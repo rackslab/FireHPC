@@ -60,6 +60,7 @@ and this project adheres to
     RacksDB database content.
   - Install `bach-completion` by default on all nodes with _common_ role.
   - Install `clustershell` on all nodes by default with new _clustershell_ role.
+  - Introduce _nginx_ role.
 - docs:
   - Mention `conf` command `--db`, `--schema` and `--tags` options in
     `firehpc(1)` manpage.
