@@ -39,12 +39,24 @@ slurm_restd_socket: "{{ fhpc_slurmrestd_socket }}"
 slurm_accounts: "{{ fhpc_groups }}"
 slurm_compute_nodes: "{{ fhpc_nodes['compute'] }}"
 racksdb_database: "{{ fhpc_db }}"
+redis_local_password_file: "{{ fhpc_cluster_state_dir }}/redis/redis.password"
 slurmweb_slurmrestd_socket: "{{ fhpc_slurmrestd_socket }}"
-slurmweb_settings_defaults:
+slurmweb_agent_settings_defaults:
+  service:
+    cluster: "{{ fhpc_cluster }}"
   slurmrestd:
     socket: "{{ fhpc_slurmrestd_socket }}"
+  cache:
+    enabled: yes
+    password: "{{ lookup('ansible.builtin.file', redis_local_password_file) }}"
+slurmweb_gateway_settings_defaults:
+  ui:
+    host: "http://{{ slurmweb_hostname }}"
+  agents:
+    url: "http://{{ slurmweb_hostname }}/{{ slurmweb_agent_subdir }}"
+  authentication:
+    enabled: yes
   ldap:
-    uri: "ldap://{{ fhpc_ldap_server }}/"
+    uri: "ldaps://{{ fhpc_ldap_server }}/"
     user_base: "ou=people,{{ fhpc_ldap_base }}"
     group_base: "ou=groups,{{ fhpc_ldap_base }}"
-redis_local_password_file: "{{ fhpc_cluster_state_dir }}/redis/redis.password"
