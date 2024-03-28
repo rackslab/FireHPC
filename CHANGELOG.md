@@ -58,6 +58,7 @@ and this project adheres to
     LDAP groups.
   - Use `fhpc_db` for default `racksdb_database` variable value and to define
     RacksDB database content.
+  - Install `bach-completion` by default on all nodes with _common_ role.
 - docs:
   - Mention `conf` command `--db`, `--schema` and `--tags` options in
     `firehpc(1)` manpage.
