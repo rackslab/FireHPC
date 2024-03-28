@@ -44,10 +44,6 @@
       when:
       - slurmweb_enabled
       tags: [ slurmweb ]
-    - role: redis
-      when:
-      - redis_enabled
-      tags: [ redis ]
 
 - hosts: login:compute
   remote_user: root
