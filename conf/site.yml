@@ -34,6 +34,8 @@
       tags: [ slurm ]
     - role: racksdb
       tags: [ racksdb ]
+    - role: clustershell
+      tags: [ clustershell ]
 
 - hosts: admin
   remote_user: root

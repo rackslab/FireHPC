@@ -1,0 +1,5 @@
+---
+- name: Install clustershell packages
+  ansible.builtin.package:
+    name: "{{ clustershell_packages }}"
+    state: latest
