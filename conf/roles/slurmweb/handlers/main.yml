@@ -1,0 +1,9 @@
+---
+- name: Restart slurm-web-agent uWSGI
+  ansible.builtin.service:
+    name: slurm-web-agent-uwsgi
+    state: restarted
+- name: Restart slurm-web-gateway uWSGI
+  ansible.builtin.service:
+    name: slurm-web-gateway-uwsgi
+    state: restarted

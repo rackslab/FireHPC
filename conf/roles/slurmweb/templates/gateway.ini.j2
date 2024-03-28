@@ -1,0 +1,7 @@
+{% for section, settings in (slurmweb_gateway_settings_defaults | ansible.builtin.combine(slurmweb_gateway_settings)).items() %}
+[{{ section }}]
+{% for parameter, value in settings.items() %}
+{{ parameter }}={{ value }}
+{% endfor %}
+
+{% endfor %}

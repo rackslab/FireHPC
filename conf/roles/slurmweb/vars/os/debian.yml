@@ -1,0 +1,6 @@
+---
+slurmweb_packages:
+- slurm-web-agent
+- slurm-web-gateway
+- uwsgi-core
+- uwsgi-plugin-python3

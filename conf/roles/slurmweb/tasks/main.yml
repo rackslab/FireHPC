@@ -1,13 +1,48 @@
 ---
+- name: Gather OS specific variables
+  ansible.builtin.include_vars:
+    file: "os/{{ ansible_facts.os_family | lower }}.yml"
+
 - name: Ensure Slurm-web packages are installed
   ansible.builtin.package:
     name: "{{ slurmweb_packages }}"
     state: latest
 
-- name: Deploy Slurm-web agent configuration file
+- name: Deploy Slurm-web configuration files
   ansible.builtin.template:
-    src: agent.ini.j2
-    dest: /etc/slurm-web/agent.ini
+    src: "{{ item }}.ini.j2"
+    dest: "/etc/slurm-web/{{ item }}.ini"
     owner: root
     group: root
     mode: 0644
+  loop:
+  - agent
+  - gateway
+  notify:
+  - Restart slurm-web-{{ item }} uWSGI
+
+- name: Create JWT signing key
+  ansible.builtin.command:
+    cmd: /usr/libexec/slurm-web/slurm-web-gen-jwt-key
+    creates: "{{ slurmweb_jwt_key }}"
+
+- name: Install systemd services for components
+  ansible.builtin.copy:
+    src: "/usr/share/slurm-web/wsgi/{{ item }}/slurm-web-{{ item }}-uwsgi.service"
+    dest: "/etc/systemd/system/slurm-web-{{ item }}-uwsgi.service"
+    remote_src: yes
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+  - agent
+  - gateway
+
+- name: Ensure Slurm-web uWGSI are started
+  ansible.builtin.systemd_service:
+    name: "slurm-web-{{ item }}-uwsgi"
+    state: started
+    daemon_reload: true
+  loop:
+  - agent
+  - gateway

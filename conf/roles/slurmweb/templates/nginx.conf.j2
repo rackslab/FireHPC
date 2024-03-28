@@ -1,0 +1,17 @@
+# {{ slurmweb_hostname }}:80
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ slurmweb_hostname }};
+
+    location / {
+        include uwsgi_params;
+        uwsgi_pass unix:/run/slurm-web-gateway/uwsgi.sock;
+    }
+
+    location /{{ slurmweb_agent_subdir }}/ {
+        include uwsgi_params;
+        rewrite ^/{{ slurmweb_agent_subdir }}/(.*)$ /$1 break;
+        uwsgi_pass unix:/run/slurm-web-agent/uwsgi.sock;
+    }
+}

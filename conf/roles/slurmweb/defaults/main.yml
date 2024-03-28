@@ -1,6 +1,9 @@
 ---
 slurmweb_enabled: false
-slurmweb_packages:
-- slurm-web
-slurmweb_settings_defaults: {}
-slurmweb_settings: {}
+slurmweb_hostname: "{{ inventory_hostname }}"
+slurmweb_jwt_key: /var/lib/slurm-web/jwt.key
+slurmweb_agent_subdir: agent
+slurmweb_agent_settings_defaults: {}
+slurmweb_gateway_settings_defaults: {}
+slurmweb_agent_settings: {}
+slurmweb_gateway_settings: {}

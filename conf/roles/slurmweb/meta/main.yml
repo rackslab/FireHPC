@@ -1,0 +1,5 @@
+---
+dependencies:
+  - role: nginx
+    nginx_default_site_template: ../../slurmweb/templates/nginx.conf.j2
+  - role: redis
