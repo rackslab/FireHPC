@@ -29,11 +29,7 @@ import yaml
 
 from .templates import Templater
 from .users import UsersDirectory
-from .containers import (
-    ContainersManager,
-    ContainerImage,
-    StorageService,
-)
+from .containers import ContainersManager
 from .errors import FireHPCRuntimeError
 
 if TYPE_CHECKING:
@@ -107,11 +103,12 @@ class EmulatedCluster:
 
         infrastructure = db.infrastructures[self.name]
 
+        manager = ContainersManager(self.name)
+
         admin_node = infrastructure.nodes.filter(tags=["admin"]).first()
-        admin_image = ContainerImage.download(
-            self.name,
+        admin_image = manager.download(
+            admin_node.name,
             images.url(os),
-            f"{admin_node.name}.{self.name}",
         )
         if not emulator_mode:
             for node in infrastructure.nodes:
@@ -119,13 +116,11 @@ class EmulatedCluster:
                     logger.info(
                         "Cloning admin container image for %s.%s", node.name, self.name
                     )
-                    admin_image.clone(f"{node.name}.{self.name}")
+                    admin_image.clone(node.name)
 
         logger.info("Starting cluster storage service %s", self.name)
-        storage = StorageService(self.name)
-        storage.start()
+        manager.storage().start()
 
-        manager = ContainersManager(self.name)
         if emulator_mode:
             manager.start([admin_node.name])
         else:
@@ -169,6 +164,8 @@ class EmulatedCluster:
                     )
                     shutil.copytree(orig_custom_path, dest_custom_path)
 
+        manager = ContainersManager(self.name)
+
         infrastructure = db.infrastructures[self.name]
         for template in ["ansible.cfg", "hosts"]:
             logger.debug(
@@ -181,6 +178,7 @@ class EmulatedCluster:
                         self.settings.ansible.path / f"{template}.j2",
                         state=self.cluster_dir,
                         cluster=self.name,
+                        namespace=manager.namespace,
                         infrastructure=infrastructure,
                         emulator_mode=emulator_mode,
                     )
@@ -188,8 +186,7 @@ class EmulatedCluster:
 
         # variable fhpc_addresses
         containers_addresses = {}
-        containers = ContainersManager(self.name).running()
-        for container in containers:
+        for container in manager.running():
             containers_addresses[container.name] = [
                 str(address) for address in container.addresses()
             ]
@@ -255,15 +252,14 @@ class EmulatedCluster:
             image.remove()
 
         logger.info("Stopping cluster storage service")
-        storage = StorageService(self.name)
-        storage.stop()
+        manager.storage().stop()
 
     def start(self) -> None:
-        logger.info("Starting cluster storage service %s", self.name)
-        storage = StorageService(self.name)
-        storage.start()
-
         manager = ContainersManager(self.name)
+
+        logger.info("Starting cluster storage service %s", self.name)
+        manager.storage().start()
+
         # Search for the list of available images.
         containers = [image.name for image in manager.images()]
         # Look for the running container and start the other.

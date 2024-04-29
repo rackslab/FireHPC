@@ -25,6 +25,8 @@ and this project adheres to
 - Generate and manage groups tree internally. Groups definitions are exported to
   ansible with `fhpc_groups` extra variable and can be dumped with
   `firehpc status` command.
+- Support containers namespace to allow multiple users start the same virtual
+  clusters on the same host without conflict.
 - cli:
   - Support for tags to filter deployed configuration tasks.
   - Report cluster status in JSON format with `--json` option.

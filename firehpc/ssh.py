@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from .cluster import EmulatedCluster
 
 from .runner import run
+from .containers import ContainersManager
 from .errors import FireHPCRuntimeError
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,11 @@ class SSHClient:
                 "-i",
                 self.private_key,
             ]
-            cmd += ["-l", username, hostname]
+            cmd += [
+                "-l",
+                username,
+                f"{hostname}.{ContainersManager(self.cluster).namespace}",
+            ]
             cmd += args[1:]
             logger.debug("Running SSH command: %s", shlex.join(cmd))
             run(cmd)

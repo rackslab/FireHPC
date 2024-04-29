@@ -18,6 +18,7 @@
 # along with FireHPC.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
+import os
 from datetime import datetime
 import signal
 import threading
@@ -72,13 +73,13 @@ class UnitService(DBusObject):
 
 
 class ContainerService(UnitService):
-    def __init__(self, cluster, name):
-        super().__init__(f"firehpc-container@{cluster}:{name}")
+    def __init__(self, name, cluster, namespace):
+        super().__init__(f"firehpc-container@{cluster}.{namespace}:{name}")
 
 
 class StorageService(UnitService):
-    def __init__(self, cluster):
-        super().__init__(f"firehpc-storage@{cluster}")
+    def __init__(self, cluster, namespace):
+        super().__init__(f"firehpc-storage@{cluster}.{namespace}")
 
 
 class ImageImporter(DBusObject):
@@ -132,9 +133,10 @@ class ImageImporter(DBusObject):
 class ClusterStateModifier(DBusObject):
     INTERFACE = "org.freedesktop.machine1"
 
-    def __init__(self, cluster: str) -> ClusterStateModifier:
+    def __init__(self, cluster: str, namespace: str) -> ClusterStateModifier:
         super().__init__("/org/freedesktop/machine1")
         self.cluster = cluster
+        self.namespace = namespace
         self.loop = EventLoop()
         self.terminated_start = threading.Event()
         self.terminated_stop = threading.Event()
@@ -166,17 +168,21 @@ class ClusterStateModifier(DBusObject):
         self.loop.run()
 
     def start(self, containers: list) -> None:
-        self.must_start = [f"{container}.{self.cluster}" for container in containers]
+        self.must_start = [
+            f"{container}.{self.cluster}.{self.namespace}" for container in containers
+        ]
         if not len(self.must_start):
             logger.info("No container to start")
             return
-        logger.debug("Starting waiter thread")
+        logger.debug(
+            "Starting waiter thread for containers to start: %s", self.must_start
+        )
         waiter = threading.Thread(target=self._waiter)
         waiter.start()
         wait_first = True
         for container in containers:
-            logger.info("Starting container %s.%s", container, self.cluster)
-            Container.start(self.cluster, container)
+            logger.info("Starting container %s", container)
+            Container.start(container, self.cluster, self.namespace)
             # Wait some time before starting the second container to let systemd-nspawn
             # and systemd-networkd setup cluster private network properly and avoid
             # the following container from erasing everything before completion.
@@ -190,11 +196,14 @@ class ClusterStateModifier(DBusObject):
         self.loop.quit()
 
     def stop(self, containers: list) -> None:
-        self.must_stop = [container.name for container in containers]
+        self.must_stop = [container.fqdn for container in containers]
         if not len(self.must_stop):
             logger.info("No container to stop")
             return
-        logger.debug("Starting waiter thread")
+        logger.debug(
+            "Starting waiter thread for containers for containers to stop: %s",
+            self.must_stop,
+        )
         waiter = threading.Thread(target=self._waiter)
         waiter.start()
         for container in containers:
@@ -209,9 +218,15 @@ class ClusterStateModifier(DBusObject):
 class Container(DBusObject):
     INTERFACE = "org.freedesktop.machine1"
 
-    def __init__(self, name: str, path: str) -> Container:
+    def __init__(self, name: str, cluster: str, namespace: str, path: str) -> Container:
         super().__init__(path)
         self.name = name
+        self.cluster = cluster
+        self.namespace = namespace
+
+    @property
+    def fqdn(self):
+        return f"{self.name}.{self.cluster}.{self.namespace}"
 
     def poweroff(self) -> None:
         # Mimic behaviour of machinectl poweroff that send SIGRTMIN+4 to system
@@ -261,19 +276,23 @@ class Container(DBusObject):
         return result
 
     @staticmethod
-    def start(cluster, name) -> None:
-        service = ContainerService(cluster, name)
+    def start(name, cluster, namespace) -> None:
+        service = ContainerService(name, cluster, namespace)
         service.start()
 
     @classmethod
-    def from_machine(cls, machine) -> Container:
-        return cls(machine[0], machine[3])
+    def from_machine(cls, machine, cluster) -> Container:
+        (name, cluster, namespace) = machine[0].split(".", 3)
+        return cls(name, cluster, namespace, machine[3])
 
     @classmethod
     def from_machine_path(cls, path) -> Container:
         obj = DBus().proxy(cls.INTERFACE, path)
+        (name, cluster, namespace) = obj.Name.split(".", 3)
         return cls(
-            obj.Name,
+            name,
+            cluster,
+            namespace,
             path,
         )
 
@@ -284,6 +303,8 @@ class ContainerImage(DBusObject):
     def __init__(
         self,
         name: str,
+        cluster: str,
+        namespace: str,
         creation: int,
         modification: int,
         volume: int,
@@ -291,6 +312,8 @@ class ContainerImage(DBusObject):
     ):
         super().__init__(path)
         self.name = name
+        self.cluster = cluster
+        self.namespace = namespace
         self.creation = datetime.utcfromtimestamp(creation / 10 ** 6)
         self.modification = datetime.utcfromtimestamp(modification / 10 ** 6)
         self.volume = volume
@@ -320,13 +343,17 @@ class ContainerImage(DBusObject):
             f"Unable to remove container image {self.name} after {retries} tries"
         )
 
-    def clone(self, target) -> None:
+    def clone(self, node: str) -> None:
+        target = f"{node}.{self.cluster}.{self.namespace}"
         self.proxy.Clone(target, False)
 
     @classmethod
     def from_machine_image(cls, image) -> ContainerImage:
+        (name, cluster, namespace) = image[0].split(".", 3)
         return cls(
-            image[0],
+            name,
+            cluster,
+            namespace,
             image[3],
             image[4],
             image[5],
@@ -336,19 +363,16 @@ class ContainerImage(DBusObject):
     @classmethod
     def from_machine_image_path(cls, path: str) -> ContainerImage:
         obj = DBus().proxy(cls.INTERFACE, path)
+        (name, cluster, namespace) = obj.Name.split(".", 3)
         return cls(
-            obj.Name,
+            name,
+            cluster,
+            namespace,
             obj.CreationTimestamp,
             obj.CreationTimestamp,
             obj.Usage,
             path,
         )
-
-    @staticmethod
-    def download(cluster: str, url: str, name: str) -> ContainerImage:
-        importer = ImageImporter(url, name)
-        importer.transfer()
-        return ContainersManager(cluster).image(name)
 
 
 class ContainersManager(DBusObject):
@@ -357,31 +381,41 @@ class ContainersManager(DBusObject):
     def __init__(self, cluster: str) -> ContainersManager:
         super().__init__("/org/freedesktop/machine1")
         self.cluster = cluster
+        self.namespace = os.getlogin()
 
     def running(self) -> list:
         return [
-            Container.from_machine(machine)
+            Container.from_machine(machine, self.cluster)
             for machine in self.proxy.ListMachines()
-            if machine[0].endswith(f".{self.cluster}") and machine[1] == "container"
+            if machine[0].endswith(f".{self.cluster}.{self.namespace}")
+            and machine[1] == "container"
         ]
 
     def container(self, name) -> Container:
         return Container.from_machine_path(
-            self.proxy.GetMachine(f"{name}.{self.cluster}")
+            self.proxy.GetMachine(f"{name}.{self.cluster}.{self.namespace}")
         )
 
     def images(self) -> list:
         return [
             ContainerImage.from_machine_image(image)
             for image in self.proxy.ListImages()
-            if image[0].endswith(f".{self.cluster}")
+            if image[0].endswith(f".{self.cluster}.{self.namespace}")
         ]
 
     def image(self, name) -> ContainerImage:
         return ContainerImage.from_machine_image_path(self.proxy.GetImage(name))
 
+    def download(self, node: str, url: str) -> ContainerImage:
+        name = f"{node}.{self.cluster}.{self.namespace}"
+        ImageImporter(url, name).transfer()
+        return ContainerImage.from_machine_image_path(self.proxy.GetImage(name))
+
+    def storage(self) -> StorageService:
+        return StorageService(self.cluster, self.namespace)
+
     def start(self, containers: list):
-        ClusterStateModifier(self.cluster).start(containers)
+        ClusterStateModifier(self.cluster, self.namespace).start(containers)
 
     def stop(self):
-        ClusterStateModifier(self.cluster).stop(self.running())
+        ClusterStateModifier(self.cluster, self.namespace).stop(self.running())
