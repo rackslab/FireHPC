@@ -119,6 +119,8 @@ and this project adheres to
     which eventually result in IPv4 adresses in `/etc/hosts` being removed from
     network interfaces when initial leases reach their timeout.
 - docs: Grammatical error and typos in `firehpc(1)` manpage
+- lib: limit network devices names to 12 characters to avoid network zone name
+  errors with `systemd-nspawn`.
 
 ## [1.0.0] - 2023-07-20
 
