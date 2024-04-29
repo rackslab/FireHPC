@@ -274,9 +274,9 @@ class EmulatedCluster:
         )
 
     def stop(self) -> None:
-        manager = ContainersManager(self.name)
-        manager.stop()
+        ContainersManager(self.name).stop()
 
     def status(self) -> ClusterStatus:
-        containers = ContainersManager(self.name).running()
-        return ClusterStatus(containers, self.users_directory)
+        return ClusterStatus(
+            ContainersManager(self.name).running(), self.users_directory
+        )
