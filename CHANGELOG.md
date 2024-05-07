@@ -105,6 +105,7 @@ and this project adheres to
 - Handle RacksDB format and schema errors with correct error message.
 - Wait for both IPv4 and IPv6 addresses when retrieving container addresses, to
   avoid retrieving only IPv6 before IPv4 address is finally available.
+- Correctly handle and report DNS errors in SSH module.
 - conf:
   - Open slurmd spool directory permissions to all users for running batch
     jobs scripts.

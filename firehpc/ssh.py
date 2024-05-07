@@ -21,6 +21,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Union
 import logging
 import shlex
+import socket
+
 import paramiko
 
 if TYPE_CHECKING:
@@ -96,6 +98,10 @@ class SSHClient:
                     logger.debug("Running SSH command with library: %s", cmd)
                     stdin, stdout, stderr = client.exec_command(cmd)
                     return stdout.read(), stderr.read()
+                except socket.gaierror as err:
+                    raise FireHPCRuntimeError(
+                        f"Get address information error for host {hostname}: {err}"
+                    ) from err
                 except paramiko.ssh_exception.SSHException as err:
                     logger.error("SSH error while running command '%s': %s", cmd, err)
                     logger.info("Retries left: %d", max_retries - retries)
