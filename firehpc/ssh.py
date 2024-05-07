@@ -54,60 +54,66 @@ class SSHClient:
         # append container namespace to hostname
         hostname += f".{ContainersManager(self.cluster).namespace}"
         if self.asbin:
-            cmd = [
-                "ssh",
-                "-o",
-                f"UserKnownHostsFile={self.known_hosts}",
-                "-i",
-                self.private_key,
-            ]
-            cmd += [
-                "-l",
-                username,
-                hostname,
-            ]
-            cmd += args[1:]
-            logger.debug("Running SSH command: %s", shlex.join(cmd))
-            run(cmd)
+            return self._exec_bin(username, hostname, args[1:])
         else:
-            retries = 0
-            max_retries = 3
-            while retries < max_retries:
-                try:
-                    if args[0] not in self.clients:
-                        client = paramiko.SSHClient()
-                        logger.debug("Loading SSH hosts keys from %s", self.known_hosts)
-                        client.load_host_keys(self.known_hosts)
-                        logger.debug("Connecting client to %s@%s", username, hostname)
-                        client.connect(
-                            hostname,
-                            username=username,
-                            key_filename=self.private_key,
-                        )
-                        self.clients[args[0]] = client
-                    else:
-                        client = self.clients.get(args[0])
+            return self._exec_lib(username, hostname, args[1:])
 
-                    if len(args) < 2:
-                        raise FireHPCRuntimeError(
-                            "Command to execute must be provided in SSHClient.exec in "
-                            "library mode"
-                        )
+    def _exec_bin(self, username, hostname, cmd):
+        _cmd = [
+            "ssh",
+            "-o",
+            f"UserKnownHostsFile={self.known_hosts}",
+            "-i",
+            self.private_key,
+        ]
+        _cmd += [
+            "-l",
+            username,
+            hostname,
+        ]
+        _cmd += cmd
+        logger.debug("Running SSH command: %s", shlex.join(_cmd))
+        run(_cmd)
 
-                    cmd = shlex.join(args[1:])
-                    logger.debug("Running SSH command with library: %s", cmd)
-                    stdin, stdout, stderr = client.exec_command(cmd)
-                    return stdout.read(), stderr.read()
-                except socket.gaierror as err:
+    def _exec_lib(self, username, hostname, cmd):
+        retries = 0
+        max_retries = 3
+        while retries < max_retries:
+            try:
+                if hostname not in self.clients:
+                    client = paramiko.SSHClient()
+                    logger.debug("Loading SSH hosts keys from %s", self.known_hosts)
+                    client.load_host_keys(self.known_hosts)
+                    logger.debug("Connecting client to %s@%s", username, hostname)
+                    client.connect(
+                        hostname,
+                        username=username,
+                        key_filename=self.private_key,
+                    )
+                    self.clients[hostname] = client
+                else:
+                    client = self.clients.get(hostname)
+
+                if not len(cmd):
                     raise FireHPCRuntimeError(
-                        f"Get address information error for host {hostname}: {err}"
-                    ) from err
-                except paramiko.ssh_exception.SSHException as err:
-                    logger.error("SSH error while running command '%s': %s", cmd, err)
-                    logger.info("Retries left: %d", max_retries - retries)
-                    retries += 1
-                    del self.clients[args[0]]
+                        "Command to execute must be provided in SSHClient.exec in "
+                        "library mode"
+                    )
 
-            raise FireHPCRuntimeError(
-                f"Unable to run SSH command '{cmd}' after {max_retries} retries"
-            )
+                _cmd = shlex.join(cmd)
+                logger.debug("Running SSH command with library: %s", _cmd)
+                stdin, stdout, stderr = client.exec_command(_cmd)
+                return stdout.read(), stderr.read()
+            except socket.gaierror as err:
+                raise FireHPCRuntimeError(
+                    f"Get address information error for host {hostname}: {err}"
+                ) from err
+            except paramiko.ssh_exception.SSHException as err:
+                logger.error("SSH error while running command '%s': %s", _cmd, err)
+                logger.info("Retries left: %d", max_retries - retries)
+                retries += 1
+                del self.clients[hostname]
+
+        raise FireHPCRuntimeError(
+            f"Unable to run SSH command '{_cmd}' after {max_retries} retries"
+        )
