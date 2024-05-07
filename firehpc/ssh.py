@@ -49,6 +49,8 @@ class SSHClient:
             # connect with root user by default
             username = "root"
             hostname = args[0]
+        # append container namespace to hostname
+        hostname += f".{ContainersManager(self.cluster).namespace}"
         if self.asbin:
             cmd = [
                 "ssh",
@@ -60,7 +62,7 @@ class SSHClient:
             cmd += [
                 "-l",
                 username,
-                f"{hostname}.{ContainersManager(self.cluster).namespace}",
+                hostname,
             ]
             cmd += args[1:]
             logger.debug("Running SSH command: %s", shlex.join(cmd))
