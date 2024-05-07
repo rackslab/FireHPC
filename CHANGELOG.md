@@ -7,6 +7,9 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [unreleased]
+
+## [1.1.0] - 2024-05-07
+
 ### Added
 - Integration with [RacksDB](https://github.com/rackslab/RacksDB) to extract
   emulated cluster topology (#1).
@@ -126,4 +129,5 @@ and this project adheres to
 ## [1.0.0] - 2023-07-20
 
 [unreleased]: https://github.com/rackslab/firehpc/compare/v1.0.0...HEAD
+[1.1.0]: https://github.com/rackslab/firehpc/releases/tag/v1.1.0
 [1.0.0]: https://github.com/rackslab/firehpc/releases/tag/v1.0.0
