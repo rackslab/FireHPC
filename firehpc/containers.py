@@ -244,27 +244,32 @@ class Container(DBusObject):
         # address type and the 2nd element is a tuple with address all bytes as separate
         # integers.
         while True:
-            for address in self.proxy.GetAddresses():
-                if address[0] == int(socket.AF_INET):
-                    found_v4 = True
-                    # Join all bytes with . to build an IPv4 address
-                    result.append(ipaddress.IPv4Address(".".join(map(str, address[1]))))
-                elif address[0] == int(socket.AF_INET6):
-                    found_v6 = True
-                    # Join with : all 2 bytes converted a string of hex values
-                    result.append(
-                        ipaddress.IPv6Address(
-                            ":".join(
-                                [f"{a:x}{b:x}" for a, b in zip(*[iter(address[1])] * 2)]
+            try:
+                for address in self.proxy.GetAddresses():
+                    if address[0] == int(socket.AF_INET):
+                        found_v4 = True
+                        # Join all bytes with . to build an IPv4 address
+                        result.append(ipaddress.IPv4Address(".".join(map(str, address[1]))))
+                    elif address[0] == int(socket.AF_INET6):
+                        found_v6 = True
+                        # Join with : all 2 bytes converted a string of hex values
+                        result.append(
+                            ipaddress.IPv6Address(
+                                ":".join(
+                                    [f"{a:x}{b:x}" for a, b in zip(*[iter(address[1])] * 2)]
+                                )
                             )
                         )
-                    )
-                else:
-                    logger.error(
-                        "Unsupported socket type %d for address of container %s",
-                        address[0],
-                        self.name,
-                    )
+                    else:
+                        logger.error(
+                            "Unsupported socket type %d for address of container %s",
+                            address[0],
+                            self.name,
+                        )
+            except DBusError as err:
+                raise FireHPCRuntimeError(
+                    f"DBus error while getting IP addresses of {self.name}: {err}"
+                ) from err
             if (found_v4 and found_v6) or not wait:
                 break  # stop main while loop
             else:

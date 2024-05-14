@@ -11,6 +11,9 @@ and this project adheres to
 ### Changed
 - conf: install missing socat package on RHEL.
 
+### Fixed
+- core: properly handle DBus error when getting containers addresses.
+
 ## [1.1.0] - 2024-05-07
 
 ### Added
