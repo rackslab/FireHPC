@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [unreleased]
 
+### Added
+- docs: add sysctl fs.inotify.max_user_instances value increase recommendation
+  in README.md to avoid weird issue when launching many containers.
+
 ### Changed
 - conf: install missing socat package on RHEL.
 

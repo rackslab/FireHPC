@@ -158,6 +158,14 @@ so the `mymachines` service can resolve IP addresses of container names:
  protocols:      db files
 ```
 
+It is also recommended to increase maximum inotify instances from default 128 to
+1024 for instance to avoid weird issues when starting a large number of
+containers:
+
+```console
+# sysctl fs.inotify.max_user_instances=1024
+```
+
 Without this modification, the `mymachines` service is basically ignored by the
 _return_ action on `resolve` service. For reference, see `nss-mymachines(8)`.
 
