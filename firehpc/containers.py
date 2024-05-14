@@ -249,14 +249,19 @@ class Container(DBusObject):
                     if address[0] == int(socket.AF_INET):
                         found_v4 = True
                         # Join all bytes with . to build an IPv4 address
-                        result.append(ipaddress.IPv4Address(".".join(map(str, address[1]))))
+                        result.append(
+                            ipaddress.IPv4Address(".".join(map(str, address[1])))
+                        )
                     elif address[0] == int(socket.AF_INET6):
                         found_v6 = True
                         # Join with : all 2 bytes converted a string of hex values
                         result.append(
                             ipaddress.IPv6Address(
                                 ":".join(
-                                    [f"{a:x}{b:x}" for a, b in zip(*[iter(address[1])] * 2)]
+                                    [
+                                        f"{a:x}{b:x}"
+                                        for a, b in zip(*[iter(address[1])] * 2)
+                                    ]
                                 )
                             )
                         )
