@@ -8,6 +8,9 @@ and this project adheres to
 
 ## [unreleased]
 
+### Changed
+- conf: install missing socat package on RHEL.
+
 ## [1.1.0] - 2024-05-07
 
 ### Added
@@ -128,6 +131,6 @@ and this project adheres to
 
 ## [1.0.0] - 2023-07-20
 
-[unreleased]: https://github.com/rackslab/firehpc/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/rackslab/firehpc/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/rackslab/firehpc/releases/tag/v1.1.0
 [1.0.0]: https://github.com/rackslab/firehpc/releases/tag/v1.0.0
