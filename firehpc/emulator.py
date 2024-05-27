@@ -77,7 +77,9 @@ class ClusterJobsLoader:
                     )
                     while nb_submit:
                         user = random.choice(status.directory.users)
-                        self._launch_job(user, qos[0], partitions[0])
+                        self._launch_job(
+                            user, random.choice(qos), random.choice(partitions)
+                        )
                         nb_submit -= 1
         except FireHPCRuntimeError as err:
             logger.critical(
