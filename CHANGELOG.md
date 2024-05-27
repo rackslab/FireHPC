@@ -9,7 +9,12 @@ and this project adheres to
 ## [unreleased]
 
 ### Added
-- usage emulator: Submit jobs randomly in existing QOS and partitions.
+- usage emulator:
+  - Submit jobs randomly in existing QOS and partitions.
+  - Submit jobs of various sizes, with a power of 2 number (1, 2, 4, 8…) of
+    cores or nodes, up to the full size of the cluster. A number of nodes is
+    selected when Slurm SelectType plugin is linear, a number of cores is
+    selected otherwise.
 - docs: add sysctl fs.inotify.max_user_instances value increase recommendation
   in README.md to avoid weird issue when launching many containers.
 

@@ -47,29 +47,39 @@ class ClusterJobsLoader:
         self.cluster = cluster
         self.ssh = SSHClient(self.cluster, asbin=False)
         self.stop = False
+        # Initialized in run()
+        self.select_type = None
+        self.nodes = 0
+        self.cpus = 0
 
     def run(self) -> None:
         logger.info("cluster %s: started running jobs loader", self.cluster.name)
         status = self.cluster.status()
 
         try:
-            nodes = self._get_nodes()
-            logger.info("Found nodes: %s", nodes)
+            self.select_type = self._get_select_type()
+            (self.nodes, self.cpus) = self._get_resources()
+            logger.info("cluster %s: nodes found: %s", self.cluster.name, self.nodes)
+            logger.info("cluster %s: cpus found: %s", self.cluster.name, self.cpus)
             partitions = self._get_partitions()
-            logger.info("Found partitions: %s", partitions)
+            logger.info(
+                "cluster %s: partitions found: %s", self.cluster.name, partitions
+            )
             qos = self._get_qos()
-            logger.info("Found QOS: %s", qos)
+            logger.info("cluster %s: QOS found: %s", self.cluster.name, qos)
+
+            pending_jobs_limit = self.nodes * 5
 
             while not self.stop:
                 pending_jobs = self._get_pending_jobs()
-                if len(pending_jobs) >= len(nodes) * 10:
+                if len(pending_jobs) >= pending_jobs_limit:
                     logger.debug(
                         "cluster %s: Waiting for pending jobs to run…",
                         self.cluster.name,
                     )
                     time.sleep(5)
                 else:
-                    nb_submit = len(nodes) * 10 - len(pending_jobs)
+                    nb_submit = pending_jobs_limit - len(pending_jobs)
                     logger.info(
                         "cluster %s: %s new jobs to submit",
                         self.cluster.name,
@@ -89,16 +99,30 @@ class ClusterJobsLoader:
             )
         logger.info("cluster %s: jobs loader is stopping", self.cluster.name)
 
-    def _get_nodes(self) -> list[str]:
+    def _get_select_type(self) -> str | None:
+        stdout, stderr = self.ssh.exec(
+            [f"admin.{self.cluster.name}", "scontrol", "show", "config"]
+        )
+        result = None
+        for line in stdout.decode().split("\n"):
+            if line.startswith("SelectType "):
+                result = line.split(" = ")[1]
+        return result
+
+    def _get_resources(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
             [f"admin.{self.cluster.name}", "scontrol", "show", "nodes", "--json"]
         )
+        nodes = cpus = 0
         try:
-            return [node["name"] for node in json.loads(stdout)["nodes"]]
+            for node in json.loads(stdout)["nodes"]:
+                nodes += 1
+                cpus += node["cpus"]
         except json.decoder.JSONDecodeError as err:
             raise FireHPCRuntimeError(
                 f"Unable to retrieve nodes from cluster {self.cluster.name}: {str(err)}"
             ) from err
+        return nodes, cpus
 
     def _get_partitions(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
@@ -153,20 +177,36 @@ class ClusterJobsLoader:
             dest = "admin"
         else:
             dest = "login"
-        self.ssh.exec(
-            [
-                f"{user.login}@{dest}.{self.cluster.name}",
-                "sbatch",
-                "--qos",
-                qos,
-                "--partition",
-                partition,
-                "--time",
-                "1:0:0",  # 1 hour
-                "--wrap",
-                "/usr/bin/sleep 360",
-            ]
-        )
+        cmd = [
+            f"{user.login}@{dest}.{self.cluster.name}",
+            "sbatch",
+            "--qos",
+            qos,
+            "--partition",
+            partition,
+            "--time",
+            "1:0:0",  # 1 hour
+            "--wrap",
+            "/usr/bin/sleep 360",
+        ]
+
+        def random_power_two(limit: int) -> int:
+            """Select randomly one power of two below the limit."""
+            i = 1
+            possible_values = []
+            while i < limit:
+                possible_values.append(i)
+                i *= 2
+            return random.choice(possible_values)
+
+        # If select/linear, allocate a number of nodes, else allocates a number
+        # of tasks.
+        if self.select_type == "select/linear":
+            cmd.extend(["--nodes", str(random_power_two(self.nodes))])
+        else:
+            cmd.extend(["--ntasks", str(random_power_two(self.cpus))])
+
+        self.ssh.exec(cmd)
 
 
 class FireHPCUsageEmulator:
