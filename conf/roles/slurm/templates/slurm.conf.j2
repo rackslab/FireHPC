@@ -23,4 +23,6 @@ NodeName={{ slurm_compute_nodes | nodeset_fold }} Procs=2 NodeHostName={{ slurm_
 {% else %}
 NodeName={{ slurm_compute_nodes | nodeset_fold }} Procs=2 State=UNKNOWN
 {% endif %}
-PartitionName=normal Nodes={{ slurm_compute_nodes | nodeset_fold }} Default=YES MaxTime=INFINITE State=UP
+{% for slurm_partition in slurm_partitions %}
+PartitionName={{ slurm_partition.name }} Nodes={{ slurm_partition.node }} Default={{ "YES" if "default" in slurm_partition and slurm_partition.default else "NO" }} MaxTime={{ slurm_partition.maxtime }} State={{ slurm_partition.state }}
+{% endfor %}

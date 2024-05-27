@@ -14,7 +14,15 @@ slurm_local_jwt_key_file: jwt_hs256.key  # dummy
 slurm_db_password: "{{ lookup('file', '{{ slurm_local_mariadb_password_file }}', errors='ignore') }}"
 slurm_users: []
 slurm_accounts: []
+slurm_qos: []
 slurm_compute_nodes: []
+slurm_partitions:
+- name: normal
+  node: "{{ slurm_compute_nodes | nodeset_fold }}"
+  default: yes
+  maxtime: INFINITE
+  state: UP
+
 slurm_params: {}
 slurmdbd_params: {}
 

@@ -105,3 +105,20 @@
     cmd: "sacctmgr --immediate create user name={{ item }} cluster={{ slurm_cluster }} account={{ slurm_accounts | selectattr('members', 'search', item) | map(attribute='name') | last }}"
   when: item not in slurmdbd_users.stdout_lines
   loop: "{{ slurm_users }}"
+
+- name: Get current slurmdbd QOS
+  ansible.builtin.command:
+    cmd: sacctmgr --noheader --parsable2 list qos format=name
+  register: slurmdbd_qos
+
+- name: Create QOS in slurmdbd
+  ansible.builtin.command:
+    cmd: "sacctmgr --immediate create qos {{ item.name }} {{ item.args | join(' ') }}"
+  when: item.name not in slurmdbd_qos.stdout_lines
+  loop: "{{ slurm_qos }}"
+
+- name: Allow QOS to root association in slurmdbd
+  ansible.builtin.command:
+    cmd: "sacctmgr --immediate update account root set qos+={{ item.name }}"
+  when: item.name not in slurmdbd_qos.stdout_lines
+  loop: "{{ slurm_qos }}"
