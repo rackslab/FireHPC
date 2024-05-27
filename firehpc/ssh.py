@@ -78,9 +78,10 @@ class SSHClient:
     def _exec_lib(self, username, hostname, cmd):
         retries = 0
         max_retries = 3
+        client_key = f"{username}@{hostname}"
         while retries < max_retries:
             try:
-                if hostname not in self.clients:
+                if client_key not in self.clients:
                     client = paramiko.SSHClient()
                     logger.debug("Loading SSH hosts keys from %s", self.known_hosts)
                     client.load_host_keys(self.known_hosts)
@@ -90,9 +91,9 @@ class SSHClient:
                         username=username,
                         key_filename=self.private_key,
                     )
-                    self.clients[hostname] = client
+                    self.clients[client_key] = client
                 else:
-                    client = self.clients.get(hostname)
+                    client = self.clients.get(client_key)
 
                 if not len(cmd):
                     raise FireHPCRuntimeError(
@@ -112,7 +113,7 @@ class SSHClient:
                 logger.error("SSH error while running command '%s': %s", _cmd, err)
                 logger.info("Retries left: %d", max_retries - retries)
                 retries += 1
-                del self.clients[hostname]
+                del self.clients[client_key]
 
         raise FireHPCRuntimeError(
             f"Unable to run SSH command '{_cmd}' after {max_retries} retries"

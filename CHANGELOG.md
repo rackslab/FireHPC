@@ -24,7 +24,10 @@ and this project adheres to
 - conf: install missing socat package on RHEL.
 
 ### Fixed
-- core: properly handle DBus error when getting containers addresses.
+- core:
+  - Properly handle DBus error when getting containers addresses.
+  - Potential key conflict in dictionnary of SSH clients when multiple users
+    connect to the same host with Paramiko library.
 - conf: install mpi packages in parallel instead of sequential loop.
 
 ## [1.1.0] - 2024-05-07
