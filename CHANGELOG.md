@@ -17,6 +17,7 @@ and this project adheres to
 
 ### Fixed
 - core: properly handle DBus error when getting containers addresses.
+- conf: install mpi packages in parallel instead of sequential loop.
 
 ## [1.1.0] - 2024-05-07
 
