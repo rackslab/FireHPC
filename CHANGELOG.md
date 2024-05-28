@@ -15,6 +15,8 @@ and this project adheres to
     cores or nodes, up to the full size of the cluster. A number of nodes is
     selected when Slurm SelectType plugin is linear, a number of cores is
     selected otherwise.
+  - Select job partition randomly weighted by their number of resources to favor
+    largest partitions.
 - conf: add possibility to define additional QOS and alternative partitions in
   Slurm.
 - docs: add sysctl fs.inotify.max_user_instances value increase recommendation

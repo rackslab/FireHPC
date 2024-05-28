@@ -27,6 +27,7 @@ import json
 import random
 import time
 import threading
+from collections import namedtuple
 
 from .version import get_version
 from .settings import RuntimeSettings
@@ -42,6 +43,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes"])
+
+
 class ClusterJobsLoader:
     def __init__(self, cluster: EmulatedCluster):
         self.cluster = cluster
@@ -55,6 +59,12 @@ class ClusterJobsLoader:
     def run(self) -> None:
         logger.info("cluster %s: started running jobs loader", self.cluster.name)
         status = self.cluster.status()
+
+        def random_partition():
+            """Select randomly one partition weighted by their number of nodes."""
+            return random.choices(
+                partitions, [partition.nodes for partition in partitions]
+            )[0].name
 
         try:
             self.select_type = self._get_select_type()
@@ -87,9 +97,7 @@ class ClusterJobsLoader:
                     )
                     while nb_submit:
                         user = random.choice(status.directory.users)
-                        self._launch_job(
-                            user, random.choice(qos), random.choice(partitions)
-                        )
+                        self._launch_job(user, random.choice(qos), random_partition())
                         nb_submit -= 1
         except FireHPCRuntimeError as err:
             logger.critical(
@@ -129,7 +137,10 @@ class ClusterJobsLoader:
             [f"admin.{self.cluster.name}", "scontrol", "show", "partitions", "--json"]
         )
         try:
-            return [partition["name"] for partition in json.loads(stdout)["partitions"]]
+            return [
+                ClusterPartition(partition["name"], partition["nodes"]["total"])
+                for partition in json.loads(stdout)["partitions"]
+            ]
         except json.decoder.JSONDecodeError as err:
             raise FireHPCRuntimeError(
                 f"Unable to retrieve partitions from cluster {self.cluster.name}: "
