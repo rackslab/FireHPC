@@ -179,8 +179,8 @@ class ClusterJobsLoader:
             "cluster %s: submitting job for user %s on partition %s with QOS %s",
             self.cluster.name,
             user.login,
-            qos,
             partition,
+            qos,
         )
         # If there is only one container, consider the cluster is using emulator mode
         # and submit job on admin node. Otherwise, submit job on login node.

@@ -30,6 +30,8 @@ and this project adheres to
   - Properly handle DBus error when getting containers addresses.
   - Potential key conflict in dictionnary of SSH clients when multiple users
     connect to the same host with Paramiko library.
+- usage emulator: order of partition/qos variables in job submission
+  informational message.
 - conf: install mpi packages in parallel instead of sequential loop.
 
 ## [1.1.0] - 2024-05-07
