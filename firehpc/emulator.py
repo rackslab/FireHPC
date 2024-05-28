@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes"])
+ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes", "cpus"])
 
 
 class ClusterJobsLoader:
@@ -53,8 +53,6 @@ class ClusterJobsLoader:
         self.stop = False
         # Initialized in run()
         self.select_type = None
-        self.nodes = 0
-        self.cpus = 0
 
     def run(self) -> None:
         logger.info("cluster %s: started running jobs loader", self.cluster.name)
@@ -64,13 +62,14 @@ class ClusterJobsLoader:
             """Select randomly one partition weighted by their number of nodes."""
             return random.choices(
                 partitions, [partition.nodes for partition in partitions]
-            )[0].name
+            )[0]
+
+        def total_nodes():
+            """Return total number of nodes in all partitions."""
+            return sum([partition.nodes for partition in partitions])
 
         try:
             self.select_type = self._get_select_type()
-            (self.nodes, self.cpus) = self._get_resources()
-            logger.info("cluster %s: nodes found: %s", self.cluster.name, self.nodes)
-            logger.info("cluster %s: cpus found: %s", self.cluster.name, self.cpus)
             partitions = self._get_partitions()
             logger.info(
                 "cluster %s: partitions found: %s", self.cluster.name, partitions
@@ -78,7 +77,7 @@ class ClusterJobsLoader:
             qos = self._get_qos()
             logger.info("cluster %s: QOS found: %s", self.cluster.name, qos)
 
-            pending_jobs_limit = self.nodes * 5
+            pending_jobs_limit = total_nodes() * 5
 
             while not self.stop:
                 pending_jobs = self._get_pending_jobs()
@@ -117,28 +116,17 @@ class ClusterJobsLoader:
                 result = line.split(" = ")[1]
         return result
 
-    def _get_resources(self) -> list[str]:
-        stdout, stderr = self.ssh.exec(
-            [f"admin.{self.cluster.name}", "scontrol", "show", "nodes", "--json"]
-        )
-        nodes = cpus = 0
-        try:
-            for node in json.loads(stdout)["nodes"]:
-                nodes += 1
-                cpus += node["cpus"]
-        except json.decoder.JSONDecodeError as err:
-            raise FireHPCRuntimeError(
-                f"Unable to retrieve nodes from cluster {self.cluster.name}: {str(err)}"
-            ) from err
-        return nodes, cpus
-
     def _get_partitions(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
             [f"admin.{self.cluster.name}", "scontrol", "show", "partitions", "--json"]
         )
         try:
             return [
-                ClusterPartition(partition["name"], partition["nodes"]["total"])
+                ClusterPartition(
+                    partition["name"],
+                    partition["nodes"]["total"],
+                    partition["cpus"]["total"],
+                )
                 for partition in json.loads(stdout)["partitions"]
             ]
         except json.decoder.JSONDecodeError as err:
@@ -174,12 +162,14 @@ class ClusterJobsLoader:
                 f"{str(err)}"
             ) from err
 
-    def _launch_job(self, user: UserEntry, qos: str, partition: str) -> None:
+    def _launch_job(
+        self, user: UserEntry, qos: str, partition: ClusterPartition
+    ) -> None:
         logger.info(
             "cluster %s: submitting job for user %s on partition %s with QOS %s",
             self.cluster.name,
             user.login,
-            partition,
+            partition.name,
             qos,
         )
         # If there is only one container, consider the cluster is using emulator mode
@@ -194,7 +184,7 @@ class ClusterJobsLoader:
             "--qos",
             qos,
             "--partition",
-            partition,
+            partition.name,
             "--time",
             "1:0:0",  # 1 hour
             "--wrap",
@@ -205,7 +195,7 @@ class ClusterJobsLoader:
             """Select randomly one power of two below the limit."""
             i = 1
             possible_values = []
-            while i < limit:
+            while i <= limit:
                 possible_values.append(i)
                 i *= 2
             return random.choice(possible_values)
@@ -213,9 +203,9 @@ class ClusterJobsLoader:
         # If select/linear, allocate a number of nodes, else allocates a number
         # of tasks.
         if self.select_type == "select/linear":
-            cmd.extend(["--nodes", str(random_power_two(self.nodes))])
+            cmd.extend(["--nodes", str(random_power_two(partition.nodes))])
         else:
-            cmd.extend(["--ntasks", str(random_power_two(self.cpus))])
+            cmd.extend(["--ntasks", str(random_power_two(partition.cpus))])
 
         self.ssh.exec(cmd)
 
