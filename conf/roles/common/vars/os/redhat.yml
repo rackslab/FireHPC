@@ -7,5 +7,6 @@ common_packages:
   - man-db
   - bash-completion
   - socat
+  - openssh-clients
 common_ca_system_dir: /etc/pki/ca-trust/source/anchors
 common_ca_update_cmd: update-ca-trust extract

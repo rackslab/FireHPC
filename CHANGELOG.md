@@ -17,8 +17,10 @@ and this project adheres to
     selected otherwise.
   - Select job partition randomly weighted by their number of resources to favor
     largest partitions.
-- conf: add possibility to define additional QOS and alternative partitions in
-  Slurm.
+- conf:
+  - Add possibility to define additional QOS and alternative partitions in
+    Slurm.
+  - Add support for RHEL9 and compatibles distributions.
 - docs: add sysctl fs.inotify.max_user_instances value increase recommendation
   in README.md to avoid weird issue when launching many containers.
 

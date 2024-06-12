@@ -1,5 +1,5 @@
 ---
 redis_packages:
 - redis
-redis_conf_file: /etc/redis.conf
+redis_conf_file: "{{ (ansible_distribution_major_version == '8') | ternary('/etc/redis.conf','/etc/redis/redis.conf') }}"
 redis_service: redis
