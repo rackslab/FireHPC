@@ -26,7 +26,9 @@ and this project adheres to
   in README.md to avoid weird issue when launching many containers.
 
 ### Changed
-- conf: install missing socat package on RHEL.
+- conf:
+  - Install missing socat package on RHEL.
+  - Use packages list instead of loop to install MariaDB packages.
 
 ### Fixed
 - core:
