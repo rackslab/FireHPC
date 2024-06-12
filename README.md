@@ -181,7 +181,7 @@ With your regular user, run FireHPC with a cluster name and an OS in arguments.
 For example:
 
 ```
-$ firehpc deploy --db racksdb.yml --cluster hpc --os debian11
+$ firehpc deploy --db racksdb.yml --cluster hpc --os debian12
 ```
 
 The available OS are reported by this command:
