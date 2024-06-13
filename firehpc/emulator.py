@@ -80,15 +80,15 @@ class ClusterJobsLoader:
             pending_jobs_limit = total_nodes() * 5
 
             while not self.stop:
-                pending_jobs = self._get_pending_jobs()
-                if len(pending_jobs) >= pending_jobs_limit:
+                pending_jobs = self._get_nb_pending_jobs()
+                if pending_jobs >= pending_jobs_limit:
                     logger.debug(
                         "cluster %s: Waiting for pending jobs to run…",
                         self.cluster.name,
                     )
                     time.sleep(5)
                 else:
-                    nb_submit = pending_jobs_limit - len(pending_jobs)
+                    nb_submit = pending_jobs_limit - pending_jobs
                     logger.info(
                         "cluster %s: %s new jobs to submit",
                         self.cluster.name,
@@ -149,16 +149,12 @@ class ClusterJobsLoader:
                 f"Unable to retrieve qos from cluster {self.cluster.name}: {str(err)}"
             ) from err
 
-    def _get_pending_jobs(self):
+    def _get_nb_pending_jobs(self):
         stdout, stderr = self.ssh.exec(
             [f"admin.{self.cluster.name}", "squeue", "--state", "pending", "--json"]
         )
         try:
-            return [
-                job["job_id"]
-                for job in json.loads(stdout)["jobs"]
-                if job["job_state"] == "PENDING"
-            ]
+            return len(json.loads(stdout)["jobs"])
         except json.decoder.JSONDecodeError as err:
             raise FireHPCRuntimeError(
                 f"Unable to retrieve pending jobs from cluster {self.cluster.name}: "
