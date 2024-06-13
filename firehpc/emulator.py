@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes", "cpus"])
+ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes", "cpus", "time"])
 
 
 class ClusterJobsLoader:
@@ -126,6 +126,7 @@ class ClusterJobsLoader:
                     partition["name"],
                     partition["nodes"]["total"],
                     partition["cpus"]["total"],
+                    partition["maximums"]["time"],
                 )
                 for partition in json.loads(stdout)["partitions"]
             ]
@@ -177,6 +178,10 @@ class ClusterJobsLoader:
             dest = "admin"
         else:
             dest = "login"
+        if partition.time["set"]:
+            timelimit = str(partition.time["number"])
+        else:
+            timelimit = "1:0:0"  # 1 hour
         cmd = [
             f"{user.login}@{dest}.{self.cluster.name}",
             "sbatch",
@@ -185,7 +190,7 @@ class ClusterJobsLoader:
             "--partition",
             partition.name,
             "--time",
-            "1:0:0",  # 1 hour
+            timelimit,
             "--wrap",
             "/usr/bin/sleep 360",
         ]

@@ -35,6 +35,8 @@ and this project adheres to
   - Properly handle DBus error when getting containers addresses.
   - Potential key conflict in dictionnary of SSH clients when multiple users
     connect to the same host with Paramiko library.
+  - Set jobs time limit to partition time limit when set to avoid jobs that
+    exceed partition time limit.
 - usage emulator:
   - Order of partition/qos variables in job submission informational message.
   - Support of Slurm 24.05 `sacctmgr show qos --json` format to retrieve the
