@@ -140,7 +140,10 @@ class ClusterJobsLoader:
             [f"admin.{self.cluster.name}", "sacctmgr", "show", "qos", "--json"]
         )
         try:
-            return [qos["name"] for qos in json.loads(stdout)["QOS"]]
+            qos_output = json.loads(stdout)
+            # QOS key has changed to lower case in Slurm 24.05
+            qos_key = "qos" if "qos" in qos_output else "QOS"
+            return [qos["name"] for qos in json.loads(stdout)[qos_key]]
         except json.decoder.JSONDecodeError as err:
             raise FireHPCRuntimeError(
                 f"Unable to retrieve qos from cluster {self.cluster.name}: {str(err)}"
