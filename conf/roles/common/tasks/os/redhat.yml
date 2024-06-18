@@ -1,4 +1,12 @@
 ---
+- name: Define system locale
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/localectl
+      - set-locale
+      - LANG=en_US.UTF-8
+    creates: /etc/locale.conf
+
 # On redhat based distributions, add EPEL repos GPG key and yum conf using
 # release package
 - name: Import EPEL GPG key

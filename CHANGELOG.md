@@ -41,7 +41,9 @@ and this project adheres to
   - Order of partition/qos variables in job submission informational message.
   - Support of Slurm 24.05 `sacctmgr show qos --json` format to retrieve the
     list of defined QOS.
-- conf: install mpi packages in parallel instead of sequential loop.
+- conf:
+  - Install mpi packages in parallel instead of sequential loop.
+  - Configure system locale to `en_US.UTF-8` on rocky8.
 
 ## [1.1.0] - 2024-05-07
 
