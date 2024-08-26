@@ -44,6 +44,8 @@ and this project adheres to
 - conf:
   - Install mpi packages in parallel instead of sequential loop.
   - Configure system locale to `en_US.UTF-8` on rocky8.
+  - Add SLURMRESTD_SECURITY=disable_user_check environment variable in
+    slurmrestd service to allow running as slurm user.
 
 ## [1.1.0] - 2024-05-07
 

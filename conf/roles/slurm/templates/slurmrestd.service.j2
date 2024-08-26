@@ -6,6 +6,7 @@ Environment="SLURM_JWT=daemon"
 ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS [::]:6820
 {% else %}
 Environment=
+Environment=SLURMRESTD_SECURITY=disable_user_check
 ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS unix:{{ slurm_restd_socket }}
 RuntimeDirectory=slurmrestd
 RuntimeDirectoryMode=0755
