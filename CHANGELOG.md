@@ -9,7 +9,9 @@ and this project adheres to
 ## [unreleased]
 
 ### Added
-- Add rocky9 image.
+- images:
+  - Add rocky9
+  - Add debian13
 - usage emulator:
   - Submit jobs randomly in existing QOS and partitions.
   - Submit jobs of various sizes, with a power of 2 number (1, 2, 4, 8…) of
