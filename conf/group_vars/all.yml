@@ -52,7 +52,7 @@ slurmweb_agent_settings_defaults:
     password: "{{ lookup('ansible.builtin.file', redis_local_password_file) }}"
 slurmweb_gateway_settings_defaults:
   ui:
-    host: "http://{{ slurmweb_hostname }}"
+    host: "http://{{ slurmweb_hostname }}.{{ fhpc_namespace }}"
   agents:
     url: "http://{{ slurmweb_hostname }}/{{ slurmweb_agent_subdir }}"
   authentication:

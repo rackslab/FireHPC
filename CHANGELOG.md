@@ -50,6 +50,7 @@ and this project adheres to
   - Configure system locale to `en_US.UTF-8` on rocky8.
   - Add SLURMRESTD_SECURITY=disable_user_check environment variable in
     slurmrestd service to allow running as slurm user.
+  - Containers namespace missing in Slurm-web gateway `[ui]` > `host`.
 
 ## [1.1.0] - 2024-05-07
 
