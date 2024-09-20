@@ -169,6 +169,12 @@ containers:
 Without this modification, the `mymachines` service is basically ignored by the
 _return_ action on `resolve` service. For reference, see `nss-mymachines(8)`.
 
+This can be made persistent with:
+
+```console
+# echo fs.inotify.max_user_instances=1024 > /etc/sysctl.d/99-firehpc.conf
+```
+
 For a quick start, copy the simple example RacksDB database:
 
 ```
