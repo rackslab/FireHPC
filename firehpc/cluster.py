@@ -209,6 +209,7 @@ class EmulatedCluster:
             extravars = {
                 "fhpc_cluster_state_dir": str(self.cluster_dir),
                 "fhpc_cluster": self.name,
+                "fhpc_namespace": manager.namespace,
                 "fhpc_users": users_directory._users_generic(),
                 "fhpc_groups": users_directory._groups_generic(),
             }
