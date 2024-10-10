@@ -44,6 +44,10 @@
       when:
       - slurmweb_enabled
       tags: [ slurmweb ]
+    - role: metrics
+      when:
+      - metrics_enabled
+      tags: [ metrics ]
 
 - hosts: login:compute
   remote_user: root

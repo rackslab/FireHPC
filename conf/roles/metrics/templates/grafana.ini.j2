@@ -1,0 +1,28 @@
+#################################### Server ####################################
+[server]
+# The ip address to bind to, empty will bind to all interfaces
+http_addr =
+
+# The http port  to use
+http_port = 3000
+
+# The public facing domain name used to access grafana from a browser
+domain = {{ ansible_fqdn }}
+
+#################################### Analytics ####################################
+[analytics]
+# Server reporting, sends usage counters to stats.grafana.org every 24 hours.
+# No ip addresses are being tracked, only simple counters to track
+# running instances, dashboard and error counts. It is very helpful to us.
+# Change this option to false to disable reporting.
+reporting_enabled = false
+
+#################################### Security ####################################
+[security]
+# disable creation of admin user on first start of grafana
+disable_initial_admin_creation = true
+
+#################################### Auth LDAP ##########################
+[auth.ldap]
+enabled = true
+config_file = /etc/grafana/ldap.toml

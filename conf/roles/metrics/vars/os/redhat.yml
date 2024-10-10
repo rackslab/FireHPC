@@ -1,0 +1,3 @@
+---
+metrics_signing_key_url: https://rpm.grafana.com/gpg.key
+metrics_repository_url: https://rpm.grafana.com

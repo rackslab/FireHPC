@@ -1,0 +1,9 @@
+---
+- name: Add metrics dnf repository
+  ansible.builtin.yum_repository:
+    name: grafana
+    description: Grafana Repository for metrics stack
+    file: grafana
+    baseurl: "{{ metrics_repository_url }}"
+    gpgcheck: yes
+    gpgkey: "{{ metrics_signing_key_url }}"

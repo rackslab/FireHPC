@@ -1,0 +1,45 @@
+---
+- name: Gather OS specific variables
+  ansible.builtin.include_vars:
+    file: "os/{{ ansible_facts.os_family | lower }}.yml"
+
+- name: Include OS dedicated tasks
+  ansible.builtin.include_tasks:
+    file: "os/{{ ansible_facts.os_family | lower }}.yml"
+
+- name: Install metrics packages
+  ansible.builtin.package:
+    name: "{{ metrics_packages }}"
+
+- name: Ensure metrics services are started and enabled
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ metrics_services }}"
+
+- name: Create dashboards directory
+  ansible.builtin.file:
+    path: "{{ metrics_dashboards_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Copy dashboards
+  ansible.builtin.copy:
+    src: "{{ item  }}"
+    dest: "{{ metrics_dashboards_dir }}/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ metrics_dashboards }}"
+
+- name: Deploy metrics configuration files
+  ansible.builtin.template:
+    src: "{{ item.template }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - "Restart {{ item.service }}"
+  loop: "{{ metrics_confs }}"

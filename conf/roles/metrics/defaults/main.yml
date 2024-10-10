@@ -1,0 +1,42 @@
+---
+metrics_enabled: false
+metrics_signing_key_path: /usr/share/keyrings/grafana.key
+metrics_repository_name: grafana
+metrics_repository_url: "{{ undef(hint='metrics repository URL must be defined') }}"
+metrics_repository_release: stable
+metrics_packages:
+- alloy
+- prometheus
+- grafana
+metrics_services:
+- alloy
+- prometheus
+- grafana-server
+metrics_ldap_server: "admin.{{ ansible_facts.domain }}"  # dummy
+metrics_ldap_port: 389
+metrics_ldap_user_filter: (uid=%s)
+metrics_ldap_search_base: "dc=cluster,dc=example,dc=com"  # dummy
+metrics_ldap_admins_group: "cn=admin,ou=groups,{{ metrics_ldap_search_base }}"  # dummy
+metrics_dashboards_dir: /var/lib/grafana/dashboards
+metrics_dashboards:
+- slurm.json
+
+metrics_confs:
+- template: alloy.j2
+  dest: /etc/alloy/config.alloy
+  service: alloy
+- template: prometheus.yml.j2
+  dest: /etc/prometheus/prometheus.yml
+  service: prometheus
+- template: grafana.ini.j2
+  dest: /etc/grafana/grafana.ini
+  service: grafana
+- template: ldap.toml.j2
+  dest: /etc/grafana/ldap.toml
+  service: grafana
+- template: datasources.yaml.j2
+  dest: /etc/grafana/provisioning/datasources/prometheus.yaml
+  service: grafana
+- template: dashboards.yaml.j2
+  dest: /etc/grafana/provisioning/dashboards/default.yaml
+  service: grafana

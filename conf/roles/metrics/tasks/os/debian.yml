@@ -1,0 +1,12 @@
+---
+- name: Execute apt tasks
+  block:
+    - name: Download grafana GPG signing key for metrics stack
+      ansible.builtin.get_url:
+        url: "{{ metrics_signing_key_url }}"
+        dest: "{{ metrics_signing_key_path }}"
+
+    - name: Install grafana apt repository for metrics stack
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by={{ metrics_signing_key_path }} arch=amd64] {{ metrics_repository_url }} {{ metrics_repository_release }} main"
+        filename: "{{ metrics_repository_name }}"

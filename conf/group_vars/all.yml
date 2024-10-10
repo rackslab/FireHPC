@@ -61,3 +61,5 @@ slurmweb_gateway_settings_defaults:
     uri: "ldaps://{{ fhpc_ldap_server }}/"
     user_base: "ou=people,{{ fhpc_ldap_base }}"
     group_base: "ou=groups,{{ fhpc_ldap_base }}"
+metrics_ldap_server: "{{ fhpc_ldap_server }}"
+metrics_ldap_search_base: "{{ fhpc_ldap_base }}"

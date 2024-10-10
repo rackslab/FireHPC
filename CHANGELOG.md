@@ -27,6 +27,7 @@ and this project adheres to
     Slurm.
   - Add support for RHEL9 and compatibles distributions.
   - Add possibility to define custom site file name in nginx role.
+  - Introduce metrics role to deploy prometheus, alloy and grafana.
 - docs: add sysctl fs.inotify.max_user_instances value increase recommendation
   in README.md to avoid weird issue when launching many containers.
 
