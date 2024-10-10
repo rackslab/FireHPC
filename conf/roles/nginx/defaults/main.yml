@@ -1,3 +1,5 @@
 ---
 nginx_packages:
 - nginx
+nginx_site_template: "{{ undef(hint='Nginx file template must be defined') }}"
+nginx_conf_filename: default

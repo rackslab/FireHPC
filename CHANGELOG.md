@@ -26,6 +26,7 @@ and this project adheres to
   - Add possibility to define additional QOS and alternative partitions in
     Slurm.
   - Add support for RHEL9 and compatibles distributions.
+  - Add possibility to define custom site file name in nginx role.
 - docs: add sysctl fs.inotify.max_user_instances value increase recommendation
   in README.md to avoid weird issue when launching many containers.
 

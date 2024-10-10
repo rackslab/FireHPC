@@ -8,15 +8,27 @@
     name: "{{ nginx_packages }}"
     state: latest
 
-- name: Setup default site
+- name: Setup site
   ansible.builtin.template:
-    src: "{{ nginx_default_site_template }}"
-    dest: "{{ nginx_conf_file }}"
+    src: "{{ nginx_site_template }}"
+    dest: "{{ nginx_conf_dir }}/{{ nginx_conf_filename_ext }}"
     owner: root
     group: root
     mode: 0644
   notify:
-    - Restart nginx
+  - Restart nginx
+
+- name: Enable site
+  ansible.builtin.file:
+    src: "{{ nginx_conf_dir }}/{{ nginx_conf_filename_ext }}"
+    path: "/etc/nginx/sites-enabled/{{ nginx_conf_filename_ext }}"
+    state: link
+    owner: root
+    group: root
+  notify:
+  - Restart nginx
+  when:
+  - ansible_facts.os_family == 'debian'
 
 - name: Ensure nginx service is started
   ansible.builtin.service:

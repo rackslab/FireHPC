@@ -1,2 +1,3 @@
 ---
-nginx_conf_file: /etc/nginx/sites-available/default
+nginx_conf_dir: /etc/nginx/sites-available
+nginx_conf_filename_ext: "{{ nginx_conf_filename }}"
