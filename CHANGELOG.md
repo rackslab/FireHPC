@@ -108,7 +108,8 @@ and this project adheres to
   - Use `fhpc_db` for default `racksdb_database` variable value and to define
     RacksDB database content.
   - Install `bach-completion` by default on all nodes with _common_ role.
-  - Install `clustershell` on all nodes by default with new _clustershell_ role.
+  - Install `clustershell` on all nodes by default with new _clustershell_
+    role (#3).
   - Introduce _nginx_ role.
 - docs:
   - Mention `conf` command `--db`, `--schema` and `--tags` options in
