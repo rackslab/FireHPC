@@ -28,6 +28,11 @@ The following services are automatically deployed in the emulated cluster:
 - SSH with public keys
 - OpenMPI
 
+Additional components can be also be deployed, such as:
+
+- [Slurm-web](https://slurm-web.com)
+- Metrics stack with Prometheus, Grafana and Grafana Alloy
+
 ## Architecture
 
 FireHPC requires Python >= 3.9.
@@ -183,6 +188,11 @@ $ cp /usr/share/doc/firehpc/examples/db/racksdb.yml racksdb.yml
 
 This file can optionally be modified to add nodes or change hostnames.
 
+
+## Usage
+
+### Deploy
+
 With your regular user, run FireHPC with a cluster name and an OS in arguments.
 For example:
 
@@ -196,6 +206,8 @@ The available OS are reported by this command:
 $ firehpc images
 ```
 
+### Status
+
 When it is deployed, check the status of the emulated cluster:
 
 ```
@@ -203,6 +215,8 @@ $ firehpc status --cluster hpc
 ```
 
 This reports the started containers and the randomly generated user accounts.
+
+### MPI
 
 You can connect to your containers (eg. _admin_) with this command:
 
@@ -237,6 +251,20 @@ You can also try Slurm REST API:
 [<user>@login ~]$ export $(scontrol token)
 [<user>@login ~]$ curl -H "X-SLURM-USER-NAME: ${USER}" -H "X-SLURM-USER-TOKEN: ${SLURM_JWT}" http://admin:6820/slurm/v0.0.39/nodes
 ```
+
+### Slurm-web
+
+When Slurm-web is enabled, it is available at: http://admin.hpc/
+
+### Metrics
+
+When the metrics stack is enabled, Grafana is available at:
+http://admin.hpc:3000/
+
+Grafana is setup with a _Slurm_ dashboard showing diagrams of nodes states and
+job queue by default.
+
+### Clean
 
 When you are done, you can clean up everything for a cluster with this command:
 
