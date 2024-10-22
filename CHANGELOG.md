@@ -35,6 +35,8 @@ and this project adheres to
     to access Grafana and Slurm-web interfaces.
 
 ### Changed
+- usage emulator: Change pending jobs limit formula to avoid number of jobs
+  growing as fast as the number of nodes.
 - conf:
   - Install missing socat package on RHEL.
   - Use packages list instead of loop to install MariaDB packages.

@@ -77,7 +77,13 @@ class ClusterJobsLoader:
             qos = self._get_qos()
             logger.info("cluster %s: QOS found: %s", self.cluster.name, qos)
 
-            pending_jobs_limit = total_nodes() * 5
+            # Formula to have jobs limit that grows less than the number of nodes. With
+            # this formula, we have:
+            #   2 nodes: 12 jobs
+            #   10 nodes: 64 jobs
+            #   100 nodes: 270 jobs
+            #   1000 nodes: 918 jobs
+            pending_jobs_limit = int(30 * (total_nodes() ** 0.5) - 30)
 
             while not self.stop:
                 pending_jobs = self._get_nb_pending_jobs()
