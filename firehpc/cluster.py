@@ -190,10 +190,32 @@ class EmulatedCluster:
             containers_addresses[container.name] = [
                 str(address) for address in container.addresses()
             ]
-        # variable fhpc_nodes
+
+        # variable fhpc_nodes, a dict where nodes are first grouped by tag,
+        # then grouped by socket/cores configurations.
         nodes = {}
+
+        def insert_in_node_group():
+            for node_group in nodes[tag]:
+                if (
+                    node_group["sockets"] == node.type.cpu.sockets
+                    and node_group["cores"] == node.type.cpu.cores
+                ):
+                    node_group["nodes"].append(node.name)
+                    return
+            nodes[tag].append(
+                {
+                    "sockets": node.type.cpu.sockets,
+                    "cores": node.type.cpu.cores,
+                    "nodes": [node.name],
+                }
+            )
+
         for tag in ["admin", "login", "compute"]:
-            nodes[tag] = [node.name for node in infrastructure.nodes.filter(tags=[tag])]
+            if tag not in nodes:
+                nodes[tag] = []
+            for node in infrastructure.nodes.filter(tags=[tag]):
+                insert_in_node_group()
 
         # Unless already existing, generate custom.yml file with variables and
         # add option to ansible-playbook command line to load this file as a

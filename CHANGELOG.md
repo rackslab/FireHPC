@@ -38,6 +38,9 @@ and this project adheres to
     repository.
 
 ### Changed
+- Transform `fhpc_nodes` dictionary values from list of nodes to list of
+  dictionaries to group nodes that share the same socket/cores configuration in
+  RacksDB.
 - usage emulator: Change pending jobs limit formula to avoid number of jobs
   growing as fast as the number of nodes.
 - conf:
