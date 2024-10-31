@@ -18,11 +18,9 @@ ProctrackType=proctrack/linuxproc
 {{ key }}={{ value }}
 {% endfor %}
 
-{% if slurm_emulator %}
-NodeName={{ slurm_compute_nodes | nodeset_fold }} Procs=2 NodeHostName={{ slurm_server }} State=UNKNOWN
-{% else %}
-NodeName={{ slurm_compute_nodes | nodeset_fold }} Procs=2 State=UNKNOWN
-{% endif %}
+{% for node_group in slurm_compute_nodes %}
+NodeName={{ node_group.nodes | nodeset_fold }} Sockets={{ node_group.sockets }} CoresPerSocket={{ node_group.cores }}{% if slurm_emulator %} NodeHostName={{ slurm_server }}{% endif %} State=UNKNOWN
+{% endfor %}
 {% for slurm_partition in slurm_partitions %}
 PartitionName={{ slurm_partition.name }} Nodes={{ slurm_partition.node }} Default={{ "YES" if "default" in slurm_partition and slurm_partition.default else "NO" }} MaxTime={{ slurm_partition.maxtime }} State={{ slurm_partition.state }}
 {% endfor %}

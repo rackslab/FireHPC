@@ -18,7 +18,7 @@ slurm_qos: []
 slurm_compute_nodes: []
 slurm_partitions:
 - name: normal
-  node: "{{ slurm_compute_nodes | nodeset_fold }}"
+  node: "{{ slurm_compute_nodes | map(attribute='nodes') | flatten | nodeset_fold }}"
   default: yes
   maxtime: INFINITE
   state: UP
