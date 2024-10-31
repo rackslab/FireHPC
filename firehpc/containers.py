@@ -324,8 +324,8 @@ class ContainerImage(DBusObject):
         self.name = name
         self.cluster = cluster
         self.namespace = namespace
-        self.creation = datetime.utcfromtimestamp(creation / 10 ** 6)
-        self.modification = datetime.utcfromtimestamp(modification / 10 ** 6)
+        self.creation = datetime.utcfromtimestamp(creation / 10**6)
+        self.modification = datetime.utcfromtimestamp(modification / 10**6)
         self.volume = volume
 
     def remove(self, retries=3) -> None:
