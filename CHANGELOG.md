@@ -53,6 +53,7 @@ and this project adheres to
     compute nodes sockets/cores/memory matching configuration check.
   - Move `maxtime` and `state` Slurm partitions parameters in `params`
     sub-dictionary.
+  - Rename `slurm_partitions` > `node`→`nodes` key.
 
 ### Fixed
 - core:
