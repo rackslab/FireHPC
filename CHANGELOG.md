@@ -48,6 +48,8 @@ and this project adheres to
 - conf:
   - Install missing socat package on RHEL.
   - Use packages list instead of loop to install MariaDB packages.
+  - Enable `config_overrides` slurmd parameter in Slurm configuration to avoid
+    compute nodes sockets/cores/memory matching configuration check.
 
 ### Fixed
 - core:
