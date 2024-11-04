@@ -30,6 +30,8 @@ and this project adheres to
   - Introduce metrics role to deploy prometheus, alloy and grafana.
   - Declare nodes in Slurm configuration with their socket/cores/memory
     configuration extracted from RacksDB.
+  - Add `params` key in `slurm_partitions` parameter to give possibility to
+    set any arbitrary Slurm partition configuration parameter in inventory.
 - docs:
   - Add sysctl `fs.inotify.max_user_instances` value increase recommendation in
     README.md to avoid weird issue when launching many containers.
@@ -49,6 +51,8 @@ and this project adheres to
   - Use packages list instead of loop to install MariaDB packages.
   - Enable `config_overrides` slurmd parameter in Slurm configuration to avoid
     compute nodes sockets/cores/memory matching configuration check.
+  - Move `maxtime` and `state` Slurm partitions parameters in `params`
+    sub-dictionary.
 
 ### Fixed
 - core:

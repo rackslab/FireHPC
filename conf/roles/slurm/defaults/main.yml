@@ -20,8 +20,9 @@ slurm_partitions:
 - name: normal
   node: "{{ slurm_compute_nodes | map(attribute='nodes') | flatten | nodeset_fold }}"
   default: yes
-  maxtime: INFINITE
-  state: UP
+  params:
+    MaxTime: INFINITE
+    State: UP
 
 slurm_params: {}
 slurmdbd_params: {}
