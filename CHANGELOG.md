@@ -19,7 +19,7 @@ and this project adheres to
   - Submit jobs of various sizes, with a power of 2 number (1, 2, 4, 8…) of
     cores or nodes, up to the full size of the cluster. A number of nodes is
     selected when Slurm SelectType plugin is linear, a number of cores is
-    selected otherwise.
+    selected otherwise. Small jobs are more submitted than big jobs.
   - Select job partition randomly weighted by their number of resources to favor
     largest partitions.
 - conf:

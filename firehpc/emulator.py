@@ -208,7 +208,11 @@ class ClusterJobsLoader:
             while i <= limit:
                 possible_values.append(i)
                 i *= 2
-            return random.choice(possible_values)
+            weights = [
+                min(512, 2 ** (len(possible_values) - index[0] - 1))
+                for index in enumerate(possible_values)
+            ]
+            return random.choices(possible_values, weights)[0]
 
         # If select/linear, allocate a number of nodes, else allocates a number
         # of tasks.
