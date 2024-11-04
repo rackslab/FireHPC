@@ -192,21 +192,20 @@ class EmulatedCluster:
             ]
 
         # variable fhpc_nodes, a dict where nodes are first grouped by tag,
-        # then grouped by socket/cores configurations.
+        # then grouped by node type.
         nodes = {}
 
-        def insert_in_node_group():
-            for node_group in nodes[tag]:
-                if (
-                    node_group["sockets"] == node.type.cpu.sockets
-                    and node_group["cores"] == node.type.cpu.cores
-                ):
-                    node_group["nodes"].append(node.name)
+        def insert_in_node_type():
+            for node_type in nodes[tag]:
+                if node_type["type"] == node.type.id:
+                    node_type["nodes"].append(node.name)
                     return
             nodes[tag].append(
                 {
+                    "type": node.type.id,
                     "sockets": node.type.cpu.sockets,
                     "cores": node.type.cpu.cores,
+                    "memory": node.type.ram.dimm * (node.type.ram.size // 1024**2),
                     "nodes": [node.name],
                 }
             )
@@ -215,7 +214,7 @@ class EmulatedCluster:
             if tag not in nodes:
                 nodes[tag] = []
             for node in infrastructure.nodes.filter(tags=[tag]):
-                insert_in_node_group()
+                insert_in_node_type()
 
         # Unless already existing, generate custom.yml file with variables and
         # add option to ansible-playbook command line to load this file as a
