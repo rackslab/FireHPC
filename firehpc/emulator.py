@@ -188,6 +188,12 @@ class ClusterJobsLoader:
             timelimit = str(partition.time["number"])
         else:
             timelimit = "1:0:0"  # 1 hour
+
+        # Make 1/10th of job radomly fail.
+        script = "/usr/bin/sleep 360"
+        if not random.choices([True, False], weights=[10,1])[0]:
+            script += " && /bin/false"
+
         cmd = [
             f"{user.login}@{dest}.{self.cluster.name}",
             "sbatch",
@@ -198,7 +204,7 @@ class ClusterJobsLoader:
             "--time",
             timelimit,
             "--wrap",
-            "/usr/bin/sleep 360",
+            script,
         ]
 
         def random_power_two(limit: int) -> int:

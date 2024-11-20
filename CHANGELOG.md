@@ -22,6 +22,7 @@ and this project adheres to
     selected otherwise. Small jobs are more submitted than big jobs.
   - Select job partition randomly weighted by their number of resources to favor
     largest partitions.
+  - Make some (about 1/10th) submitted jobs randomly fail (#9).
 - conf:
   - Add possibility to define additional QOS and alternative partitions in
     Slurm.
