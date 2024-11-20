@@ -42,6 +42,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# 2-tuple of possible jobs timelimits and durations with their correspond weights in
+# ramdom selection.
+JOBS_TIMELIMITS = (["10", "30", "1:0:0", "6:0:0"], [50, 5, 2, 1])
+JOBS_DURATIONS = ([360, 540, 720, 1200], [50, 5, 2, 1])
 
 ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes", "cpus", "time"])
 
@@ -187,11 +191,15 @@ class ClusterJobsLoader:
         if partition.time["set"]:
             timelimit = str(partition.time["number"])
         else:
-            timelimit = "1:0:0"  # 1 hour
+            timelimit = random.choices(JOBS_TIMELIMITS[0], weights=JOBS_TIMELIMITS[1])[
+                0
+            ]
 
         # Make 1/10th of job radomly fail.
-        script = "/usr/bin/sleep 360"
-        if not random.choices([True, False], weights=[10,1])[0]:
+        script = "/usr/bin/sleep " + str(
+            random.choices(JOBS_DURATIONS[0], weights=JOBS_DURATIONS[1])[0]
+        )
+        if not random.choices([True, False], weights=[10, 1])[0]:
             script += " && /bin/false"
 
         cmd = [

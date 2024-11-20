@@ -23,6 +23,8 @@ and this project adheres to
   - Select job partition randomly weighted by their number of resources to favor
     largest partitions.
   - Make some (about 1/10th) submitted jobs randomly fail (#9).
+  - Submit jobs with random durations and timelimit with low probability for
+    jobs to reach their timelimit (#10).
 - conf:
   - Add possibility to define additional QOS and alternative partitions in
     Slurm.
