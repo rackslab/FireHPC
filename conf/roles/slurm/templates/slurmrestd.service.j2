@@ -13,3 +13,9 @@ RuntimeDirectoryMode=0755
 {% endif %}
 User=slurm
 Group=slurm
+# There are probably some memory leaks in slurmrestd, it strictly consumes more
+# memory requests after requests. As a workaround to this, set a memory limit so
+# that kernel OOM kills the service when it is reached, and restart the service
+# immediately.
+MemoryMax=3G
+Restart=always
