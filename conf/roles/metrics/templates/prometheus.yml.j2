@@ -23,6 +23,9 @@ scrape_configs:
   - job_name: slurm
 
     scrape_interval: 30s
+    # Increase from default 10s as slurmrestd can sometimes be slow to respond
+    # in presence of 1000+ jobs.
+    scrape_timeout: 20s
 
     metrics_path: /agent/metrics
     static_configs:
