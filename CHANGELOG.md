@@ -76,6 +76,8 @@ and this project adheres to
   - Add SLURMRESTD_SECURITY=disable_user_check environment variable in
     slurmrestd service to allow running as slurm user.
   - Containers namespace missing in Slurm-web gateway `[ui]` > `host`.
+  - Force creation of CA and LDAP certificates to override possibly existing
+    certificates during bootstrap.
 
 ## [1.1.0] - 2024-05-07
 

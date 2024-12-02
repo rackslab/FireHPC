@@ -38,3 +38,4 @@
     privatekey_path: "{{ common_local_ca_key_file }}"
     privatekey_passphrase: "{{ lookup('ansible.builtin.file', common_local_ca_password_file) }}"
     provider: selfsigned
+    force: true  # override possibly existing certificate

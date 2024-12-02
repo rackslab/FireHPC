@@ -33,3 +33,4 @@
     ownca_not_after: +365d  # valid for one year
     ownca_not_before: "-1d"  # valid since yesterday
     path: "{{ ldap_local_tls_cert_file }}"
+    force: true  # override possibly existing certificate
