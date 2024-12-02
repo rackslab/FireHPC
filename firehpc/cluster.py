@@ -276,6 +276,13 @@ class EmulatedCluster:
         logger.info("Stopping cluster storage service")
         manager.storage().stop()
 
+        # Remove cluster state directory
+        if self.cluster_dir.exists():
+            logger.info(
+                "Removing existing cluster state directory %s", self.cluster_dir
+            )
+            shutil.rmtree(self.cluster_dir)
+
     def start(self) -> None:
         manager = ContainersManager(self.name)
 

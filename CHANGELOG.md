@@ -65,6 +65,7 @@ and this project adheres to
     connect to the same host with Paramiko library.
   - Set jobs time limit to partition time limit when set to avoid jobs that
     exceed partition time limit.
+  - Remove cluster state on cluster clean.
 - usage emulator:
   - Order of partition/qos variables in job submission informational message.
   - Support of Slurm 24.05 `sacctmgr show qos --json` format to retrieve the
