@@ -171,10 +171,11 @@ This command accepts the following options:
 +
 --
 This command requires at least one argument to specify the destination container
-in the format [LOGIN@]CONTAINER.CLUSTER (ex: `admin.hpc` or `john@login.hpc`).
-Additional arguments are treated as a command to execute on container with its
-own arguments. Without additional arguments, an interactive shell is launched in
-the container.
+in the format [LOGIN@][CONTAINER.]CLUSTER (ex: `hpc`, `login.hpc`, `root@hpc` or
+`john@cn1.hpc`). By default, _admin_ container is considered. Additional
+arguments are treated as a command to execute on container with its own
+arguments. Without additional arguments, an interactive shell is launched in the
+container.
 --
 
 [.cli-opt]#*start*#::

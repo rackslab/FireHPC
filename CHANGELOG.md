@@ -58,6 +58,7 @@ and this project adheres to
   - Move `maxtime` and `state` Slurm partitions parameters in `params`
     sub-dictionary.
   - Rename `slurm_partitions` > `node`→`nodes` key.
+- docs: Explain in manpage ssh command considers admin container by default.
 
 ### Fixed
 - core:
