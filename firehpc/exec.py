@@ -295,13 +295,9 @@ class FireHPCExec:
         cluster.stop()
 
     def _execute_ssh(self):
-        if "." not in self.args.args[0]:
-            logger.critical(
-                "Format of ssh command first argument is not valid, it must be "
-                "destination node with format: [login@]node.cluster"
-            )
-            sys.exit(1)
-        cluster_name = self.args.args[0].split(".")[1]
+        cluster_name = self.args.args[0]
+        if "." in self.args.args[0]:
+            cluster_name = cluster_name.split(".")[1]
         cluster = EmulatedCluster(self.settings, cluster_name, self.args.state)
         ssh = SSHClient(cluster)
         ssh.exec(self.args.args)
