@@ -28,7 +28,7 @@ from racksdb.errors import RacksDBFormatError, RacksDBSchemaError
 from .version import get_version
 from .settings import RuntimeSettings
 from .state import default_state_dir
-from .cluster import EmulatedCluster
+from .cluster import EmulatedCluster, clusters_list
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
 from .images import OSImagesSources
@@ -216,6 +216,10 @@ class FireHPCExec:
         parser_images = subparsers.add_parser("images", help="List available OS images")
         parser_images.set_defaults(func=self._execute_images)
 
+        # list command
+        parser_list = subparsers.add_parser("list", help="List existing clusters")
+        parser_list.set_defaults(func=self._execute_list)
+
         self.args = parser.parse_args()
         self._setup_logger()
         self.settings = RuntimeSettings()
@@ -317,3 +321,6 @@ class FireHPCExec:
     def _execute_images(self):
         images = OSImagesSources(self.settings)
         print(str(images), end="")
+
+    def _execute_list(self):
+        print("\n".join(clusters_list(self.args.state)))

@@ -40,6 +40,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+def clusters_list(state: Path):
+    """Return list of cluster names present in state directory."""
+    return [path.name for path in state.glob('*')]
+
 
 @dataclass
 class ClusterStatus:

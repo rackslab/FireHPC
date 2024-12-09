@@ -15,6 +15,7 @@ and this project adheres to
 - Introduce `fhpc_namespace` extra variable with the name of containers
   namespace.
 - Add bash-completion script for `firehpc` command (#12).
+- Add `firehpc list` command to list clusters present in state directory (#16).
 - usage emulator:
   - Submit jobs randomly in existing QOS and partitions.
   - Submit jobs of various sizes, with a power of 2 number (1, 2, 4, 8…) of
