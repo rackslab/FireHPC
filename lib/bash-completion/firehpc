@@ -1,0 +1,202 @@
+# firehpc(1) completion
+# -*- shell-script -*-
+#
+# Copyright (C) 2024 Rackslab
+#
+# This file is part of FireHPC.
+#
+# FireHPC is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FireHPC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with FireHPC.  If not, see <https://www.gnu.org/licenses/>.
+
+__contains_word() {
+    local w word=$1; shift
+    for w in "$@"; do
+        [[ $w = "$word" ]] && return
+    done
+}
+
+__firehpc_clusters_list() {
+    ls ~/.local/state/firehpc/
+}
+
+__firehpc_os_list() {
+    grep https /usr/share/firehpc/images.yml | cut -d: -f1
+}
+
+_firehpc_global() {
+    local cur=$1 prev=$2 comps; shift; shift;
+    local verbs=$@
+    local -A OPTS=(
+        [STANDALONE]='-v --version --debug --show-libs-logs'
+        [FILE]='--state'
+    )
+    if __contains_word "$prev" ${OPTS[FILE]}; then
+        _filedir -d
+    elif [[ $cur = -* ]]; then
+        COMPREPLY=( $(compgen -W '${OPTS[*]}' -- "$cur") )
+    else
+        COMPREPLY=( $(compgen -W '${OPTS[*]} ${verbs}' -- "$cur") )
+    fi
+    return 0
+}
+
+_firehpc_clean() {
+    local cur=$1 prev=$2 comps
+    local -A OPTS=(
+        [CLUSTER]='--cluster'
+    )
+    if __contains_word "$prev" ${OPTS[CLUSTER]}; then
+        comps=$( __firehpc_clusters_list )
+        COMPREPLY=( $(compgen -o filenames -W '$comps' -- "$cur") )
+    else
+        COMPREPLY=( $(compgen -W '${OPTS[*]}' -- "$cur") )
+    fi
+    return 0
+}
+
+_firehpc_conf() {
+    local cur=$1 prev=$2 comps
+    local -A OPTS=(
+        [STANDALONE]='--with-bootstrap --slurm-emulator'
+        [CLUSTER]='--cluster'
+        [DIR]='-c --custom'
+        [FILE]='--db --schema'
+        [ARG]='--tags'
+    )
+    if __contains_word "$prev" ${OPTS[CLUSTER]}; then
+        comps=$( __firehpc_clusters_list )
+        COMPREPLY=( $(compgen -o filenames -W '$comps' -- "$cur") )
+    elif __contains_word "$prev" ${OPTS[FILE]}; then
+        _filedir
+    elif __contains_word "$prev" ${OPTS[DIR]}; then
+        _filedir -d
+    elif ! __contains_word "$prev" ${OPTS[ARG]}; then
+        COMPREPLY=( $(compgen -W '${OPTS[*]}' -- "$cur") )
+    fi
+    return 0
+}
+
+_firehpc_deploy() {
+    local cur=$1 prev=$2 comps
+    local -A OPTS=(
+        [STANDALONE]='--slurm-emulator'
+        [CLUSTER]='--cluster --users'
+        [OS]='--os'
+        [DIR]='-c --custom'
+        [FILE]='--db --schema'
+        [ARG]='--tags'
+    )
+    if __contains_word "$prev" ${OPTS[CLUSTER]}; then
+        comps=$( __firehpc_clusters_list )
+        COMPREPLY=( $(compgen -o filenames -W '$comps' -- "$cur") )
+    elif __contains_word "$prev" ${OPTS[OS]}; then
+        comps=$( __firehpc_os_list )
+        COMPREPLY=( $(compgen -W '$comps' -- "$cur") )
+    elif __contains_word "$prev" ${OPTS[FILE]}; then
+        _filedir
+    elif __contains_word "$prev" ${OPTS[DIR]}; then
+        _filedir -d
+    elif ! __contains_word "$prev" ${OPTS[ARG]}; then
+       COMPREPLY=( $(compgen -W '${OPTS[*]}' -- "$cur") )
+    fi
+    return 0
+}
+
+_firehpc_ssh() {
+   comps=$( __firehpc_clusters_list )
+   COMPREPLY=( $(compgen -o filenames -W '$comps' -- "$cur") )
+   return 0
+}
+
+_firehpc_start_stop() {
+    local cur=$1 prev=$2 comps
+    local -A OPTS=(
+        [CLUSTER]='--cluster'
+    )
+    if __contains_word "$prev" ${OPTS[CLUSTER]}; then
+        comps=$( __firehpc_clusters_list )
+        COMPREPLY=( $(compgen -o filenames -W '$comps' -- "$cur") )
+    else
+        COMPREPLY=( $(compgen -W '${OPTS[*]}' -- "$cur") )
+    fi
+    return 0
+}
+
+_firehpc_status() {
+    local cur=$1 prev=$2 comps
+    local -A OPTS=(
+        [STANDALONE]='--json'
+        [CLUSTER]='--cluster'
+    )
+    if __contains_word "$prev" ${OPTS[CLUSTER]}; then
+        comps=$( __firehpc_clusters_list )
+        COMPREPLY=( $(compgen -o filenames -W '$comps' -- "$cur") )
+    else
+        COMPREPLY=( $(compgen -W '${OPTS[*]}' -- "$cur") )
+    fi
+    return 0
+}
+
+_firehpc() {
+    local cur prev opts
+    local i verb comps
+
+    local VERBS='clean conf deploy images ssh start status stop'
+
+    _init_completion || return
+
+    # Find the verb in the command
+    for ((i=0; i <= COMP_CWORD; i++)); do
+        if __contains_word "${COMP_WORDS[i]}" ${VERBS}; then
+            verb=${COMP_WORDS[i]}
+            break
+        fi
+    done
+
+    case $verb in
+        clean)
+            _firehpc_clean "$cur" "$prev"
+            return
+            ;;
+        conf)
+            _firehpc_conf "$cur" "$prev"
+            return
+            ;;
+        deploy)
+            _firehpc_deploy "$cur" "$prev"
+            return
+            ;;
+        images)
+            # Nothing to suggest for this verbs
+            return
+            ;;
+        ssh)
+            _firehpc_ssh "$cur" "$prev"
+            return
+            ;;
+        start|stop)
+            _firehpc_start_stop "$cur" "$prev"
+            return
+            ;;
+        status)
+            _firehpc_status "$cur" "$prev"
+            return
+            ;;
+        *)
+            _firehpc_global "$cur" "$prev" $VERBS
+            return
+            ;;
+    esac
+}
+
+complete -F _firehpc firehpc
