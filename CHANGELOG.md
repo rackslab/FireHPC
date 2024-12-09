@@ -45,6 +45,7 @@ and this project adheres to
   - Explain in README.md Ansible core 2.16 requirement for both _rocky8_ and
     _debian13_ clusters with a method to install this version from PyPI
     repository.
+  - Mention `firehpc list` command in manpage.
 
 ### Changed
 - Transform `fhpc_nodes` dictionary values from list of nodes to list of

@@ -165,6 +165,10 @@ This command accepts the following options:
   List available operating systems and the URL of the corresponding container
   images to download.
 
+[.cli-opt]#*list*#::
+
+  List clusters present in FireHPC state directory.
+
 [.cli-opt]#*ssh*#::
 
   Open a shell or run a command on a container through SSH.
