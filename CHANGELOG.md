@@ -46,6 +46,7 @@ and this project adheres to
     _debian13_ clusters with a method to install this version from PyPI
     repository.
   - Mention `firehpc list` command in manpage.
+  - Mention `firehpc load` command in manpage.
 
 ### Changed
 - Replace `fhpc-emulate-slurm-usage` command by `firehpc load` (#13).
