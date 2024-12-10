@@ -48,6 +48,7 @@ and this project adheres to
   - Mention `firehpc list` command in manpage.
 
 ### Changed
+- Replace `fhpc-emulate-slurm-usage` command by `firehpc load` (#13).
 - Transform `fhpc_nodes` dictionary values from list of nodes to list of
   dictionaries to group nodes by type in RacksDB.
 - `firehpc ssh <cluster>` now connects to _admin_ host by default (#8).

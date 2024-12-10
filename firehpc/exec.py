@@ -32,6 +32,7 @@ from .cluster import EmulatedCluster, clusters_list
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
 from .images import OSImagesSources
+from .emulator import load_clusters
 from .log import TTYFormatter
 from .dumpers import DumperFactory
 
@@ -220,6 +221,16 @@ class FireHPCExec:
         parser_list = subparsers.add_parser("list", help="List existing clusters")
         parser_list.set_defaults(func=self._execute_list)
 
+        # load command
+        parser_load = subparsers.add_parser("load", help="Load clusters wiht jobs")
+        parser_load.add_argument(
+            "clusters",
+            metavar="CLUSTER",
+            help="Destination clusters",
+            nargs="+",
+        )
+        parser_load.set_defaults(func=self._execute_load)
+
         self.args = parser.parse_args()
         self._setup_logger()
         self.settings = RuntimeSettings()
@@ -324,3 +335,6 @@ class FireHPCExec:
 
     def _execute_list(self):
         print("\n".join(clusters_list(self.args.state)))
+
+    def _execute_load(self):
+        load_clusters(self.settings, self.args.clusters, self.args.state)
