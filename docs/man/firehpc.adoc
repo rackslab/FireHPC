@@ -169,6 +169,11 @@ This command accepts the following options:
 
   List clusters present in FireHPC state directory.
 
+[.cli-opt]#*load*#::
+
+  Load clusters with fake jobs to emulate real usage. The command requires one
+  or multiple cluster names in argument.
+
 [.cli-opt]#*ssh*#::
 
   Open a shell or run a command on a container through SSH.

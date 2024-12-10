@@ -18,8 +18,7 @@
 # along with FireHPC.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
-import argparse
+from typing import TYPE_CHECKING, List
 from pathlib import Path
 import logging
 import sys
@@ -29,13 +28,10 @@ import time
 import threading
 from collections import namedtuple
 
-from .version import get_version
 from .settings import RuntimeSettings
-from .state import default_state_dir
 from .cluster import EmulatedCluster
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
-from .log import TTYFormatter
 
 if TYPE_CHECKING:
     from .users import UserEntry
@@ -49,6 +45,31 @@ JOBS_DURATIONS = ([360, 540, 720, 1200], [50, 5, 2, 1])
 
 ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes", "cpus", "time"])
 
+def load_clusters(settings: RuntimeSettings, clusters: List[str], state: Path):
+    loaders = []
+    threads = []
+    try:
+        for _cluster in clusters:
+            loader = ClusterJobsLoader(
+                EmulatedCluster(settings, _cluster, state)
+            )
+            thread = threading.Thread(target=loader.run)
+            loaders.append(loader)
+            threads.append(thread)
+            thread.start()
+        # wait for any thread
+        threads[0].join()
+    except FireHPCRuntimeError as e:
+        logger.critical(str(e))
+        sys.exit(1)
+    except KeyboardInterrupt:
+        logger.info("Received keyboard interrupt, setting loader stop flag.")
+        for loader in loaders:
+            loader.stop = True
+        logger.info("Waiting for loader threads to stop…")
+        for thread in threads:
+            thread.join()
+        logger.info("Cluster jobs loader is stopped.")
 
 class ClusterJobsLoader:
     def __init__(self, cluster: EmulatedCluster):
@@ -236,87 +257,3 @@ class ClusterJobsLoader:
             cmd.extend(["--ntasks", str(random_power_two(partition.cpus))])
 
         self.ssh.exec(cmd)
-
-
-class FireHPCUsageEmulator:
-    @classmethod
-    def run(cls):
-        cls()
-
-    def __init__(self):
-        parser = argparse.ArgumentParser(
-            description="Emulate Slurm usage on FireHPC cluster."
-        )
-        parser.add_argument(
-            "-v",
-            "--version",
-            action="version",
-            version="FireHPC " + get_version(),
-        )
-        parser.add_argument(
-            "--debug",
-            action="store_true",
-            help="Enable debug mode",
-        )
-        parser.add_argument(
-            "--show-libs-logs",
-            action="store_true",
-            help="Show external libraries logs",
-        )
-        parser.add_argument(
-            "--state",
-            help="Directory to store cluster state (default: %(default)s)",
-            type=Path,
-            default=default_state_dir(),
-        )
-        parser.add_argument(
-            "clusters",
-            metavar="cluster",
-            help="Cluster to run usage emulation.",
-            nargs="+",
-        )
-
-        self.args = parser.parse_args()
-        self._setup_logger()
-        settings = RuntimeSettings()
-        loaders = []
-        threads = []
-        try:
-            for _cluster in self.args.clusters:
-                loader = ClusterJobsLoader(
-                    EmulatedCluster(settings, _cluster, self.args.state)
-                )
-                thread = threading.Thread(target=loader.run)
-                loaders.append(loader)
-                threads.append(thread)
-                thread.start()
-            # wait for any thread
-            threads[0].join()
-        except FireHPCRuntimeError as e:
-            logger.critical(str(e))
-            sys.exit(1)
-        except KeyboardInterrupt:
-            logger.info("Received keyboard interrupt, setting loader stop flag.")
-            for loader in loaders:
-                loader.stop = True
-            logger.info("Waiting for loader threads to stop…")
-            for thread in threads:
-                thread.join()
-            logger.info("Cluster jobs loader is stopped.")
-
-    def _setup_logger(self) -> None:
-        if self.args.debug:
-            logging_level = logging.DEBUG
-        else:
-            logging_level = logging.INFO
-
-        root_logger = logging.getLogger()
-        root_logger.setLevel(logging_level)
-        handler = logging.StreamHandler()
-        handler.setLevel(logging_level)
-        formatter = TTYFormatter(self.args.debug)
-        handler.setFormatter(formatter)
-        if not self.args.show_libs_logs:
-            lib_filter = logging.Filter("firehpc")  # filter out all libs logs
-            handler.addFilter(lib_filter)
-        root_logger.addHandler(handler)

@@ -46,8 +46,10 @@ and this project adheres to
     _debian13_ clusters with a method to install this version from PyPI
     repository.
   - Mention `firehpc list` command in manpage.
+  - Mention `firehpc load` command in manpage.
 
 ### Changed
+- Replace `fhpc-emulate-slurm-usage` command by `firehpc load` (#13).
 - Transform `fhpc_nodes` dictionary values from list of nodes to list of
   dictionaries to group nodes by type in RacksDB.
 - `firehpc ssh <cluster>` now connects to _admin_ host by default (#8).
@@ -83,6 +85,9 @@ and this project adheres to
   - Containers namespace missing in Slurm-web gateway `[ui]` > `host`.
   - Force creation of CA and LDAP certificates to override possibly existing
     certificates during bootstrap.
+
+### Removed
+- docs: Remove `fhpc-emulate-slurm-usage` manpage.
 
 ## [1.1.0] - 2024-05-07
 
