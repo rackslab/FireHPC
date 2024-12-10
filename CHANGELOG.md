@@ -85,6 +85,9 @@ and this project adheres to
   - Force creation of CA and LDAP certificates to override possibly existing
     certificates during bootstrap.
 
+### Removed
+- docs: Remove `fhpc-emulate-slurm-usage` manpage.
+
 ## [1.1.0] - 2024-05-07
 
 ### Added
