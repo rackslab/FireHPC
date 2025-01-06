@@ -16,7 +16,7 @@ and this project adheres to
   namespace.
 - Add bash-completion script for `firehpc` command (#12).
 - Add `firehpc list` command to list clusters present in state directory (#16).
-- usage emulator:
+- load:
   - Submit jobs randomly in existing QOS and partitions.
   - Submit jobs of various sizes, with a power of 2 number (1, 2, 4, 8…) of
     cores or nodes, up to the full size of the cluster. A number of nodes is
@@ -27,6 +27,7 @@ and this project adheres to
   - Make some (about 1/10th) submitted jobs randomly fail (#9).
   - Submit jobs with random durations and timelimit with low probability for
     jobs to reach their timelimit (#10).
+  - Support Slurm configuration without accounting service and QOS.
 - conf:
   - Add possibility to define additional QOS and alternative partitions in
     Slurm.
@@ -55,8 +56,8 @@ and this project adheres to
 - Transform `fhpc_nodes` dictionary values from list of nodes to list of
   dictionaries to group nodes by type in RacksDB.
 - `firehpc ssh <cluster>` now connects to _admin_ host by default (#8).
-- usage emulator: Change pending jobs limit formula to avoid number of jobs
-  growing as fast as the number of nodes.
+- load: Change pending jobs limit formula to avoid number of jobs growing as
+  fast as the number of nodes.
 - conf:
   - Install `socat` package on all nodes in _common_ role.
   - Use packages list instead of loop to install MariaDB packages.
@@ -77,7 +78,7 @@ and this project adheres to
   - Set jobs time limit to partition time limit when set to avoid jobs that
     exceed partition time limit.
   - Remove cluster state on cluster clean.
-- usage emulator:
+- load:
   - Order of partition/qos variables in job submission informational message.
   - Support of Slurm 24.05 `sacctmgr show qos --json` format to retrieve the
     list of defined QOS.

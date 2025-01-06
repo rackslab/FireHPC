@@ -18,7 +18,7 @@
 # along with FireHPC.  If not, see <https://www.gnu.org/licenses/>.
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 from pathlib import Path
 import logging
 import sys
@@ -78,6 +78,7 @@ class ClusterJobsLoader:
         self.stop = False
         # Initialized in run()
         self.select_type = None
+        self.accounting = False
 
     def run(self) -> None:
         logger.info("cluster %s: started running jobs loader", self.cluster.name)
@@ -94,7 +95,7 @@ class ClusterJobsLoader:
             return sum([partition.nodes for partition in partitions])
 
         try:
-            self.select_type = self._get_select_type()
+            self._get_cluster_config()
             partitions = self._get_partitions()
             logger.info(
                 "cluster %s: partitions found: %s", self.cluster.name, partitions
@@ -137,15 +138,18 @@ class ClusterJobsLoader:
             )
         logger.info("cluster %s: jobs loader is stopping", self.cluster.name)
 
-    def _get_select_type(self) -> str | None:
+    def _get_cluster_config(self) -> None:
         stdout, stderr = self.ssh.exec(
             [f"admin.{self.cluster.name}", "scontrol", "show", "config"]
         )
-        result = None
         for line in stdout.decode().split("\n"):
             if line.startswith("SelectType "):
-                result = line.split(" = ")[1]
-        return result
+                self.select_type = line.split(" = ")[1]
+            if (
+                line.startswith("AccountingStorageType ")
+                and line.split(" = ")[1] == "accounting_storage/slurmdbd"
+            ):
+                self.accounting = True
 
     def _get_partitions(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
@@ -168,6 +172,12 @@ class ClusterJobsLoader:
             ) from err
 
     def _get_qos(self) -> list[str]:
+        if not self.accounting:
+            logger.info(
+                "cluster %s: accounting is disabled, skipping QOS retrieval",
+                self.cluster.name,
+            )
+            return [None]
         stdout, stderr = self.ssh.exec(
             [f"admin.{self.cluster.name}", "sacctmgr", "show", "qos", "--json"]
         )
@@ -194,7 +204,7 @@ class ClusterJobsLoader:
             ) from err
 
     def _launch_job(
-        self, user: UserEntry, qos: str, partition: ClusterPartition
+        self, user: UserEntry, qos: Optional[str], partition: ClusterPartition
     ) -> None:
         logger.info(
             "cluster %s: submitting job for user %s on partition %s with QOS %s",
@@ -226,8 +236,6 @@ class ClusterJobsLoader:
         cmd = [
             f"{user.login}@{dest}.{self.cluster.name}",
             "sbatch",
-            "--qos",
-            qos,
             "--partition",
             partition.name,
             "--time",
@@ -235,6 +243,9 @@ class ClusterJobsLoader:
             "--wrap",
             script,
         ]
+        # Insert QOS argument if defined.
+        if qos:
+            cmd[2:2] = ["--qos", qos]
 
         def random_power_two(limit: int) -> int:
             """Select randomly one power of two below the limit."""
