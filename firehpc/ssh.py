@@ -54,7 +54,7 @@ class SSHClient:
         # When dot is absent from hostname, consider it is the cluster name. In this
         # case, connect to admin host of this cluster by default.
         if "." not in hostname:
-            hostname  = "admin." + hostname
+            hostname = "admin." + hostname
         # append container namespace to hostname
         hostname += f".{ContainersManager(self.cluster).namespace}"
         if self.asbin:

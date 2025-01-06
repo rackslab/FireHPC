@@ -45,14 +45,13 @@ JOBS_DURATIONS = ([360, 540, 720, 1200], [50, 5, 2, 1])
 
 ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes", "cpus", "time"])
 
+
 def load_clusters(settings: RuntimeSettings, clusters: List[str], state: Path):
     loaders = []
     threads = []
     try:
         for _cluster in clusters:
-            loader = ClusterJobsLoader(
-                EmulatedCluster(settings, _cluster, state)
-            )
+            loader = ClusterJobsLoader(EmulatedCluster(settings, _cluster, state))
             thread = threading.Thread(target=loader.run)
             loaders.append(loader)
             threads.append(thread)
@@ -70,6 +69,7 @@ def load_clusters(settings: RuntimeSettings, clusters: List[str], state: Path):
         for thread in threads:
             thread.join()
         logger.info("Cluster jobs loader is stopped.")
+
 
 class ClusterJobsLoader:
     def __init__(self, cluster: EmulatedCluster):
