@@ -9,5 +9,6 @@ common_packages:
   - less
   - locales
   - bash-completion
+  - socat
 common_ca_system_dir: /usr/local/share/ca-certificates
 common_ca_update_cmd: update-ca-certificates

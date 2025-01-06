@@ -57,7 +57,7 @@ and this project adheres to
 - usage emulator: Change pending jobs limit formula to avoid number of jobs
   growing as fast as the number of nodes.
 - conf:
-  - Install missing socat package on RHEL.
+  - Install `socat` package on all nodes in _common_ role.
   - Use packages list instead of loop to install MariaDB packages.
   - Enable `config_overrides` slurmd parameter in Slurm configuration to avoid
     compute nodes sockets/cores/memory matching configuration check.
