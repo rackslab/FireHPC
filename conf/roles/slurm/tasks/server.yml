@@ -15,11 +15,18 @@
     group: slurm
     mode: '0600'
   notify: Restart slurmdbd
+  when: slurm_with_accounting
 
 - name: Install slurm server specific packages
   ansible.builtin.package:
     name: "{{ slurm_emulator | ternary(slurm_emulator_server_packages, slurm_server_packages) }}"
     state: latest
+
+- name: Install slurm accounting specific packages
+  ansible.builtin.package:
+    name: "{{ slurm_emulator | ternary(slurm_emulator_accounting_packages, slurm_accounting_packages) }}"
+    state: latest
+  when: slurm_with_accounting
 
 - name: Install slurmrestd
   ansible.builtin.package:
@@ -43,14 +50,18 @@
 
 # This is required on redhat based distributions as the service is not
 # automatically started by the RPM packages, and it does not hurt on Debian.
-- name: Ensure slurm server services are started
+- name: Ensure slurm server service is started
   ansible.builtin.service:
-    name: "{{ item }}"
+    name: slurmctld
     state: started
     enabled: yes
-  with_items:
-    - slurmdbd
-    - slurmctld
+
+- name: Ensure slurm accounting service is started
+  ansible.builtin.service:
+    name: slurmdbd
+    state: started
+    enabled: yes
+  when: slurm_with_accounting
 
 - name: Create slurmrestd service override directory
   ansible.builtin.file:
@@ -83,42 +94,54 @@
   ansible.builtin.command:
     cmd: "sacctmgr --immediate create cluster {{ slurm_cluster }}"
     creates: "/var/lib/mysql/slurm_acct_db/{{ slurm_cluster }}_job_table.ibd"
+  when: slurm_with_accounting
 
 - name: Get current slurmdbd accounts
   ansible.builtin.command:
     cmd: sacctmgr --noheader --parsable2 list accounts format=Account
   register: slurmdbd_accounts
+  when: slurm_with_accounting
 
 - name: Create account in slurmdbd
   ansible.builtin.command:
     cmd: "sacctmgr --immediate create account name={{ item.name }} cluster={{ slurm_cluster }} parent={{ item.parent }}"
-  when: item.name not in slurmdbd_accounts.stdout_lines
+  when:
+  - slurm_with_accounting
+  - item.name not in slurmdbd_accounts.stdout_lines
   loop: "{{ slurm_accounts }}"
 
 - name: Get current slurmdbd users
   ansible.builtin.command:
     cmd: sacctmgr --noheader --parsable2 list users format=User
   register: slurmdbd_users
+  when: slurm_with_accounting
 
 - name: Create users in slurmdbd
   ansible.builtin.command:
     cmd: "sacctmgr --immediate create user name={{ item }} cluster={{ slurm_cluster }} account={{ slurm_accounts | selectattr('members', 'search', item) | map(attribute='name') | last }}"
-  when: item not in slurmdbd_users.stdout_lines
+  when:
+  - slurm_with_accounting
+  - item not in slurmdbd_users.stdout_lines
   loop: "{{ slurm_users }}"
 
 - name: Get current slurmdbd QOS
   ansible.builtin.command:
     cmd: sacctmgr --noheader --parsable2 list qos format=name
   register: slurmdbd_qos
+  when: slurm_with_accounting
 
 - name: Create QOS in slurmdbd
   ansible.builtin.command:
     cmd: "sacctmgr --immediate create qos {{ item.name }} {{ item.args | join(' ') }}"
-  when: item.name not in slurmdbd_qos.stdout_lines
+  when:
+  - slurm_with_accounting
+  - item.name not in slurmdbd_qos.stdout_lines
   loop: "{{ slurm_qos }}"
 
 - name: Allow QOS to root association in slurmdbd
   ansible.builtin.command:
     cmd: "sacctmgr --immediate update account root set qos+={{ item.name }}"
-  when: item.name not in slurmdbd_qos.stdout_lines
+  when:
+  - slurm_with_accounting
+  - item.name not in slurmdbd_qos.stdout_lines
   loop: "{{ slurm_qos }}"

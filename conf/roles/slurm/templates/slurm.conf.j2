@@ -14,9 +14,11 @@ CredType = cred/munge
 AuthType = auth/slurm
 CredType = cred/slurm
 {% endif %}
+{% if slurm_with_accounting %}
 AccountingStorageType=accounting_storage/slurmdbd # default: accounting_storage/none
 AccountingStorageHost={{ slurm_server }}          # must be specified, as soon as slurmdbd is used
 AccountingStorageEnforce=qos,limits,associations  # default: none
+{% endif %}
 {% if slurm_with_jwt %}
 AuthAltTypes=auth/jwt
 AuthAltParameters=jwt_key={{ slurm_jwt_key_path }}

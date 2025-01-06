@@ -3,6 +3,7 @@ slurm_common_packages:
   - slurm-client
 slurm_server_packages:
   - slurmctld
+slurm_accounting_packages:
   - slurmdbd
 slurm_restd_packages:
   - slurmrestd
@@ -15,6 +16,7 @@ slurm_munge_packages:
 slurm_sackd_packages:
   - sackd
 slurm_emulator_server_packages: []
+slurm_emulator_accounting_packages: []
 slurm_emulator_compute_packages: []
 slurm_state_save_loc: /var/lib/slurm/slurmctld
 slurm_slurmd_spool_dir: /var/lib/slurm/slurmd

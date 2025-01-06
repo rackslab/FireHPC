@@ -38,6 +38,7 @@ and this project adheres to
   - Add `params` key in `slurm_partitions` parameter to give possibility to
     set any arbitrary Slurm partition configuration parameter in inventory.
   - Support Slurm native authentication in alternative to munge (#22).
+  - Add possibility to disable deployment of SlurmDBD accounting service (#20).
 - docs:
   - Add sysctl `fs.inotify.max_user_instances` value increase recommendation in
     README.md to avoid weird issue when launching many containers.

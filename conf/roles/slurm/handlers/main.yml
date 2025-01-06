@@ -17,7 +17,9 @@
   ansible.builtin.service:
     name: slurmdbd
     state: restarted
-  when: slurm_profiles['server'] in group_names
+  when:
+  - slurm_with_accounting
+  - slurm_profiles['server'] in group_names
 
 # slurmd service is deployed and must be restard on compute nodes or the single
 # server node when slurm_emulator is true.

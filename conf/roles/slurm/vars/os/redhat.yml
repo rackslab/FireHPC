@@ -3,6 +3,7 @@ slurm_common_packages:
   - slurm
 slurm_server_packages:
   - slurm-slurmctld
+slurm_accounting_packages:
   - slurm-slurmdbd
 slurm_restd_packages:
   - slurm-slurmrestd
