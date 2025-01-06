@@ -32,7 +32,9 @@ slurm_server: "{{ groups['admin'][0] }}"
 slurm_profiles:
   compute: compute
   server: admin
+  login: login
 slurm_local_munge_key_file: "{{ fhpc_cluster_state_dir }}/munge/munge.key"
+slurm_local_slurm_key_file: "{{ fhpc_cluster_state_dir }}/slurm/slurm.key"
 slurm_local_mariadb_password_file: "{{ fhpc_cluster_state_dir }}/mariadb/mariadb.password"
 slurm_local_jwt_key_file: "{{ fhpc_cluster_state_dir }}/slurm/jwt_hs256.key"
 slurm_users: "{{ fhpc_users | map(attribute='login') | list }}"

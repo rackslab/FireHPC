@@ -7,6 +7,13 @@ SlurmdParameters=config_overrides                 # default: none
 SlurmUser=slurm                                   # default: root
 StateSaveLocation={{ slurm_state_save_loc }}      # default: /var/spool
 SlurmdSpoolDir={{ slurm_slurmd_spool_dir }}       # default: /var/spool/slurmd
+{% if slurm_with_munge %}
+AuthType = auth/munge
+CredType = cred/munge
+{% else %}
+AuthType = auth/slurm
+CredType = cred/slurm
+{% endif %}
 AccountingStorageType=accounting_storage/slurmdbd # default: accounting_storage/none
 AccountingStorageHost={{ slurm_server }}          # must be specified, as soon as slurmdbd is used
 AccountingStorageEnforce=qos,limits,associations  # default: none

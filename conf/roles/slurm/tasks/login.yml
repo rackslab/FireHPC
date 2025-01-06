@@ -1,0 +1,14 @@
+---
+- name: Install sackd packages
+  ansible.builtin.package:
+    name: "{{ slurm_sackd_packages }}"
+    state: latest
+  when: not slurm_with_munge
+
+# This is required on redhat based distributions as the service is not
+# automatically started by the RPM packages, and it does not hurt on Debian.
+- name: Ensure sackd service is started
+  ansible.builtin.service:
+    name: sackd
+    state: started
+    enabled: yes

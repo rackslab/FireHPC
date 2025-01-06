@@ -1,11 +1,13 @@
 ---
 slurm_profiles: {}
 slurm_emulator: False
+slurm_with_munge: false
 slurm_uid: 432  # picked randomly among 100-499
 slurm_gid: 432  # picked randomly among 100-499
 slurm_server: admin
 slurm_cluster: hpc
 slurm_local_munge_key_file: munge.key  # dummy
+slurm_local_slurm_key_file: slurm.key  # dummy
 slurm_local_mariadb_password_file: mariadb.password  # dummy
 slurm_local_jwt_key_file: jwt_hs256.key  # dummy
 # The lookup errors are ignored because the variable is loaded by boostrap

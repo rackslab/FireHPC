@@ -27,6 +27,12 @@
     name: "{{ slurm_emulator | ternary(slurm_emulator_common_packages, slurm_common_packages) }}"
     state: latest
 
+- name: Install munge packages
+  ansible.builtin.package:
+    name: "{{ slurm_munge_packages }}"
+    state: latest
+  when: slurm_with_munge
+
 - name: Create slurm configuration directory
   ansible.builtin.file:
     path: /etc/slurm
@@ -54,6 +60,21 @@
     group: munge
     mode: '0400'
   notify: Restart munge
+  when: slurm_with_munge
+
+- name: Deploy slurm key
+  ansible.builtin.copy:
+    src: "{{ slurm_local_slurm_key_file }}"
+    dest: /etc/slurm/slurm.key
+    owner: slurm
+    group: slurm
+    mode: '0400'
+  notify:
+  - Restart slurmctld
+  - Restart slurmdbd
+  - Restart slurmd
+  - Restart sackd
+  when: not slurm_with_munge
 
 # This is required on redhat based distributions as the service is not
 # automatically started by the RPM packages, and it does not hurt on Debian.
@@ -62,6 +83,7 @@
     name: munge
     state: started
     enabled: yes
+  when: slurm_with_munge
 
 # Each profile is applied in the group associated the keys or slurm_profiles
 # hash or all the profiles are applied on the unique server node when

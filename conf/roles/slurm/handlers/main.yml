@@ -31,3 +31,12 @@
   ansible.builtin.service:
     name: munge
     state: restarted
+  when: slurm_with_munge
+
+- name: Restart sackd
+  ansible.builtin.service:
+    name: sackd
+    state: restarted
+  when:
+  - not slurm_with_munge
+  - slurm_profiles['login'] in group_names

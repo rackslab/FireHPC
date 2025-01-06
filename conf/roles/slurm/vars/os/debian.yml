@@ -1,7 +1,6 @@
 ---
 slurm_common_packages:
   - slurm-client
-  - munge
 slurm_server_packages:
   - slurmctld
   - slurmdbd
@@ -11,7 +10,10 @@ slurm_compute_packages:
   - slurmd
 slurm_emulator_common_packages:
   - slurm-emulator
+slurm_munge_packages:
   - munge
+slurm_sackd_packages:
+  - sackd
 slurm_emulator_server_packages: []
 slurm_emulator_compute_packages: []
 slurm_state_save_loc: /var/lib/slurm/slurmctld

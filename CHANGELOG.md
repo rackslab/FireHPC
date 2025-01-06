@@ -37,6 +37,7 @@ and this project adheres to
     configuration extracted from RacksDB.
   - Add `params` key in `slurm_partitions` parameter to give possibility to
     set any arbitrary Slurm partition configuration parameter in inventory.
+  - Support Slurm native authentication in alternative to munge (#22).
 - docs:
   - Add sysctl `fs.inotify.max_user_instances` value increase recommendation in
     README.md to avoid weird issue when launching many containers.
@@ -63,6 +64,8 @@ and this project adheres to
   - Move `maxtime` and `state` Slurm partitions parameters in `params`
     sub-dictionary.
   - Rename `slurm_partitions` > `node`→`nodes` key.
+  - Change default Slurm authentication plugin from munge to slurm. This can be
+    changed by setting `slurm_with_munge: true` in Ansible inventory.
 - docs: Explain in manpage ssh command considers admin container by default.
 
 ### Fixed

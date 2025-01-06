@@ -1,7 +1,6 @@
 ---
 slurm_common_packages:
   - slurm
-  - munge
 slurm_server_packages:
   - slurm-slurmctld
   - slurm-slurmdbd
@@ -9,6 +8,10 @@ slurm_restd_packages:
   - slurm-slurmrestd
 slurm_compute_packages:
   - slurm-slurmd
+slurm_munge_packages:
+  - munge
+slurm_sackd_packages:
+  - slurm-sackd
 slurm_state_save_loc: /var/spool/slurm/ctld
 slurm_slurmd_spool_dir: /var/spool/slurm/d
 slurm_jwt_key_path: /var/spool/slurm/jwt_hs256.key

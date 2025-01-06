@@ -3,6 +3,11 @@ SlurmUser=slurm                      # default: root
 StorageType=accounting_storage/mysql # must be specified
 StoragePass={{ slurm_db_password }}  # must be specified
 StorageUser=slurm                    # must be specified
+{% if slurm_with_munge %}
+AuthType = auth/munge
+{% else %}
+AuthType = auth/slurm
+{% endif %}
 {% if slurm_with_jwt %}
 AuthAltTypes=auth/jwt
 AuthAltParameters=jwt_key={{ slurm_jwt_key_path }}
