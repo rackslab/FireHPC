@@ -82,6 +82,8 @@ and this project adheres to
   - Order of partition/qos variables in job submission informational message.
   - Support of Slurm 24.05 `sacctmgr show qos --json` format to retrieve the
     list of defined QOS.
+  - Redirect jobs output to `/dev/null` to avoid filling filesystems with tons
+    of inodes (#27).
 - conf:
   - Install mpi packages in parallel instead of sequential loop.
   - Configure system locale to `en_US.UTF-8` on rocky8.

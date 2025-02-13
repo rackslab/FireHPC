@@ -240,6 +240,8 @@ class ClusterJobsLoader:
             partition.name,
             "--time",
             timelimit,
+            "--output",
+            "/dev/null",
             "--wrap",
             script,
         ]
