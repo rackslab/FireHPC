@@ -174,6 +174,16 @@ This command accepts the following options:
   Load clusters with fake jobs to emulate real usage. The command requires one
   or multiple cluster names in argument.
 
++
+--
+This command accepts the following options:
+
+[.cli-opt]#*--time-off-factor*=#[.cli-optval]##_FACTOR_##:: Define how much the
+  load is divided outside business hours (ie. 8am-7pm from monday to friday).
+  With a value of 1, the load stays the same as during business hours.
+  Default: 5.
+--
+
 [.cli-opt]#*ssh*#::
 
   Open a shell or run a command on a container through SSH.
