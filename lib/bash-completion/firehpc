@@ -112,10 +112,22 @@ _firehpc_deploy() {
     return 0
 }
 
-_firehpc_ssh_load() {
+_firehpc_ssh() {
     local cur=$1 prev=$2 comps
     comps=$( __firehpc_clusters_list )
     COMPREPLY=( $(compgen -o filenames -W '$comps' -- "$cur") )
+    return 0
+}
+
+_firehpc_load() {
+    local cur=$1 prev=$2 comps
+    local -A OPTS=(
+        [ARG]='--time-off-factor'
+    )
+    if ! __contains_word "$prev" ${OPTS[ARG]}; then
+        comps="$( __firehpc_clusters_list ) ${OPTS[*]}"
+        COMPREPLY=( $(compgen -o filenames -W '$comps' -- "$cur") )
+    fi
     return 0
 }
 
@@ -181,8 +193,12 @@ _firehpc() {
             # Nothing to suggest for these verbs
             return
             ;;
-        load|ssh)
-            _firehpc_ssh_load "$cur" "$prev"
+        ssh)
+            _firehpc_ssh "$cur" "$prev"
+            return
+            ;;
+        load)
+            _firehpc_load "$cur" "$prev"
             return
             ;;
         start|stop)
