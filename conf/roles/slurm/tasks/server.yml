@@ -94,6 +94,9 @@
   ansible.builtin.command:
     cmd: "sacctmgr --immediate create cluster {{ slurm_cluster }}"
     creates: "/var/lib/mysql/slurm_acct_db/{{ slurm_cluster }}_job_table.ibd"
+  # On recent versions of Slurm, the cluster is automatically created as soon as
+  # slurmctld registers to slurmdbd, then ignore the creation error.
+  ignore_errors: true
   when: slurm_with_accounting
 
 - name: Get current slurmdbd accounts

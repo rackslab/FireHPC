@@ -90,6 +90,8 @@ and this project adheres to
   - Containers namespace missing in Slurm-web gateway `[ui]` > `host`.
   - Force creation of CA and LDAP certificates to override possibly existing
     certificates during bootstrap.
+  - Ignore cluster creation error in slurmdbd, as it is now automatically
+    created when slurmctld registers to accounting service.
 
 ### Removed
 - docs: Remove `fhpc-emulate-slurm-usage` manpage.
