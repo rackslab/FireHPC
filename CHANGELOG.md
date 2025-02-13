@@ -28,6 +28,10 @@ and this project adheres to
   - Submit jobs with random durations and timelimit with low probability for
     jobs to reach their timelimit (#10).
   - Support Slurm configuration without accounting service and QOS.
+  - Reduce load by a factor outside of business hours to simulate humans
+    submitting less jobs when not at work (#29).
+  - Add `--time-off-factor` option to control by how much the load is divided
+    outside of business hours.
 - conf:
   - Add possibility to define additional QOS and alternative partitions in
     Slurm.

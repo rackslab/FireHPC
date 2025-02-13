@@ -222,12 +222,21 @@ class FireHPCExec:
         parser_list.set_defaults(func=self._execute_list)
 
         # load command
-        parser_load = subparsers.add_parser("load", help="Load clusters wiht jobs")
+        parser_load = subparsers.add_parser("load", help="Load clusters with jobs")
         parser_load.add_argument(
             "clusters",
             metavar="CLUSTER",
             help="Destination clusters",
             nargs="+",
+        )
+        parser_load.add_argument(
+            "--time-off-factor",
+            help=(
+                "Divide load by this factor outside business hours (default: "
+                "%(default)s)"
+            ),
+            type=int,
+            default=5,
         )
         parser_load.set_defaults(func=self._execute_load)
 
@@ -337,4 +346,9 @@ class FireHPCExec:
         print("\n".join(clusters_list(self.args.state)))
 
     def _execute_load(self):
-        load_clusters(self.settings, self.args.clusters, self.args.state)
+        load_clusters(
+            self.settings,
+            self.args.clusters,
+            self.args.state,
+            self.args.time_off_factor,
+        )

@@ -27,6 +27,7 @@ import random
 import time
 import threading
 from collections import namedtuple
+from datetime import datetime
 
 from .settings import RuntimeSettings
 from .cluster import EmulatedCluster
@@ -46,12 +47,16 @@ JOBS_DURATIONS = ([360, 540, 720, 1200], [50, 5, 2, 1])
 ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes", "cpus", "time"])
 
 
-def load_clusters(settings: RuntimeSettings, clusters: List[str], state: Path):
+def load_clusters(
+    settings: RuntimeSettings, clusters: List[str], state: Path, time_off_factor: int
+):
     loaders = []
     threads = []
     try:
         for _cluster in clusters:
-            loader = ClusterJobsLoader(EmulatedCluster(settings, _cluster, state))
+            loader = ClusterJobsLoader(
+                EmulatedCluster(settings, _cluster, state), time_off_factor
+            )
             thread = threading.Thread(target=loader.run)
             loaders.append(loader)
             threads.append(thread)
@@ -72,8 +77,9 @@ def load_clusters(settings: RuntimeSettings, clusters: List[str], state: Path):
 
 
 class ClusterJobsLoader:
-    def __init__(self, cluster: EmulatedCluster):
+    def __init__(self, cluster: EmulatedCluster, time_off_factor: int):
         self.cluster = cluster
+        self.time_off_factor = time_off_factor
         self.ssh = SSHClient(self.cluster, asbin=False)
         self.stop = False
         # Initialized in run()
@@ -90,10 +96,6 @@ class ClusterJobsLoader:
                 partitions, [partition.nodes for partition in partitions]
             )[0]
 
-        def total_nodes():
-            """Return total number of nodes in all partitions."""
-            return sum([partition.nodes for partition in partitions])
-
         try:
             self._get_cluster_config()
             partitions = self._get_partitions()
@@ -103,16 +105,9 @@ class ClusterJobsLoader:
             qos = self._get_qos()
             logger.info("cluster %s: QOS found: %s", self.cluster.name, qos)
 
-            # Formula to have jobs limit that grows less than the number of nodes. With
-            # this formula, we have:
-            #   2 nodes: 12 jobs
-            #   10 nodes: 64 jobs
-            #   100 nodes: 270 jobs
-            #   1000 nodes: 918 jobs
-            pending_jobs_limit = int(30 * (total_nodes() ** 0.5) - 30)
-
             while not self.stop:
                 pending_jobs = self._get_nb_pending_jobs()
+                pending_jobs_limit = self._get_nb_pending_jobs_limit(partitions)
                 if pending_jobs >= pending_jobs_limit:
                     logger.debug(
                         "cluster %s: Waiting for pending jobs to run…",
@@ -190,6 +185,31 @@ class ClusterJobsLoader:
             raise FireHPCRuntimeError(
                 f"Unable to retrieve qos from cluster {self.cluster.name}: {str(err)}"
             ) from err
+
+    def _get_nb_pending_jobs_limit(self, partitions):
+        """Return the limit number of pending jobs on the given partitions."""
+
+        def total_nodes():
+            """Return total number of nodes in all partitions."""
+            return sum([partition.nodes for partition in partitions])
+
+        # Formula to have jobs limit that grows less than the number of nodes. With
+        # this formula, we have:
+        #   2 nodes: 12 jobs
+        #   10 nodes: 64 jobs
+        #   100 nodes: 270 jobs
+        #   1000 nodes: 918 jobs
+        #
+        # It is divided by a time off factor outside business hours to emulate
+        # load decrease when humans stop working.
+
+        now = datetime.now()
+
+        time_off_factor = 1
+        if now.weekday() > 5 or now.hour > 19 or now.hour < 8:
+            time_off_factor = self.time_off_factor
+
+        return int(30 * (total_nodes() ** 0.5) - 30) / time_off_factor
 
     def _get_nb_pending_jobs(self):
         stdout, stderr = self.ssh.exec(
