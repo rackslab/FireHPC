@@ -15,3 +15,14 @@ AuthAltParameters=jwt_key={{ slurm_jwt_key_path }}
 {% for key, value in slurmdbd_params.items() %}
 {{ key }}={{ value }}
 {% endfor %}
+{% if slurm_with_db_archive %}
+ArchiveDir={{ slurm_db_archive_dir }}
+ArchiveEvents=yes
+ArchiveJobs=yes
+ArchiveResvs=yes
+ArchiveSteps=yes
+PurgeEventAfter={{ slurm_db_purge_after }}
+PurgeJobAfter={{ slurm_db_purge_after }}
+PurgeResvAfter={{ slurm_db_purge_after }}
+PurgeStepAfter={{ slurm_db_purge_after }}
+{% endif %}

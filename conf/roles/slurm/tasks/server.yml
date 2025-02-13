@@ -63,6 +63,17 @@
     enabled: yes
   when: slurm_with_accounting
 
+- name: Create slurmdbd archive directory
+  ansible.builtin.file:
+    path: "{{ slurm_db_archive_dir }}"
+    state: directory
+    owner: slurm
+    group: slurm
+    mode: 0755
+  when:
+  - slurm_with_accounting
+  - slurm_with_db_archive
+
 - name: Create slurmrestd service override directory
   ansible.builtin.file:
     path: "{{ slurm_restd_service_override_path | dirname }}"

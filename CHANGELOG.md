@@ -40,6 +40,9 @@ and this project adheres to
     set any arbitrary Slurm partition configuration parameter in inventory.
   - Support Slurm native authentication in alternative to munge (#22).
   - Add possibility to disable deployment of SlurmDBD accounting service (#20).
+  - Enable SlurmDBD regular archive and purge mechanism to avoid MariaDB
+    database growing too much (#28). This can be disabled with
+    `slurm_with_db_archive: false` in custom configuration.
 - docs:
   - Add sysctl `fs.inotify.max_user_instances` value increase recommendation in
     README.md to avoid weird issue when launching many containers.

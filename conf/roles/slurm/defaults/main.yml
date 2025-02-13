@@ -15,6 +15,9 @@ slurm_local_jwt_key_file: jwt_hs256.key  # dummy
 # tasks file (in bootstrap playbook) before it generates the file. This way, a
 # warning is displayed but Ansible continues instead of failing with the error.
 slurm_db_password: "{{ lookup('file', '{{ slurm_local_mariadb_password_file }}', errors='ignore') }}"
+slurm_with_db_archive: true
+slurm_db_archive_dir: /var/lib/slurm/slurmdbd
+slurm_db_purge_after: 14days
 slurm_users: []
 slurm_accounts: []
 slurm_qos: []
