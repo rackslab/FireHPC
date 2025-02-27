@@ -186,7 +186,7 @@ class ClusterJobsLoader:
                 f"Unable to retrieve qos from cluster {self.cluster.name}: {str(err)}"
             ) from err
 
-    def _get_nb_pending_jobs_limit(self, partitions):
+    def _get_nb_pending_jobs_limit(self, partitions) -> int:
         """Return the limit number of pending jobs on the given partitions."""
 
         def total_nodes():
@@ -209,7 +209,7 @@ class ClusterJobsLoader:
         if now.weekday() > 5 or now.hour > 19 or now.hour < 8:
             time_off_factor = self.time_off_factor
 
-        return int(30 * (total_nodes() ** 0.5) - 30) / time_off_factor
+        return int((30 * (total_nodes() ** 0.5) - 30) / time_off_factor)
 
     def _get_nb_pending_jobs(self):
         stdout, stderr = self.ssh.exec(
