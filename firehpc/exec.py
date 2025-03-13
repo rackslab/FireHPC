@@ -294,6 +294,7 @@ class FireHPCExec:
         cluster.deploy(self.args.os, images, db, self.args.slurm_emulator)
         cluster.conf(
             db,
+            playbooks=["bootstrap", "site"],
             custom=self.args.custom,
             emulator_mode=self.args.slurm_emulator,
             users_directory=users_directory,
@@ -301,10 +302,13 @@ class FireHPCExec:
 
     def _execute_conf(self):
         cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+        playbooks = ["site"]
+        if self.args.with_bootstrap:
+            playbooks.insert(0, "bootstrap")
         cluster.conf(
             self._load_racksdb(),
+            playbooks=playbooks,
             reinit=False,
-            bootstrap=self.args.with_bootstrap,
             custom=self.args.custom,
             tags=self.args.tags,
             emulator_mode=self.args.slurm_emulator,
