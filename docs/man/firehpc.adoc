@@ -184,6 +184,38 @@ This command accepts the following options:
   Default: 5.
 --
 
+[.cli-opt]#*restore*#::
+
+  Restore a cluster after restart and IP addresses change.
++
+--
+This command accepts the following options:
+
+[.cli-opt]#*--db*=#[.cli-optval]##_DB_##:: Path to RacksDB database that
+  contains cluster description. The database is expected to contain an
+  infrastructure whose name is the emulated cluster name with one node that is
+  assigned the _admin_ tag, at least one node that is assigned the _login_ tag
+  and at least one node that is assigned the _compute_ tag. Default:
+  [.path]#`/var/lib/racksdb`#.
+
+[.cli-opt]#*--schema*=#[.cli-optval]##_SCHEMA_##:: Path to RacksDB database
+  schema. This option should not required for normal users.
+  Default: [.path]#`/usr/share/racksdb/schema.yml`#.
+
+[.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
+  Name of the cluster to configure. This option is required.
+
+[.cli-opt]#*-c, --custom*=#[.cli-optval]##_CUSTOM_##::
+  Path to directory with custom Ansible variables to override default variables
+  provided in FireHPC. The given path must contain a [.path]#`group_vars/`# or a
+  [.path]#`host_vars/`# directory with files supported by Ansible.
+
+[.cli-opt]#*--slurm-emulator*#[.cli-optval]::
+  Enable Slurm emulator mode. In this mode, FireHPC configures only one _admin_
+  container and with a specific version of Slurm compiled to support emulation
+  of arbitrary large number of fakes nodes.
+--
+
 [.cli-opt]#*ssh*#::
 
   Open a shell or run a command on a container through SSH.

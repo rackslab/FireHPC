@@ -63,6 +63,7 @@ and this project adheres to
     repository.
   - Mention `firehpc list` command in manpage.
   - Mention `firehpc load` command in manpage.
+  - Mention `firehpc restore` command in manpage.
 
 ### Changed
 - Replace `fhpc-emulate-slurm-usage` command by `firehpc load` (#13).
