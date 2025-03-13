@@ -16,6 +16,8 @@ and this project adheres to
   namespace.
 - Add bash-completion script for `firehpc` command (#12).
 - Add `firehpc list` command to list clusters present in state directory (#16).
+- Add `firehpc restore` command to restore a cluster after restart or IP
+  addresses change (#11→#31).
 - load:
   - Submit jobs randomly in existing QOS and partitions.
   - Submit jobs of various sizes, with a power of 2 number (1, 2, 4, 8…) of

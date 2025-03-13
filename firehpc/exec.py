@@ -161,6 +161,40 @@ class FireHPCExec:
         )
         parser_conf.set_defaults(func=self._execute_conf)
 
+        # restore command
+        parser_restore = subparsers.add_parser(
+            "restore", help="Restore cluster state after restart or IP change"
+        )
+        parser_restore.add_argument(
+            "--db",
+            help="Path to RacksDB database (default: %(default)s)",
+            type=Path,
+            default=RacksDB.DEFAULT_DB,
+        )
+        parser_restore.add_argument(
+            "--schema",
+            help="Path to RacksDB schema (default: %(default)s)",
+            type=Path,
+            default=RacksDB.DEFAULT_SCHEMA,
+        )
+        parser_restore.add_argument(
+            "--cluster",
+            help="Name of the cluster on which configuration is deployed",
+            required=True,
+        )
+        parser_restore.add_argument(
+            "-c",
+            "--custom",
+            help="Path of variables directories to customize FireHPC default",
+            type=Path,
+        )
+        parser_restore.add_argument(
+            "--slurm-emulator",
+            help="Enable Slurm emulator mode",
+            action="store_true",
+        )
+        parser_restore.set_defaults(func=self._execute_restore)
+
         # ssh command
         parser_ssh = subparsers.add_parser("ssh", help="Connect to cluster by SSH")
         parser_ssh.add_argument(
@@ -311,6 +345,17 @@ class FireHPCExec:
             reinit=False,
             custom=self.args.custom,
             tags=self.args.tags,
+            emulator_mode=self.args.slurm_emulator,
+        )
+
+    def _execute_restore(self):
+        cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+        cluster.conf(
+            self._load_racksdb(),
+            playbooks=["restore"],
+            reinit=False,
+            custom=self.args.custom,
+            skip_tags=["dependencies"],  # skip slurm->mariadb dependency
             emulator_mode=self.args.slurm_emulator,
         )
 
