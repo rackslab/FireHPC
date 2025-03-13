@@ -4,9 +4,19 @@ connection_plugins = /usr/share/firehpc/extra/connection_plugins
 filter_plugins = /usr/share/firehpc/extra/filter_plugins
 interpreter_python = auto_silent
 roles_path = /usr/share/firehpc/conf/roles
+# Default Ansible precedence is:
+#
+# 1. 'all_inventory': inventory group_vars/all
+# 2. 'groups_inventory': inventory group_vars/*
+# 3. 'all_plugins_inventory': inventory plugins groups_vars/all
+# 4. 'all_plugins_play': playbook group_vars/all
+# 5. 'groups_plugins_inventory': inventory plugins groups_vars/*
+# 6. 'groups_plugins_play': playbook group_vars/*
+#
 # Alter default ansible variable precedence order to give users the possibilty
-# to define variables in inventory and override variables defined in playbook
-# provided by FireHPC.
+# to define variables in inventory (ie. ~/.local/state/firehpc/${cluster}/conf)
+# and override variables defined in playbook provided by FireHPC
+# (ie. /usr/share/firehpc/conf)
 precedence = 'all_plugins_play', 'groups_plugins_play', 'all_inventory', 'groups_inventory', 'all_plugins_inventory', 'groups_plugins_inventory'
 
 [ssh_connection]
