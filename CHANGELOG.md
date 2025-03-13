@@ -47,6 +47,8 @@ and this project adheres to
   - Enable SlurmDBD regular archive and purge mechanism to avoid MariaDB
     database growing too much (#28). This can be disabled with
     `slurm_with_db_archive: false` in custom configuration.
+  - Add restore playbook to update hosts file, restart Slurm services and resume
+    unavailable nodes.
 - docs:
   - Add sysctl `fs.inotify.max_user_instances` value increase recommendation in
     README.md to avoid weird issue when launching many containers.

@@ -1,0 +1,38 @@
+---
+# Restart munge to take into account new IP addresses in /etc/hosts file. 
+- name: Ensure munge service is started
+  ansible.builtin.service:
+    name: munge
+    state: restarted
+  when: slurm_with_munge
+
+# Trigger restart of all slurm services with dummy shell command
+- name: Trigger services restart
+  ansible.builtin.shell: /usr/bin/true
+  notify:
+  - Restart slurmdbd
+  - Restart slurmctld
+  - Restart slurmd
+  - Restart slurmrestd
+  - Restart sackd
+
+- name: Force all slurm services to restart at this point
+  ansible.builtin.meta: flush_handlers
+
+# Resume all unavailable compute nodes
+- name: Retrieve list of unavailable nodes
+  ansible.builtin.command: /usr/bin/sinfo --list-reasons --json
+  register: sinfo
+  when:
+  - slurm_profiles['server'] in group_names
+  - not slurm_emulator
+
+- name: Resume unavailable nodes
+  ansible.builtin.command:
+    cmd: /usr/bin/scontrol update nodename={{ item.nodes.nodes | nodeset_fold }} state=resume
+  loop: "{{ (sinfo.stdout | from_json).sinfo }}"
+  loop_control:
+    label: "Resuming node {{ item.nodes.nodes | nodeset_fold }}"
+  when:
+  - slurm_profiles['server'] in group_names
+  - not slurm_emulator
