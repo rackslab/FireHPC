@@ -1,0 +1,9 @@
+- hosts: all
+  remote_user: root
+  tasks:
+  - import_role:
+      name: common
+      tasks_from: restore
+  - import_role:
+      name: slurm
+      tasks_from: restore
