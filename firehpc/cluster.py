@@ -138,6 +138,7 @@ class EmulatedCluster:
         reinit: bool = True,
         custom: Path = None,
         tags: Optional[list[str]] = None,
+        skip_tags: Optional[list[str]] = None,
         emulator_mode: bool = False,
         users_directory: Optional[UsersDirectory] = None,
     ) -> conf:
@@ -246,6 +247,9 @@ class EmulatedCluster:
 
         if tags is not None and len(tags):
             cmdline += f" --tags {','.join(tags)}"
+
+        if skip_tags is not None and len(skip_tags):
+            cmdline += f" --skip-tags {','.join(skip_tags)}"
 
         for playbook in playbooks:
             ansible_runner.run(
