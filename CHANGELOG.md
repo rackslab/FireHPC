@@ -49,6 +49,8 @@ and this project adheres to
     `slurm_with_db_archive: false` in custom configuration.
   - Add restore playbook to update hosts file, restart Slurm services and resume
     unavailable nodes.
+  - Add _mariadb_ and _dependencies_ tags on _mariadb_ role in _slurm_ role
+    dependencies.
 - docs:
   - Add sysctl `fs.inotify.max_user_instances` value increase recommendation in
     README.md to avoid weird issue when launching many containers.

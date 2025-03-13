@@ -9,3 +9,4 @@ dependencies:
     when:
     - slurm_with_accounting
     - slurm_profiles['server'] in group_names
+    tags: [ mariadb, dependencies ]
