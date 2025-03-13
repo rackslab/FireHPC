@@ -134,8 +134,8 @@ class EmulatedCluster:
     def conf(
         self,
         db: RacksDB,
+        playbooks: list[str],
         reinit: bool = True,
-        bootstrap: bool = True,
         custom: Path = None,
         tags: Optional[list[str]] = None,
         emulator_mode: bool = False,
@@ -246,10 +246,6 @@ class EmulatedCluster:
 
         if tags is not None and len(tags):
             cmdline += f" --tags {','.join(tags)}"
-
-        playbooks = ["site"]
-        if bootstrap:
-            playbooks.insert(0, "bootstrap")
 
         for playbook in playbooks:
             ansible_runner.run(
