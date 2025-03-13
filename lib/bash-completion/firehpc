@@ -86,6 +86,27 @@ _firehpc_conf() {
     return 0
 }
 
+_firehpc_restore() {
+    local cur=$1 prev=$2 comps
+    local -A OPTS=(
+        [STANDALONE]='--slurm-emulator'
+        [CLUSTER]='--cluster'
+        [DIR]='-c --custom'
+        [FILE]='--db --schema'
+    )
+    if __contains_word "$prev" ${OPTS[CLUSTER]}; then
+        comps=$( __firehpc_clusters_list )
+        COMPREPLY=( $(compgen -o filenames -W '$comps' -- "$cur") )
+    elif __contains_word "$prev" ${OPTS[FILE]}; then
+        _filedir
+    elif __contains_word "$prev" ${OPTS[DIR]}; then
+        _filedir -d
+    else
+        COMPREPLY=( $(compgen -W '${OPTS[*]}' -- "$cur") )
+    fi
+    return 0
+}
+
 _firehpc_deploy() {
     local cur=$1 prev=$2 comps
     local -A OPTS=(
@@ -164,7 +185,7 @@ _firehpc() {
     local cur prev opts
     local i verb comps
 
-    local VERBS='clean conf deploy images list load ssh start status stop'
+    local VERBS='clean conf deploy images list load restore ssh start status stop'
 
     _init_completion || return
 
@@ -199,6 +220,10 @@ _firehpc() {
             ;;
         load)
             _firehpc_load "$cur" "$prev"
+            return
+            ;;
+        restore)
+            _firehpc_restore "$cur" "$prev"
             return
             ;;
         start|stop)
