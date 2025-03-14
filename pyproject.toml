@@ -31,6 +31,13 @@ classifiers = [
 ]
 readme = "README.md"
 
+[project.optional-dependencies]
+tests = [
+    "coverage",
+    "pytest",
+    "pytest-cov",
+]
+
 [project.scripts]
 firehpc = 'firehpc.exec:FireHPCExec.run'
 
