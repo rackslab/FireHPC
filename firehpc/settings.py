@@ -19,7 +19,9 @@
 
 import configparser
 import logging
+import dataclasses
 from pathlib import Path
+import typing as t
 
 logger = logging.getLogger(__name__)
 
@@ -59,3 +61,92 @@ class RuntimeSettings:
 
         self.ansible = RuntimeSettingsAnsible(_config)
         self.images = RuntimeSettingsImages(_config)
+
+
+def optional_absolute_path(path: t.Optional[t.Union[Path, str]]) -> t.Optional[Path]:
+    if path is None:
+        return None
+    if isinstance(path, str):
+        path = Path(path)
+    return path.absolute()
+
+
+def optional_path(path: t.Optional[str]) -> t.Optional[Path]:
+    if path is None:
+        return None
+    return Path(path)
+
+
+@dataclasses.dataclass
+class ClusterRacksDBSettings:
+    db: t.Optional[Path] = None
+    schema: t.Optional[Path] = None
+
+    @classmethod
+    def deserialize(cls, content: t.Optional[dict[str, str]]):
+        if not content:
+            return cls()
+        return cls(
+            optional_absolute_path(content.get("db")),
+            optional_absolute_path(content.get("schema")),
+        )
+
+    def update_from_args(self, args):
+        if args.db:
+            self.db = optional_absolute_path(args.db)
+        if args.schema:
+            self.schema = optional_absolute_path(args.schema)
+
+    def serialize(self):
+        if self.db is None and self.schema is None:
+            return None
+        result = {}
+        if self.db:
+            result["db"] = str(self.db)
+        if self.schema:
+            result["schema"] = str(self.schema)
+        return result
+
+
+@dataclasses.dataclass
+class ClusterSettings:
+    racksdb: ClusterRacksDBSettings = dataclasses.field(
+        default_factory=ClusterRacksDBSettings
+    )
+    slurm_emulator: bool = False
+    custom: t.Optional[Path] = None
+
+    @classmethod
+    def from_args(cls, args):
+        return cls(
+            ClusterRacksDBSettings(
+                optional_absolute_path(args.db), optional_absolute_path(args.schema)
+            ),
+            args.slurm_emulator,
+            optional_absolute_path(args.custom),
+        )
+
+    @classmethod
+    def deserialize(cls, content: dict[str, t.Any]):
+        return cls(
+            ClusterRacksDBSettings.deserialize(content.get("racksdb")),
+            content["slurm_emulator"],
+            optional_path(content.get("custom")),
+        )
+
+    def update_from_args(self, args):
+        self.slurm_emulator = args.slurm_emulator
+        if args.custom:
+            self.custom = optional_absolute_path(args.custom)
+        self.racksdb.update_from_args(args)
+
+    def serialize(self):
+        result = {
+            "slurm_emulator": self.slurm_emulator,
+        }
+        racksdb = self.racksdb.serialize()
+        if racksdb:
+            result["racksdb"] = racksdb
+        if self.custom:
+            result["custom"] = str(self.custom)
+        return result

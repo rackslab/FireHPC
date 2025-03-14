@@ -39,8 +39,8 @@ class SSHClient:
     def __init__(self, cluster: EmulatedCluster, asbin: bool = True):
         self.cluster = cluster
         self.asbin = asbin
-        self.known_hosts = f"{self.cluster.cluster_dir}/ssh/known_hosts"
-        self.private_key = f"{self.cluster.cluster_dir}/ssh/id_rsa"
+        self.known_hosts = f"{self.cluster.state.path}/ssh/known_hosts"
+        self.private_key = f"{self.cluster.state.path}/ssh/id_rsa"
         if not self.asbin:
             self.clients = {}
 
