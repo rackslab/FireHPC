@@ -17,8 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with FireHPC.  If not, see <https://www.gnu.org/licenses/>.
 
-import pkg_resources
+try:
+    from importlib import metadata
+except ImportError:
+    # On Python < 3.8, use external backport library importlib-metadata.
+    import importlib_metadata as metadata
 
 
 def get_version():
-    return pkg_resources.get_distribution("firehpc").version
+    return metadata.version("firehpc")
