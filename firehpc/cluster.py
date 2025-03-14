@@ -31,6 +31,8 @@ from .templates import Templater
 from .users import UsersDirectory
 from .containers import ContainersManager
 from .errors import FireHPCRuntimeError
+from .settings import ClusterSettings
+from .state import ClusterState
 
 if TYPE_CHECKING:
     from racksdb import RacksDB
@@ -60,32 +62,27 @@ class ClusterStatus:
 
 
 class EmulatedCluster:
-    def __init__(self, settings: RuntimeSettings, name: str, state: Path):
-        self.settings = settings
+    def __init__(
+        self,
+        runtime_settings: RuntimeSettings,
+        name: str,
+        state: ClusterState,
+        cluster_settings: ClusterSettings,
+    ):
+        self.runtime_settings = runtime_settings
         self.name = name
         self.state = state
-
-    @property
-    def cluster_dir(self) -> Path:
-        return self.state / self.name
-
-    @property
-    def conf_dir(self) -> Path:
-        return self.cluster_dir / "conf"
-
-    @property
-    def extravars_path(self) -> Path:
-        return self.conf_dir / "custom.yml"
+        self.cluster_settings = cluster_settings
 
     @property
     def users_directory(self) -> UsersDirectory:
         try:
-            with open(self.extravars_path) as fh:
+            with open(self.state.extravars) as fh:
                 content = yaml.safe_load(fh)
         except FileNotFoundError:
             raise FireHPCRuntimeError(
                 f"Unable to find cluster {self.name} extra variables file "
-                f"{self.extravars_path}"
+                f"{self.state.extravars}"
             )
         return UsersDirectory.load(
             self.name, content["fhpc_users"], content["fhpc_groups"]
@@ -96,15 +93,9 @@ class EmulatedCluster:
         os: str,
         images: OSImagesSources,
         db: RacksDB,
-        emulator_mode: bool,
     ) -> None:
 
-        if not self.state.exists():
-            logger.debug("Creating state directory %s", self.state)
-            self.state.mkdir(parents=True)
-        if not self.cluster_dir.exists():
-            logger.debug("Creating cluster state directory %s", self.cluster_dir)
-            self.cluster_dir.mkdir()
+        self.state.create()
 
         infrastructure = db.infrastructures[self.name]
 
@@ -115,7 +106,7 @@ class EmulatedCluster:
             admin_node.name,
             images.url(os),
         )
-        if not emulator_mode:
+        if not self.cluster_settings.slurm_emulator:
             for node in infrastructure.nodes:
                 if "admin" not in node.tags:
                     logger.info(
@@ -126,7 +117,7 @@ class EmulatedCluster:
         logger.info("Starting cluster storage service %s", self.name)
         manager.storage().start()
 
-        if emulator_mode:
+        if self.cluster_settings.slurm_emulator:
             manager.start([admin_node.name])
         else:
             manager.start([node.name for node in infrastructure.nodes])
@@ -136,21 +127,18 @@ class EmulatedCluster:
         db: RacksDB,
         playbooks: list[str],
         reinit: bool = True,
-        custom: Path = None,
         tags: Optional[list[str]] = None,
         skip_tags: Optional[list[str]] = None,
-        emulator_mode: bool = False,
         users_directory: Optional[UsersDirectory] = None,
     ) -> conf:
-        if self.conf_dir.exists() and reinit:
-            logger.debug("Removing existing configuration directory %s", self.conf_dir)
-            shutil.rmtree(self.conf_dir)
 
-        if not self.conf_dir.exists():
-            self.conf_dir.mkdir()
+        if reinit:
+            self.state.conf_clean()
+
+        self.state.conf_create()
 
         for subdir in ["group_vars", "host_vars"]:
-            dest_custom_path = self.conf_dir / subdir
+            dest_custom_path = self.state.conf / subdir
             if dest_custom_path.exists():
                 logger.info(
                     "Removing existing custom variable directory %s",
@@ -158,10 +146,10 @@ class EmulatedCluster:
                 )
                 shutil.rmtree(dest_custom_path)
 
-        if custom:
+        if self.cluster_settings.custom:
             for subdir in ["group_vars", "host_vars"]:
-                orig_custom_path = custom / subdir
-                dest_custom_path = self.conf_dir / subdir
+                orig_custom_path = self.cluster_settings.custom / subdir
+                dest_custom_path = self.state.conf / subdir
                 if orig_custom_path.exists():
                     logger.info(
                         "Copying custom variables directory %s in configuration "
@@ -176,17 +164,17 @@ class EmulatedCluster:
         for template in ["ansible.cfg", "hosts"]:
             logger.debug(
                 "Generating configuration file %s from template",
-                self.conf_dir / template,
+                self.state.conf / template,
             )
-            with open(self.conf_dir / template, "w+") as fh:
+            with open(self.state.conf / template, "w+") as fh:
                 fh.write(
                     Templater().frender(
-                        self.settings.ansible.path / f"{template}.j2",
-                        state=self.cluster_dir,
+                        self.runtime_settings.ansible.path / f"{template}.j2",
+                        state=self.state.path,
                         cluster=self.name,
                         namespace=manager.namespace,
                         infrastructure=infrastructure,
-                        emulator_mode=emulator_mode,
+                        emulator_mode=self.cluster_settings.slurm_emulator,
                     )
                 )
 
@@ -227,23 +215,26 @@ class EmulatedCluster:
         # source of extra variables. The file should not be regenerated every
         # times to make randomly generated data (eg. users) persistent over
         # successive runs.
-        if not self.extravars_path.exists():
+        if not self.state.extravars.exists():
             if users_directory is None:
                 # Generate new random users directory
                 logger.info("Generating new random users directory")
                 users_directory = UsersDirectory(10, self.name)
 
             extravars = {
-                "fhpc_cluster_state_dir": str(self.cluster_dir),
+                "fhpc_cluster_state_dir": str(self.state.path),
                 "fhpc_cluster": self.name,
                 "fhpc_namespace": manager.namespace,
                 "fhpc_users": users_directory._users_generic(),
                 "fhpc_groups": users_directory._groups_generic(),
             }
-            with open(self.extravars_path, "w+") as fh:
+            with open(self.state.extravars, "w+") as fh:
                 fh.write(yaml.dump(extravars))
 
-        cmdline = f"{self.settings.ansible.args} --extra-vars @{self.extravars_path}"
+        cmdline = (
+            f"{self.runtime_settings.ansible.args} "
+            f"--extra-vars @{self.state.extravars}"
+        )
 
         if tags is not None and len(tags):
             cmdline += f" --tags {','.join(tags)}"
@@ -253,19 +244,19 @@ class EmulatedCluster:
 
         for playbook in playbooks:
             ansible_runner.run(
-                private_data_dir=self.conf_dir,
-                playbook=f"{self.settings.ansible.path}/{playbook}.yml",
+                private_data_dir=self.state.conf,
+                playbook=f"{self.runtime_settings.ansible.path}/{playbook}.yml",
                 cmdline=cmdline,
                 extravars={
                     "fhpc_addresses": containers_addresses,
                     "fhpc_db": str(Path.cwd() / db._loader.path),
-                    "fhpc_emulator_mode": emulator_mode,
+                    "fhpc_emulator_mode": self.cluster_settings.slurm_emulator,
                     "fhpc_nodes": nodes,
                 },
             )
 
         for generated_dir in ["artifacts", "env"]:
-            generated_path = self.conf_dir / generated_dir
+            generated_path = self.state.conf / generated_dir
             logger.debug("Removing ansible generated directory %s", generated_path)
             shutil.rmtree(generated_path)
 
@@ -282,11 +273,7 @@ class EmulatedCluster:
         manager.storage().stop()
 
         # Remove cluster state directory
-        if self.cluster_dir.exists():
-            logger.info(
-                "Removing existing cluster state directory %s", self.cluster_dir
-            )
-            shutil.rmtree(self.cluster_dir)
+        self.state.clean()
 
     def start(self) -> None:
         manager = ContainersManager(self.name)

@@ -26,8 +26,8 @@ from racksdb import RacksDB
 from racksdb.errors import RacksDBFormatError, RacksDBSchemaError
 
 from .version import get_version
-from .settings import RuntimeSettings
-from .state import default_state_dir
+from .settings import RuntimeSettings, ClusterSettings
+from .state import default_state_dir, ClusterState
 from .cluster import EmulatedCluster, clusters_list
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
@@ -80,15 +80,13 @@ class FireHPCExec:
         parser_deploy = subparsers.add_parser("deploy", help="Deploy cluster")
         parser_deploy.add_argument(
             "--db",
-            help="Path to RacksDB database (default: %(default)s)",
+            help="Path to RacksDB database",
             type=Path,
-            default=RacksDB.DEFAULT_DB,
         )
         parser_deploy.add_argument(
             "--schema",
-            help="Path to RacksDB schema (default: %(default)s)",
+            help="Path to RacksDB schema",
             type=Path,
-            default=RacksDB.DEFAULT_SCHEMA,
         )
         parser_deploy.add_argument(
             "--os",
@@ -123,15 +121,13 @@ class FireHPCExec:
         )
         parser_conf.add_argument(
             "--db",
-            help="Path to RacksDB database (default: %(default)s)",
+            help="Path to RacksDB database",
             type=Path,
-            default=RacksDB.DEFAULT_DB,
         )
         parser_conf.add_argument(
             "--schema",
-            help="Path to RacksDB schema (default: %(default)s)",
+            help="Path to RacksDB schema",
             type=Path,
-            default=RacksDB.DEFAULT_SCHEMA,
         )
         parser_conf.add_argument(
             "--cluster",
@@ -167,15 +163,13 @@ class FireHPCExec:
         )
         parser_restore.add_argument(
             "--db",
-            help="Path to RacksDB database (default: %(default)s)",
+            help="Path to RacksDB database",
             type=Path,
-            default=RacksDB.DEFAULT_DB,
         )
         parser_restore.add_argument(
             "--schema",
-            help="Path to RacksDB schema (default: %(default)s)",
+            help="Path to RacksDB schema",
             type=Path,
-            default=RacksDB.DEFAULT_SCHEMA,
         )
         parser_restore.add_argument(
             "--cluster",
@@ -276,7 +270,7 @@ class FireHPCExec:
 
         self.args = parser.parse_args()
         self._setup_logger()
-        self.settings = RuntimeSettings()
+        self.runtime_settings = RuntimeSettings()
         try:
             self.args.func()
         except FireHPCRuntimeError as e:
@@ -300,21 +294,33 @@ class FireHPCExec:
             handler.addFilter(lib_filter)
         root_logger.addHandler(handler)
 
-    def _load_racksdb(self):
+    def _load_racksdb(self, settings: ClusterSettings):
         try:
-            return RacksDB.load(db=self.args.db, schema=self.args.schema)
+            return RacksDB.load(db=settings.racksdb.db, schema=settings.racksdb.schema)
         except (RacksDBSchemaError, RacksDBFormatError) as err:
             logger.critical("Unable to load RacksDB database: %s", err)
             sys.exit(1)
 
     def _execute_deploy(self):
-        images = OSImagesSources(self.settings)
+        # Load images sources
+        images = OSImagesSources(self.runtime_settings)
         if not images.supported(self.args.os):
             logger.critical("OS %s is not supported", self.args.os)
             logger.info("Run `firehpc images` to get the list of supported OS")
             sys.exit(1)
-        db = self._load_racksdb()
-        cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+
+        # Define cluster settings from args and save
+        state = ClusterState(self.args.state, self.args.cluster)
+        cluster_settings = ClusterSettings.from_args(self.args)
+        state.save(cluster_settings)
+
+        # Load RacksDB
+        db = self._load_racksdb(cluster_settings)
+
+        # Initialize cluster
+        cluster = EmulatedCluster(
+            self.runtime_settings, self.args.cluster, state, cluster_settings
+        )
 
         # If user specified another cluster name to extract its users directory, load
         # this users directory.
@@ -322,65 +328,112 @@ class FireHPCExec:
         if self.args.users:
             logger.info("Extracting users directory from cluster %s", self.args.users)
             users_directory = EmulatedCluster(
-                self.settings, self.args.users, self.args.state
-            ).users_directory
+                self.runtime_settings,
+                self.args.users,
+                ClusterState(self.args.state, self.args.users),
+            ).users_directory0
 
-        cluster.deploy(self.args.os, images, db, self.args.slurm_emulator)
+        # Deploy cluster
+        cluster.deploy(self.args.os, images, db)
         cluster.conf(
             db,
             playbooks=["bootstrap", "site"],
-            custom=self.args.custom,
-            emulator_mode=self.args.slurm_emulator,
             users_directory=users_directory,
         )
 
     def _execute_conf(self):
-        cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+        # Load cluster settings
+        state = ClusterState(self.args.state, self.args.cluster)
+        cluster_settings = state.load()
+        # Update settings with provided args
+        cluster_settings.update_from_args(self.args)
+
+        cluster = EmulatedCluster(
+            self.runtime_settings, self.args.cluster, state, cluster_settings
+        )
+        settings = cluster.load()
+        settings.update_from_args(self.args)
+        cluster.save(settings)
+
         playbooks = ["site"]
         if self.args.with_bootstrap:
             playbooks.insert(0, "bootstrap")
         cluster.conf(
-            self._load_racksdb(),
+            self._load_racksdb(cluster_settings),
             playbooks=playbooks,
             reinit=False,
-            custom=self.args.custom,
             tags=self.args.tags,
-            emulator_mode=self.args.slurm_emulator,
         )
 
     def _execute_restore(self):
-        cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+        # Load cluster settings
+        state = ClusterState(self.args.state, self.args.cluster)
+        cluster_settings = state.load()
+        # Update settings with provided args
+        cluster_settings.update_from_args(self.args)
+
+        cluster = EmulatedCluster(
+            self.runtime_settings, self.args.cluster, state, cluster_settings
+        )
         cluster.conf(
-            self._load_racksdb(),
+            self._load_racksdb(cluster_settings),
             playbooks=["restore"],
             reinit=False,
-            custom=self.args.custom,
             skip_tags=["dependencies"],  # skip slurm->mariadb dependency
-            emulator_mode=self.args.slurm_emulator,
         )
 
     def _execute_start(self):
-        cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+        # Load cluster settings
+        state = ClusterState(self.args.state, self.args.cluster)
+        cluster_settings = state.load()
+
+        cluster = EmulatedCluster(
+            self.runtime_settings, self.args.cluster, state, cluster_settings
+        )
         cluster.start()
 
     def _execute_stop(self):
-        cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+        # Load cluster settings
+        state = ClusterState(self.args.state, self.args.cluster)
+        cluster_settings = state.load()
+
+        cluster = EmulatedCluster(
+            self.runtime_settings, self.args.cluster, state, cluster_settings
+        )
         cluster.stop()
 
     def _execute_ssh(self):
+        # Load cluster settings
+        state = ClusterState(self.args.state, self.args.cluster)
+        cluster_settings = state.load()
+
         cluster_name = self.args.args[0]
         if "." in self.args.args[0]:
             cluster_name = cluster_name.split(".")[1]
-        cluster = EmulatedCluster(self.settings, cluster_name, self.args.state)
+        cluster = EmulatedCluster(
+            self.runtime_settings, cluster_name, state, cluster_settings
+        )
         ssh = SSHClient(cluster)
         ssh.exec(self.args.args)
 
     def _execute_clean(self):
-        cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+        # Load cluster settings
+        state = ClusterState(self.args.state, self.args.cluster)
+        cluster_settings = state.load()
+
+        cluster = EmulatedCluster(
+            self.runtime_settings, self.args.cluster, state, cluster_settings
+        )
         cluster.clean()
 
     def _execute_status(self):
-        cluster = EmulatedCluster(self.settings, self.args.cluster, self.args.state)
+        # Load cluster settings
+        state = ClusterState(self.args.state, self.args.cluster)
+        cluster_settings = state.load()
+
+        cluster = EmulatedCluster(
+            self.runtime_settings, self.args.cluster, state, cluster_settings
+        )
         print(
             DumperFactory.get("json" if self.args.json else "console").dump(
                 cluster.status()
@@ -388,7 +441,7 @@ class FireHPCExec:
         )
 
     def _execute_images(self):
-        images = OSImagesSources(self.settings)
+        images = OSImagesSources(self.runtime_settings)
         print(str(images), end="")
 
     def _execute_list(self):
@@ -396,7 +449,7 @@ class FireHPCExec:
 
     def _execute_load(self):
         load_clusters(
-            self.settings,
+            self.runtime_settings,
             self.args.clusters,
             self.args.state,
             self.args.time_off_factor,
