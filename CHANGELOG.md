@@ -20,6 +20,7 @@ and this project adheres to
   addresses change (#11→#31).
 - Save cluster settings on deployment so they can reused automatically in
   subsequent runs of `firehpc conf` and `firehpc restore` (#7).
+- Report cluster settings in `firehpc status`.
 - load:
   - Submit jobs randomly in existing QOS and partitions.
   - Submit jobs of various sizes, with a power of 2 number (1, 2, 4, 8…) of
