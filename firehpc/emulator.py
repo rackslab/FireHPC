@@ -109,16 +109,16 @@ class ClusterJobsLoader:
             logger.info("cluster %s: QOS found: %s", self.cluster.name, qos)
 
             while not self.stop:
-                pending_jobs = self._get_nb_pending_jobs()
-                pending_jobs_limit = self._get_nb_pending_jobs_limit(partitions)
-                if pending_jobs >= pending_jobs_limit:
+                active_jobs = self._get_nb_active_jobs()
+                active_jobs_limit = self._get_nb_active_jobs_limit(partitions)
+                if active_jobs >= active_jobs_limit:
                     logger.debug(
-                        "cluster %s: Waiting for pending jobs to run…",
+                        "cluster %s: Waiting for jobs to run…",
                         self.cluster.name,
                     )
                     time.sleep(5)
                 else:
-                    nb_submit = pending_jobs_limit - pending_jobs
+                    nb_submit = active_jobs_limit - active_jobs
                     logger.info(
                         "cluster %s: %s new jobs to submit",
                         self.cluster.name,
@@ -189,8 +189,8 @@ class ClusterJobsLoader:
                 f"Unable to retrieve qos from cluster {self.cluster.name}: {str(err)}"
             ) from err
 
-    def _get_nb_pending_jobs_limit(self, partitions) -> int:
-        """Return the limit number of pending jobs on the given partitions."""
+    def _get_nb_active_jobs_limit(self, partitions) -> int:
+        """Return the limit number of active jobs on the given partitions."""
 
         def total_nodes():
             """Return total number of nodes in all partitions."""
@@ -214,15 +214,23 @@ class ClusterJobsLoader:
 
         return int((30 * (total_nodes() ** 0.5) - 30) / time_off_factor)
 
-    def _get_nb_pending_jobs(self):
+    def _get_nb_active_jobs(self):
+        """Return the current number of active jobs (ie. pending or running) on the
+        given partitions."""
         stdout, stderr = self.ssh.exec(
-            [f"admin.{self.cluster.name}", "squeue", "--state", "pending", "--json"]
+            [
+                f"admin.{self.cluster.name}",
+                "squeue",
+                "--state",
+                "pending,running",
+                "--json",
+            ]
         )
         try:
             return len(json.loads(stdout)["jobs"])
         except json.decoder.JSONDecodeError as err:
             raise FireHPCRuntimeError(
-                f"Unable to retrieve pending jobs from cluster {self.cluster.name}: "
+                f"Unable to retrieve active jobs from cluster {self.cluster.name}: "
                 f"{str(err)}"
             ) from err
 
