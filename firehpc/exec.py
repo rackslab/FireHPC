@@ -341,6 +341,7 @@ class FireHPCExec:
 
         # Define cluster settings from args and save
         state = ClusterState(self.args.state, self.args.cluster)
+        state.create()
         cluster_settings = ClusterSettings.from_args(self.args)
         state.save(cluster_settings)
 

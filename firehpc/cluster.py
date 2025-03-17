@@ -97,8 +97,6 @@ class EmulatedCluster:
         db: RacksDB,
     ) -> None:
 
-        self.state.create()
-
         infrastructure = db.infrastructures[self.name]
 
         manager = ContainersManager(self.name)
