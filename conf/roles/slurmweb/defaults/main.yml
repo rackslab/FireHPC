@@ -1,6 +1,8 @@
 ---
 slurmweb_enabled: false
 slurmweb_hostname: "{{ inventory_hostname }}"
+slurmweb_http_server_names:
+- "{{ slurmweb_hostname }}"
 slurmweb_jwt_key: /var/lib/slurm-web/jwt.key
 slurmweb_agent_subdir: agent
 slurmweb_agent_settings_defaults: {}

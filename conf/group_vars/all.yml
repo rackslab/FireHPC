@@ -44,6 +44,9 @@ slurm_compute_nodes: "{{ fhpc_nodes['compute'] }}"
 racksdb_database: "{{ fhpc_db }}"
 redis_local_password_file: "{{ fhpc_cluster_state_dir }}/redis/redis.password"
 slurmweb_slurmrestd_socket: "{{ fhpc_slurmrestd_socket }}"
+slurmweb_http_server_names:
+- "{{ slurmweb_hostname }}"
+- "{{ slurmweb_hostname }}.{{ fhpc_namespace }}"
 slurmweb_agent_settings_defaults:
   service:
     cluster: "{{ fhpc_cluster }}"

@@ -126,6 +126,8 @@ and this project adheres to
   - Ignore cluster creation error in slurmdbd, as it is now automatically
     created when slurmctld registers to accounting service.
   - Support Rackslab development repository derivatives on RHEL.
+  - Add admin hostname with namespace in addition to just the admin hostname in
+    Slurm-web nginx site server names.
 - docs: Various formatting errors in manpage.
 
 ### Removed

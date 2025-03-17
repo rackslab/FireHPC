@@ -1,8 +1,8 @@
-# {{ slurmweb_hostname }}:80
+# {{ slurmweb_http_server_names | join(',')}}:80
 server {
     listen 80;
     listen [::]:80;
-    server_name {{ slurmweb_hostname }};
+    server_name {{ slurmweb_http_server_names | join(' ') }};
 
     location / {
         include uwsgi_params;
