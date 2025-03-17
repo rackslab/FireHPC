@@ -76,8 +76,12 @@ and this project adheres to
 - Transform `fhpc_nodes` dictionary values from list of nodes to list of
   dictionaries to group nodes by type in RacksDB.
 - `firehpc ssh <cluster>` now connects to _admin_ host by default (#8).
-- load: Change pending jobs limit formula to avoid number of jobs growing as
-  fast as the number of nodes.
+- load:
+  - Change pending jobs limit formula to avoid number of jobs growing as fast as
+    the number of nodes.
+  - Consider running jobs in addition to pending jobs when computing the number
+    of new jobs to submit, in order to significantly reduce load on clusters out
+    of working hours.
 - conf:
   - Install `socat` package on all nodes in _common_ role.
   - Use packages list instead of loop to install MariaDB packages.
