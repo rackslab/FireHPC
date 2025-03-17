@@ -83,15 +83,13 @@ This command accepts the following options:
 This command accepts the following options:
 
 [.cli-opt]#*--db*=#[.cli-optval]##_DB_##:: Path to RacksDB database that
-  contains cluster description. The database is expected to contain an
-  infrastructure whose name is the emulated cluster name with one node that is
-  assigned the _admin_ tag, at least one node that is assigned the _login_ tag
-  and at least one node that is assigned the _compute_ tag. Default:
-  [.path]#`/var/lib/racksdb`#.
+  contains cluster description. By default, value from cluster settings or
+  default RacksDB value [.path]#`/var/lib/racksdb`# is used.
 
 [.cli-opt]#*--schema*=#[.cli-optval]##_SCHEMA_##:: Path to RacksDB database
-  schema. This option should not required for normal users.
-  Default: [.path]#`/usr/share/racksdb/schema.yml`#.
+  schema. This option should not be required for normal users. By default, valueq
+  from cluster settings or default RacksDB value
+  [.path]#`/usr/share/racksdb/schema.yml`# is used.
 
 [.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
   Name of the cluster to configure. This option is required.
@@ -99,9 +97,10 @@ This command accepts the following options:
 [.cli-opt]#*-c, --custom*=#[.cli-optval]##_CUSTOM_##::
   Path to directory with custom Ansible variables to override default variables
   provided in FireHPC. The given path must contain a [.path]#`group_vars/`# or a
-  [.path]#`host_vars/`# directory with files supported by Ansible.
+  [.path]#`host_vars/`# directory with files supported by Ansible. By default,
+  value from cluster settings is used.
 
-[.cli-opt]#--tags*=#[.cli-optval]##TAGS ...]##::
+[.cli-opt]#*--tags*# [.cli-optval]##_TAG …_##::
   Select for deployment the Ansible tasks assigned with these tags. Multiple
   tags can be given. Tasks are selected when they are assigned at least one of
   the tags.
@@ -110,10 +109,11 @@ This command accepts the following options:
   Execute configuration _bootstrap_ phase, additionally to the _deployment_
   phase. By default, only the _deployment_ phase is run.
 
-[.cli-opt]#*--slurm-emulator*#[.cli-optval]::
+[.cli-opt]#*--slurm-emulator*#::
   Enable Slurm emulator mode. In this mode, FireHPC configures only one _admin_
   container and with a specific version of Slurm compiled to support emulation
-  of arbitrary large number of fakes nodes.
+  of arbitrary large number of fakes nodes. By default, value from cluster
+  settings is used.
 --
 
 [.cli-opt]#*deploy*#::
@@ -121,7 +121,6 @@ This command accepts the following options:
   Deploy an emulated HPC cluster, with the following steps: download container
   images, setup virtual network and shared storage service, start containers and
   deploy configuration in two phases (_bootstrap_ and _deployment_).
-
 +
 --
 This command accepts the following options:
@@ -131,11 +130,11 @@ This command accepts the following options:
   infrastructure whose name is the emulated cluster name with one node that is
   assigned the _admin_ tag, at least one node that is assigned the _login_ tag
   and at least one node that is assigned the _compute_ tag. Default:
-  [.path]#`/var/lib/racksdb`.
+  [.path]#`/var/lib/racksdb`#.
 
 [.cli-opt]#*--schema*=#[.cli-optval]##_SCHEMA_##:: Path to RacksDB database
-  schema. This option should not required for normal users.
-  Default: [.path]#`/usr/share/racksdb/schema.yml`
+  schema. This option should not be required for normal users.
+  Default: [.path]#`/usr/share/racksdb/schema.yml`#.
 
 [.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
   Name of the cluster to configure. This option is required.
@@ -149,7 +148,7 @@ This command accepts the following options:
   provided in FireHPC. The given path must contain a [.path]#`group_vars/`# or a
   [.path]#`host_vars/`# directory with files supported by Ansible.
 
-[.cli-opt]#*--slurm-emulator*#[.cli-optval]::
+[.cli-opt]#*--slurm-emulator*#::
   Enable Slurm emulator mode. In this mode, FireHPC spawns only one _admin_
   container and install a specific version of Slurm compiled to support
   emulation of arbitrary large number of fakes nodes.
@@ -159,6 +158,10 @@ This command accepts the following options:
   from another existing cluster. This is useful to create the have the same user
   accounts on several clusters.
 --
++
+This command saves values of [.cli-opt]#*--db*#, [.cli-opt]#*--schema*#,
+[.cli-opt]#*-c, --custom*# and [.cli-opt]#*--slurm-emulator*# options in cluster
+settings file.
 
 [.cli-opt]#*images*#::
 
@@ -192,28 +195,28 @@ This command accepts the following options:
 This command accepts the following options:
 
 [.cli-opt]#*--db*=#[.cli-optval]##_DB_##:: Path to RacksDB database that
-  contains cluster description. The database is expected to contain an
-  infrastructure whose name is the emulated cluster name with one node that is
-  assigned the _admin_ tag, at least one node that is assigned the _login_ tag
-  and at least one node that is assigned the _compute_ tag. Default:
-  [.path]#`/var/lib/racksdb`#.
+  contains cluster description. By default, value from cluster settings or
+  default RacksDB value [.path]#`/var/lib/racksdb`# is used.
 
 [.cli-opt]#*--schema*=#[.cli-optval]##_SCHEMA_##:: Path to RacksDB database
-  schema. This option should not required for normal users.
-  Default: [.path]#`/usr/share/racksdb/schema.yml`#.
+  schema. This option should not be required for normal users. By default, value
+  from cluster settings or default RacksDB value
+  [.path]#`/usr/share/racksdb/schema.yml`# is used.
 
 [.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
-  Name of the cluster to configure. This option is required.
+  Name of the cluster to restore. This option is required.
 
 [.cli-opt]#*-c, --custom*=#[.cli-optval]##_CUSTOM_##::
   Path to directory with custom Ansible variables to override default variables
   provided in FireHPC. The given path must contain a [.path]#`group_vars/`# or a
-  [.path]#`host_vars/`# directory with files supported by Ansible.
+  [.path]#`host_vars/`# directory with files supported by Ansible. By default,
+  value from cluster settings is used.
 
-[.cli-opt]#*--slurm-emulator*#[.cli-optval]::
+[.cli-opt]#*--slurm-emulator*#::
   Enable Slurm emulator mode. In this mode, FireHPC configures only one _admin_
   container and with a specific version of Slurm compiled to support emulation
-  of arbitrary large number of fakes nodes.
+  of arbitrary large number of fakes nodes. By default, value from cluster
+  settings is used.
 --
 
 [.cli-opt]#*ssh*#::
@@ -267,6 +270,37 @@ This command accepts the following options:
 
 [.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
   Name of the cluster to stop. This option is required.
+--
+
+[.cli-opt]#*update*#::
+
+  Update cluster settings.
++
+--
+This command accepts the following options:
+
+[.cli-opt]#*--db*=#[.cli-optval]##_DB_##:: New path to RacksDB database that
+  contains cluster description. The database is expected to contain an
+  infrastructure whose name is the emulated cluster name with one node that is
+  assigned the _admin_ tag, at least one node that is assigned the _login_ tag
+  and at least one node that is assigned the _compute_ tag.
+
+[.cli-opt]#*--schema*=#[.cli-optval]##_SCHEMA_##:: New path to RacksDB database
+  schema. This option should not be required for normal users.
+
+[.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
+  Name of the cluster to update. This option is required.
+
+[.cli-opt]#*-c, --custom*=#[.cli-optval]##_CUSTOM_##::
+  New path to directory with custom Ansible variables to override default
+  variables provided in FireHPC. The given path must contain a
+  [.path]#`group_vars/`# or a [.path]#`host_vars/`# directory with files
+  supported by Ansible.
+
+[.cli-opt]#*--slurm-emulator*#::
+  Enable Slurm emulator mode. In this mode, FireHPC configures only one _admin_
+  container and with a specific version of Slurm compiled to support emulation
+  of arbitrary large number of fakes nodes.
 --
 
 == Exit status

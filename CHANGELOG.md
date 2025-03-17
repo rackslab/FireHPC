@@ -68,6 +68,7 @@ and this project adheres to
   - Mention `firehpc list` command in manpage.
   - Mention `firehpc load` command in manpage.
   - Mention `firehpc restore` command in manpage.
+  - Mention cluster settings and `firehpc update` command in manpage.
 - pkgs: Introduce tests extra package with dependencies required to run tests.
 
 ### Changed
@@ -87,7 +88,11 @@ and this project adheres to
   - Rename `slurm_partitions` > `node`→`nodes` key.
   - Change default Slurm authentication plugin from munge to slurm. This can be
     changed by setting `slurm_with_munge: true` in Ansible inventory.
-- docs: Explain in manpage ssh command considers admin container by default.
+- docs:
+  - Explain in manpage ssh command considers admin container by default.
+  - Update documentation of `--db`, `--schema`, `--custom` and
+    `--slurm-emulator` options of `conf` and `restore` commands with their new
+    semantics regarding management of cluster settings.
 
 ### Fixed
 - core:
@@ -113,6 +118,7 @@ and this project adheres to
     certificates during bootstrap.
   - Ignore cluster creation error in slurmdbd, as it is now automatically
     created when slurmctld registers to accounting service.
+- docs: Various formatting errors in manpage.
 
 ### Removed
 - docs: Remove `fhpc-emulate-slurm-usage` manpage.
