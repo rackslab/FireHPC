@@ -268,6 +268,36 @@ class FireHPCExec:
         )
         parser_load.set_defaults(func=self._execute_load)
 
+        # update command
+        parser_update = subparsers.add_parser("update", help="Update cluster settings")
+        parser_update.add_argument(
+            "--cluster",
+            help="Name of the cluster",
+            required=True,
+        )
+        parser_update.add_argument(
+            "--db",
+            help="New path to RacksDB database",
+            type=Path,
+        )
+        parser_update.add_argument(
+            "--schema",
+            help="New path to RacksDB schema",
+            type=Path,
+        )
+        parser_update.add_argument(
+            "-c",
+            "--custom",
+            help="New path of variables directories to customize FireHPC default",
+            type=Path,
+        )
+        parser_update.add_argument(
+            "--slurm-emulator",
+            help="Enable Slurm emulator mode",
+            action="store_true",
+        )
+        parser_update.set_defaults(func=self._execute_update)
+
         self.args = parser.parse_args()
         self._setup_logger()
         self.runtime_settings = RuntimeSettings()
@@ -403,13 +433,15 @@ class FireHPCExec:
         cluster.stop()
 
     def _execute_ssh(self):
-        # Load cluster settings
-        state = ClusterState(self.args.state, self.args.cluster)
-        cluster_settings = state.load()
-
+        # Define cluster name
         cluster_name = self.args.args[0]
         if "." in self.args.args[0]:
             cluster_name = cluster_name.split(".")[1]
+
+        # Load cluster settings
+        state = ClusterState(self.args.state, cluster_name)
+        cluster_settings = state.load()
+
         cluster = EmulatedCluster(
             self.runtime_settings, cluster_name, state, cluster_settings
         )
@@ -454,3 +486,11 @@ class FireHPCExec:
             self.args.state,
             self.args.time_off_factor,
         )
+
+    def _execute_update(self):
+        # Load cluster settings
+        state = ClusterState(self.args.state, self.args.cluster)
+        cluster_settings = state.load()
+        # Update settings with provided args
+        cluster_settings.update_from_args(self.args)
+        state.save(cluster_settings)
