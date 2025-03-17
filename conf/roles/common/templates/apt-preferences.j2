@@ -1,0 +1,5 @@
+{% for release, priority in releases_priorities.items() %}
+Package: *
+Pin: release c={{ release }}
+Pin-Priority: {{ priority }}
+{% endfor %}

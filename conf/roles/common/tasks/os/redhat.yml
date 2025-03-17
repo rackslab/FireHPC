@@ -47,6 +47,7 @@
     baseurl: "https://hpck.it/rpm/el$releasever/{{ item }}/$basearch/"
     gpgcheck: yes
     gpgkey: https://hpck.it/keyring.asc
+    priority: "{{ common_hpckit_priorities[item] | default(99) }}"
   loop: "{{ common_hpckit_derivatives }}"
 
 # Add Rackslab development deb packages repositories
@@ -58,5 +59,6 @@
     baseurl: "https://build.rackslab.io/devs/rpm/el$releasever/{{ item }}/$basearch/"
     gpgcheck: yes
     gpgkey: https://build.rackslab.io/devs/keyring.asc
+    priority: "{{ common_devs_priorities[item] | default(99) }}"
   when: common_with_devs_repos
   loop: "{{ common_devs_derivatives }}"
