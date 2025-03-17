@@ -122,6 +122,7 @@ and this project adheres to
     certificates during bootstrap.
   - Ignore cluster creation error in slurmdbd, as it is now automatically
     created when slurmctld registers to accounting service.
+  - Support Rackslab development repository derivatives on RHEL.
 - docs: Various formatting errors in manpage.
 
 ### Removed

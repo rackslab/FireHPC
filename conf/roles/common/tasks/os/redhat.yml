@@ -52,10 +52,11 @@
 # Add Rackslab development deb packages repositories
 - name: Add Rackslab development rpm packages repository
   ansible.builtin.yum_repository:
-    name: "Rackslab-devs"
-    description: "Rackslab development repository"
+    name: "Rackslab-devs-{{ item }}"
+    description: "Rackslab development {{ item }} repository"
     file: rackslab-devs
-    baseurl: "https://build.rackslab.io/devs/rpm/el$releasever/main/$basearch/"
+    baseurl: "https://build.rackslab.io/devs/rpm/el$releasever/{{ item }}/$basearch/"
     gpgcheck: yes
     gpgkey: https://build.rackslab.io/devs/keyring.asc
   when: common_with_devs_repos
+  loop: "{{ common_devs_derivatives }}"
