@@ -356,12 +356,14 @@ class FireHPCExec:
         # this users directory.
         users_directory = None
         if self.args.users:
+            users_cluster_state = ClusterState(self.args.state, self.args.users)
             logger.info("Extracting users directory from cluster %s", self.args.users)
             users_directory = EmulatedCluster(
                 self.runtime_settings,
                 self.args.users,
-                ClusterState(self.args.state, self.args.users),
-            ).users_directory0
+                users_cluster_state,
+                users_cluster_state.load(),
+            ).users_directory
 
         # Deploy cluster
         cluster.deploy(self.args.os, images, db)
