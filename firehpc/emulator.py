@@ -49,7 +49,10 @@ ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes", "cpus", "tim
 
 
 def load_clusters(
-    settings: RuntimeSettings, clusters: List[str], state_path: Path, time_off_factor: int
+    settings: RuntimeSettings,
+    clusters: List[str],
+    state_path: Path,
+    time_off_factor: int,
 ):
     loaders = []
     threads = []
