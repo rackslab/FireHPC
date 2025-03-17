@@ -52,11 +52,13 @@ def clusters_list(state: Path):
 class ClusterStatus:
     containers: list[Container]
     directory: UsersDirectory
+    settings: ClusterSettings
 
     def _generic(self):
         return {
             "containers": [container.name for container in self.containers],
             "users": self.directory._users_generic(),
+            "settings": self.settings.serialize(),
             "groups": self.directory._groups_generic(),
         }
 
@@ -299,5 +301,7 @@ class EmulatedCluster:
 
     def status(self) -> ClusterStatus:
         return ClusterStatus(
-            ContainersManager(self.name).running(), self.users_directory
+            ContainersManager(self.name).running(),
+            self.users_directory,
+            self.cluster_settings,
         )

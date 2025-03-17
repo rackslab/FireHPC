@@ -25,6 +25,7 @@ from ..errors import FireHPCRuntimeError
 
 if TYPE_CHECKING:
     from ..users import UserEntry, GroupEntry
+    from ..settings import ClusterSettings
 
 
 class UserEntryConsoleDumper:
@@ -42,16 +43,46 @@ class GroupEntryConsoleDumper:
         )
 
 
+class ClusterSettingsConsoleDumper:
+    @staticmethod
+    def dump(obj: ClusterSettings):
+        result = ""
+
+        def label(name):
+            return f"  {name:15s}"
+
+        if obj.custom:
+            result += f"{label('custom')}: {obj.custom}\n"
+        result += (
+            f"{label('slurm emulator')}: {'yes' if obj.slurm_emulator else 'no'}\n"
+        )
+        if obj.racksdb.db:
+            result += f"{label('db')}: {obj.racksdb.db}\n"
+        if obj.racksdb.schema:
+            result += f"{label('schema')}: {obj.racksdb.schema}\n"
+        return result
+
+
 class ClusterStatusConsoleDumper:
     @staticmethod
     def dump(obj: ClusterStatus) -> str:
         result = ""
+
+        # List of containers
         result += "containers:\n"
         for container in obj.containers:
             result += f"  {container.name} is running\n"
+
+        # Cluster settings
+        result += "settings:\n"
+        result += ClusterSettingsConsoleDumper.dump(obj.settings)
+
+        # List of users
         result += "users:\n"
         for user in obj.directory:
             result += f"  {UserEntryConsoleDumper.dump(user)}\n"
+
+        # List of groups
         result += "groups:\n"
         for group in obj.directory.groups:
             result += f"  {GroupEntryConsoleDumper.dump(group)}\n"
