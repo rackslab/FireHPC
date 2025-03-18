@@ -32,7 +32,7 @@ from .cluster import EmulatedCluster, clusters_list
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
 from .images import OSImagesSources
-from .emulator import load_clusters
+from .load import load_clusters
 from .log import TTYFormatter
 from .dumpers import DumperFactory
 
