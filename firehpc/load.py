@@ -19,7 +19,6 @@
 
 from __future__ import annotations
 from typing import TYPE_CHECKING, List, Optional
-from pathlib import Path
 import logging
 import sys
 import json
@@ -31,7 +30,7 @@ from datetime import datetime
 
 from .settings import RuntimeSettings
 from .cluster import EmulatedCluster
-from .state import ClusterState
+from .state import UserState, ClusterState
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
 
@@ -51,16 +50,18 @@ ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes", "cpus", "tim
 def load_clusters(
     settings: RuntimeSettings,
     clusters: List[str],
-    state_path: Path,
+    user_state: UserState,
     time_off_factor: int,
 ):
     loaders = []
     threads = []
     try:
         for _cluster in clusters:
-            state = ClusterState(state_path, _cluster)
+            cluster_state = ClusterState(user_state, _cluster)
             loader = ClusterJobsLoader(
-                EmulatedCluster(settings, _cluster, state, state.load()),
+                EmulatedCluster(
+                    settings, _cluster, cluster_state, cluster_state.load()
+                ),
                 time_off_factor,
             )
             thread = threading.Thread(target=loader.run)
