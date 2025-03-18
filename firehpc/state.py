@@ -37,13 +37,23 @@ def default_state_dir():
 
 
 @dataclasses.dataclass
+class UserState:
+    path: Path
+
+    def create(self):
+        if not self.path.exists():
+            logger.debug("Creating state directory %s", self.path)
+            self.path.mkdir(parents=True)
+
+
+@dataclasses.dataclass
 class ClusterState:
-    state: Path
+    user_state: UserState
     cluster: str
 
     @property
     def path(self):
-        return self.state / self.cluster
+        return self.user_state.path / "clusters" / self.cluster
 
     @property
     def conf(self) -> Path:
@@ -61,9 +71,7 @@ class ClusterState:
         return self.path.exists()
 
     def create(self):
-        if not self.state.exists():
-            logger.debug("Creating state directory %s", self.state)
-            self.state.mkdir(parents=True)
+        self.user_state.create()
         if not self.path.exists():
             logger.debug("Creating cluster state directory %s", self.path)
             self.path.mkdir()

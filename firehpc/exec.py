@@ -27,7 +27,7 @@ from racksdb.errors import RacksDBFormatError, RacksDBSchemaError
 
 from .version import get_version
 from .settings import RuntimeSettings, ClusterSettings
-from .state import default_state_dir, ClusterState
+from .state import default_state_dir, UserState, ClusterState
 from .cluster import EmulatedCluster, clusters_list
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
@@ -301,6 +301,7 @@ class FireHPCExec:
         self.args = parser.parse_args()
         self._setup_logger()
         self.runtime_settings = RuntimeSettings()
+        self.user_state = UserState(self.args.state)
         try:
             self.args.func()
         except FireHPCRuntimeError as e:
@@ -340,7 +341,7 @@ class FireHPCExec:
             sys.exit(1)
 
         # Define cluster settings from args and save
-        state = ClusterState(self.args.state, self.args.cluster)
+        state = ClusterState(self.user_state, self.args.cluster)
         state.create()
         cluster_settings = ClusterSettings.from_args(self.args)
         state.save(cluster_settings)
@@ -357,7 +358,7 @@ class FireHPCExec:
         # this users directory.
         users_directory = None
         if self.args.users:
-            users_cluster_state = ClusterState(self.args.state, self.args.users)
+            users_cluster_state = ClusterState(self.user_state, self.args.users)
             logger.info("Extracting users directory from cluster %s", self.args.users)
             users_directory = EmulatedCluster(
                 self.runtime_settings,
@@ -376,7 +377,7 @@ class FireHPCExec:
 
     def _execute_conf(self):
         # Load cluster settings
-        state = ClusterState(self.args.state, self.args.cluster)
+        state = ClusterState(self.user_state, self.args.cluster)
         cluster_settings = state.load()
         # Update settings with provided args
         cluster_settings.update_from_args(self.args)
@@ -400,7 +401,7 @@ class FireHPCExec:
 
     def _execute_restore(self):
         # Load cluster settings
-        state = ClusterState(self.args.state, self.args.cluster)
+        state = ClusterState(self.user_state, self.args.cluster)
         cluster_settings = state.load()
         # Update settings with provided args
         cluster_settings.update_from_args(self.args)
@@ -417,7 +418,7 @@ class FireHPCExec:
 
     def _execute_start(self):
         # Load cluster settings
-        state = ClusterState(self.args.state, self.args.cluster)
+        state = ClusterState(self.user_state, self.args.cluster)
         cluster_settings = state.load()
 
         cluster = EmulatedCluster(
@@ -427,7 +428,7 @@ class FireHPCExec:
 
     def _execute_stop(self):
         # Load cluster settings
-        state = ClusterState(self.args.state, self.args.cluster)
+        state = ClusterState(self.user_state, self.args.cluster)
         cluster_settings = state.load()
 
         cluster = EmulatedCluster(
@@ -442,7 +443,7 @@ class FireHPCExec:
             cluster_name = cluster_name.split(".")[1]
 
         # Load cluster settings
-        state = ClusterState(self.args.state, cluster_name)
+        state = ClusterState(self.user_state, cluster_name)
         cluster_settings = state.load()
 
         cluster = EmulatedCluster(
@@ -453,7 +454,7 @@ class FireHPCExec:
 
     def _execute_clean(self):
         # Load cluster settings
-        state = ClusterState(self.args.state, self.args.cluster)
+        state = ClusterState(self.user_state, self.args.cluster)
         cluster_settings = state.load()
 
         cluster = EmulatedCluster(
@@ -463,7 +464,7 @@ class FireHPCExec:
 
     def _execute_status(self):
         # Load cluster settings
-        state = ClusterState(self.args.state, self.args.cluster)
+        state = ClusterState(self.user_state, self.args.cluster)
         cluster_settings = state.load()
 
         cluster = EmulatedCluster(
@@ -486,13 +487,13 @@ class FireHPCExec:
         load_clusters(
             self.runtime_settings,
             self.args.clusters,
-            self.args.state,
+            self.user_state,
             self.args.time_off_factor,
         )
 
     def _execute_update(self):
         # Load cluster settings
-        state = ClusterState(self.args.state, self.args.cluster)
+        state = ClusterState(self.user_state, self.args.cluster)
         cluster_settings = state.load()
         # Update settings with provided args
         cluster_settings.update_from_args(self.args)
