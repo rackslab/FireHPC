@@ -206,7 +206,7 @@ _firehpc() {
     local cur prev opts
     local i verb comps
 
-    local VERBS='clean conf deploy images list load restore ssh start status stop update'
+    local VERBS='bootstrap clean conf deploy images list load restore ssh start status stop update'
 
     _init_completion || return
 
@@ -231,7 +231,7 @@ _firehpc() {
             _firehpc_deploy "$cur" "$prev"
             return
             ;;
-        images|list)
+        bootstrap|images|list)
             # Nothing to suggest for these verbs
             return
             ;;
