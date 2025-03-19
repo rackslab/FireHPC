@@ -1,0 +1,4 @@
+ansible-core
+ansible
+ansible-runner
+ClusterShell

@@ -29,6 +29,7 @@ from .version import get_version
 from .settings import RuntimeSettings, ClusterSettings
 from .state import default_state_dir, UserState, ClusterState
 from .cluster import EmulatedCluster, clusters_list
+from .environments import bootstrap
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
 from .os import OSDatabase
@@ -75,6 +76,12 @@ class FireHPCExec:
             dest="action",
             required=True,
         )
+
+        # bootstrap command
+        parser_bootstrap = subparsers.add_parser(
+            "bootstrap", help="Bootstrap deployment environments"
+        )
+        parser_bootstrap.set_defaults(func=self._execute_bootstrap)
 
         # deploy command
         parser_deploy = subparsers.add_parser("deploy", help="Deploy cluster")
@@ -331,6 +338,9 @@ class FireHPCExec:
         except (RacksDBSchemaError, RacksDBFormatError) as err:
             logger.critical("Unable to load RacksDB database: %s", err)
             sys.exit(1)
+
+    def _execute_bootstrap(self):
+        bootstrap(self.user_state, self.runtime_settings)
 
     def _execute_deploy(self):
         # Load images sources

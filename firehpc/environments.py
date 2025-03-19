@@ -33,15 +33,45 @@ widely available in host distributions supported by FireHPC.
 """
 
 from __future__ import annotations
+import venv
 import dataclasses
 import typing as t
 import logging
+
+import yaml
+
+from .runner import run
 
 if t.TYPE_CHECKING:
     from .settings import RuntimeSettings
     from .state import UserState
 
 logger = logging.getLogger(__name__)
+
+
+def bootstrap(user_state: UserState, runtime_settings: RuntimeSettings) -> None:
+    """Bootstrap deployment environments required for all OS in databases."""
+    logger.debug("Loading OS database file %s", runtime_settings.os.db)
+    with open(runtime_settings.os.db) as fh:
+        db = yaml.safe_load(fh)
+
+    # Retrieve the list of environments
+    environments = set()
+    for os, value in db.items():
+        if value["environment"] not in environments:
+            environments.add(value["environment"])
+
+    if not environments:
+        logger.warning("No environment to create")
+        return
+
+    builder = venv.EnvBuilder(clear=True, with_pip=True)
+    for environment in environments:
+        env = DeploymentEnvironment(user_state, runtime_settings, environment)
+        env.create(builder)
+        env.install()
+
+    logger.info("Bootstrap successful")
 
 
 @dataclasses.dataclass
@@ -60,3 +90,19 @@ class DeploymentEnvironment:
 
     def exists(self):
         return self.path.exists()
+
+    def create(self, builder):
+        logger.info("Creating deployment environment %s", self.name)
+        builder.create(self.path)
+
+    def install(self):
+        logger.info("Installing requirements in deployment environment %s", self.name)
+        run(
+            [
+                self.bin / "pip",
+                "install",
+                "--requirement",
+                self.runtime_settings.os.requirements / f"{self.name}.txt",
+            ],
+            check=True,
+        )
