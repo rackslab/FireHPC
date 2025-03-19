@@ -22,6 +22,8 @@ and this project adheres to
   subsequent runs of `firehpc conf` and `firehpc restore` (#7).
 - Report cluster settings in `firehpc status`.
 - Introduce `firehpc update` command to change cluster settings.
+- Integrated management of virtual environment to multiple versions of Ansible
+  depending on targeted OS (#24).
 - load:
   - Submit jobs randomly in existing QOS and partitions.
   - Submit jobs of various sizes, with a power of 2 number (1, 2, 4, 8…) of
@@ -79,6 +81,10 @@ and this project adheres to
 - Transform `fhpc_nodes` dictionary values from list of nodes to list of
   dictionaries to group nodes by type in RacksDB.
 - `firehpc ssh <cluster>` now connects to _admin_ host by default (#8).
+- Rename file `images.yml` to `os/db.yml` and name of deployment environment
+  associated to all supported OS.
+- Replace section `[images]` to `[os]` in system configuration with new `db` and
+  `requirements` parameters.
 - load:
   - Change pending jobs limit formula to avoid number of jobs growing as fast as
     the number of nodes.

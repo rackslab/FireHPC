@@ -24,6 +24,7 @@ import shutil
 import logging
 
 from .settings import ClusterSettings
+from .errors import FireHPCRuntimeError
 
 import yaml
 
@@ -40,10 +41,17 @@ def default_state_dir():
 class UserState:
     path: Path
 
+    @property
+    def clusters(self):
+        return self.path / "clusters"
+
     def create(self):
         if not self.path.exists():
             logger.debug("Creating state directory %s", self.path)
             self.path.mkdir(parents=True)
+        if not self.clusters.exists():
+            logger.debug("Creating clusters state directory %s", self.clusters)
+            self.clusters.mkdir()
 
 
 @dataclasses.dataclass
@@ -53,7 +61,7 @@ class ClusterState:
 
     @property
     def path(self):
-        return self.user_state.path / "clusters" / self.cluster
+        return self.user_state.clusters / self.cluster
 
     @property
     def conf(self) -> Path:
@@ -71,7 +79,9 @@ class ClusterState:
         return self.path.exists()
 
     def create(self):
+        # ensure users state and clusters directories are created
         self.user_state.create()
+
         if not self.path.exists():
             logger.debug("Creating cluster state directory %s", self.path)
             self.path.mkdir()
@@ -100,8 +110,14 @@ class ClusterState:
     def load(self):
         """Load cluster settings."""
         if not self.settings.exists():
-            logger.warning("Unable to find cluster settings file %s", self.settings)
-            return ClusterSettings()
-        with open(self.settings) as fh:
-            logger.debug("Loading cluster settings from file %s", self.settings)
-            return ClusterSettings.deserialize(yaml.safe_load(fh.read()))
+            raise FireHPCRuntimeError(
+                f"Unable to find cluster settings file {self.settings}"
+            )
+        try:
+            with open(self.settings) as fh:
+                logger.debug("Loading cluster settings from file %s", self.settings)
+                return ClusterSettings.deserialize(yaml.safe_load(fh.read()))
+        except KeyError as err:
+            raise FireHPCRuntimeError(
+                f"Unable to load cluster settings: {err}"
+            ) from err

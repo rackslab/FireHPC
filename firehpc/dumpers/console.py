@@ -51,6 +51,8 @@ class ClusterSettingsConsoleDumper:
         def label(name):
             return f"  {name:15s}"
 
+        result += f"{label('os')}: {obj.os}\n"
+        result += f"{label('environment')}: {obj.environment}\n"
         if obj.custom:
             result += f"{label('custom')}: {obj.custom}\n"
         result += (

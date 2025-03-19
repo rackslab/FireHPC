@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 from pathlib import Path
 import shutil
+import os
 import logging
 
 import ansible_runner
@@ -32,12 +33,12 @@ from .users import UsersDirectory
 from .containers import ContainersManager
 from .errors import FireHPCRuntimeError
 from .settings import ClusterSettings
-from .state import ClusterState
+from .state import ClusterState, UserState
+from .environments import DeploymentEnvironment
 
 if TYPE_CHECKING:
     from racksdb import RacksDB
     from .settings import RuntimeSettings
-    from .images import OSImagesSources
     from .containers import Container
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 def clusters_list(state: Path):
     """Return list of cluster names present in state directory."""
-    return [path.name for path in state.glob("*")]
+    return [path.name for path in UserState(state).clusters.glob("*")]
 
 
 @dataclass
@@ -69,7 +70,7 @@ class EmulatedCluster:
         runtime_settings: RuntimeSettings,
         name: str,
         state: ClusterState,
-        cluster_settings: ClusterSettings,
+        cluster_settings: Optional[ClusterSettings] = None,
     ):
         self.runtime_settings = runtime_settings
         self.name = name
@@ -93,7 +94,7 @@ class EmulatedCluster:
     def deploy(
         self,
         os: str,
-        images: OSImagesSources,
+        url: str,
         db: RacksDB,
     ) -> None:
 
@@ -104,7 +105,7 @@ class EmulatedCluster:
         admin_node = infrastructure.nodes.filter(tags=["admin"]).first()
         admin_image = manager.download(
             admin_node.name,
-            images.url(os),
+            url,
         )
         if not self.cluster_settings.slurm_emulator:
             for node in infrastructure.nodes:
@@ -242,7 +243,26 @@ class EmulatedCluster:
         if skip_tags is not None and len(skip_tags):
             cmdline += f" --skip-tags {','.join(skip_tags)}"
 
+        environment = DeploymentEnvironment(
+            self.state.user_state,
+            self.runtime_settings,
+            self.cluster_settings.environment,
+        )
+
+        if not environment.exists():
+            raise FireHPCRuntimeError(
+                f"Unable to find environment {environment.name}, bootstrap first?"
+            )
+
         for playbook in playbooks:
+            # Prepend deployment environment bin folder in $PATH so that
+            # ansible-runnner will execute ansible-playbook in that folder instead of
+            # the one in system paths.
+            logger.debug("Adding %s in PATH", environment.bin)
+            old_path = os.environ["PATH"]
+            os.environ["PATH"] = f"{environment.bin}:{old_path}"
+
+            # Run ansible-playbook
             ansible_runner.run(
                 private_data_dir=self.state.conf,
                 playbook=f"{self.runtime_settings.ansible.path}/{playbook}.yml",
@@ -254,6 +274,9 @@ class EmulatedCluster:
                     "fhpc_nodes": nodes,
                 },
             )
+
+            # Restore $PATH
+            os.environ["PATH"] = old_path
 
         for generated_dir in ["artifacts", "env"]:
             generated_path = self.state.conf / generated_dir
