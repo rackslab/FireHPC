@@ -48,11 +48,6 @@ include = ['firehpc*']
 "Homepage" = "https://github.com/rackslab/firehpc"
 "Bug Tracker" = "https://github.com/rackslab/firehpc/issues"
 
-[tool.black]
-target-version = ['py39']
-color = 1
-
-[tool.ruff]
+[tool.ruff.lint]
 # Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
 select = ["E", "F"]
-target-version = "py39"
