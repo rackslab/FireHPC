@@ -180,25 +180,15 @@ This can be made persistent with:
 # echo fs.inotify.max_user_instances=1024 > /etc/sysctl.d/99-firehpc.conf
 ```
 
-Deployment of Debian 13 _« trixie »_ clusters require Ansible core >= 2.16 (for
-[this fix](https://github.com/ansible/ansible/issues/82068)) while RHEL8 target
-is not supported by Ansible >= 2.17 because of dropped support of Python 3.6
-(see
-[ansible support matrix](https://docs.ansible.com/ansible-core/devel/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix)
-for reference). This means Ansible core 2.16 is the only compatible release if
-you want to deploy both RHEL8 and Debian 13 _« trixie »_ clusters. The easiest
-way to satisfy this requirement is to install Ansible from PyPI repository.
-Create a virtual environment and install ansible with this command:
+## Usage
+
+### Bootstrap
+
+First, deployment environments must be bootstrap with Ansible:
 
 ```console
-$ pip install 'ansible-core<2.17' ansible ansible-runner ClusterShell
+$ firehpc bootstrap
 ```
-
-> [!NOTE]
-> ClusterShell is required in the virtual environment for the
-> [NodeSet filters](lib/ansible/filters/NodesetFilter.py).
-
-## Usage
 
 ### Deploy
 
