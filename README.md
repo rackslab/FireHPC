@@ -184,11 +184,15 @@ This can be made persistent with:
 
 ### Bootstrap
 
-First, deployment environments must be bootstrap with Ansible:
+First, bootstrap deployment environments:
 
 ```console
 $ firehpc bootstrap
 ```
+
+> [!NOTE]
+> This command creates multiple Python virtual environments with all versions of
+> Ansible required for all supported target OS.
 
 ### Deploy
 
