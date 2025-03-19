@@ -76,6 +76,7 @@ and this project adheres to
   - Mention `firehpc list` command in manpage.
   - Mention `firehpc load` command in manpage.
   - Mention `firehpc restore` command in manpage.
+  - Mention `firehpc bootstrap` command in manpage.
   - Mention cluster settings and `firehpc update` command in manpage.
 - pkgs: Introduce tests extra package with dependencies required to run tests.
 
