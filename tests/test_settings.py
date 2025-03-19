@@ -14,6 +14,8 @@ from firehpc.settings import ClusterSettings, ClusterRacksDBSettings
 
 
 BASE_SETTINGS = {
+    "os": "debian12",
+    "environment": "ansible-latest",
     "slurm_emulator": False,
 }
 
@@ -21,7 +23,14 @@ BASE_SETTINGS = {
 class TestClusterSettings(unittest.TestCase):
 
     def test_init(self):
-        settings = ClusterSettings()
+        settings = ClusterSettings(
+            os="debian12",
+            environment="ansible-latest",
+            slurm_emulator=False,
+            racksdb=ClusterRacksDBSettings(),
+        )
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsInstance(settings.racksdb, ClusterRacksDBSettings)
         self.assertIsNone(settings.racksdb.db)
         self.assertIsNone(settings.racksdb.schema)
@@ -62,7 +71,16 @@ class TestClusterSettings(unittest.TestCase):
 
     def test_args_empty(self):
         args = self.parse_args([])
-        settings = ClusterSettings.from_args(args)
+        settings = ClusterSettings.from_values(
+            os="debian12",
+            environment="ansible-latest",
+            slurm_emulator=args.slurm_emulator,
+            db=args.db,
+            schema=args.schema,
+            custom=args.custom,
+        )
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsNone(settings.racksdb.db)
         self.assertIsNone(settings.racksdb.schema)
         self.assertFalse(settings.slurm_emulator)
@@ -71,7 +89,16 @@ class TestClusterSettings(unittest.TestCase):
 
     def test_args_custom(self):
         args = self.parse_args(["--custom", "/tmp/custom"])
-        settings = ClusterSettings.from_args(args)
+        settings = ClusterSettings.from_values(
+            os="debian12",
+            environment="ansible-latest",
+            slurm_emulator=args.slurm_emulator,
+            db=args.db,
+            schema=args.schema,
+            custom=args.custom,
+        )
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsNone(settings.racksdb.db)
         self.assertIsNone(settings.racksdb.schema)
         self.assertFalse(settings.slurm_emulator)
@@ -83,9 +110,18 @@ class TestClusterSettings(unittest.TestCase):
         cwd = os.getcwd()
         os.chdir("/tmp")
         args = self.parse_args(["--custom", "custom"])
-        settings = ClusterSettings.from_args(args)
+        settings = ClusterSettings.from_values(
+            os="debian12",
+            environment="ansible-latest",
+            slurm_emulator=args.slurm_emulator,
+            db=args.db,
+            schema=args.schema,
+            custom=args.custom,
+        )
         os.chdir(cwd)
 
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsNone(settings.racksdb.db)
         self.assertIsNone(settings.racksdb.schema)
         self.assertFalse(settings.slurm_emulator)
@@ -95,7 +131,16 @@ class TestClusterSettings(unittest.TestCase):
 
     def test_args_racksdb(self):
         args = self.parse_args(["--db", "/tmp/db", "--schema", "/tmp/schema"])
-        settings = ClusterSettings.from_args(args)
+        settings = ClusterSettings.from_values(
+            os="debian12",
+            environment="ansible-latest",
+            slurm_emulator=args.slurm_emulator,
+            db=args.db,
+            schema=args.schema,
+            custom=args.custom,
+        )
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsInstance(settings.racksdb.db, Path)
         self.assertEqual(str(settings.racksdb.db), "/tmp/db")
         self.assertIsInstance(settings.racksdb.schema, Path)
@@ -108,9 +153,18 @@ class TestClusterSettings(unittest.TestCase):
         cwd = os.getcwd()
         os.chdir("/tmp")
         args = self.parse_args(["--db", "db", "--schema", "schema"])
-        settings = ClusterSettings.from_args(args)
+        settings = ClusterSettings.from_values(
+            os="debian12",
+            environment="ansible-latest",
+            slurm_emulator=args.slurm_emulator,
+            db=args.db,
+            schema=args.schema,
+            custom=args.custom,
+        )
         os.chdir(cwd)
 
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsInstance(settings.racksdb.db, Path)
         self.assertEqual(str(settings.racksdb.db), "/tmp/db")
         self.assertIsInstance(settings.racksdb.schema, Path)
@@ -121,7 +175,16 @@ class TestClusterSettings(unittest.TestCase):
 
     def test_args_slurm_emulator(self):
         args = self.parse_args(["--slurm-emulator"])
-        settings = ClusterSettings.from_args(args)
+        settings = ClusterSettings.from_values(
+            os="debian12",
+            environment="ansible-latest",
+            slurm_emulator=args.slurm_emulator,
+            db=args.db,
+            schema=args.schema,
+            custom=args.custom,
+        )
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsNone(settings.racksdb.db)
         self.assertIsNone(settings.racksdb.schema)
         self.assertTrue(settings.slurm_emulator)
@@ -143,6 +206,8 @@ class TestClusterSettings(unittest.TestCase):
         self.assertEqual(str(settings.custom), "/tmp/from-args")
 
         # Check values did not change for other parameters
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsNone(settings.racksdb.db)
         self.assertIsNone(settings.racksdb.schema)
         self.assertFalse(settings.slurm_emulator)
@@ -165,6 +230,8 @@ class TestClusterSettings(unittest.TestCase):
         self.assertEqual(str(settings.custom), "/tmp/from-args")
 
         # Check values did not change for other parameters
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsNone(settings.racksdb.db)
         self.assertIsNone(settings.racksdb.schema)
         self.assertFalse(settings.slurm_emulator)
@@ -189,6 +256,8 @@ class TestClusterSettings(unittest.TestCase):
         self.assertEqual(str(settings.racksdb.schema), "/tmp/schema-from-args")
 
         # Check values did not change for other parameters
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsNone(settings.custom)
         self.assertFalse(settings.slurm_emulator)
 
@@ -215,6 +284,8 @@ class TestClusterSettings(unittest.TestCase):
         self.assertEqual(str(settings.racksdb.schema), "/tmp/schema-from-args")
 
         # Check values did not change for other parameters
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsNone(settings.custom)
         self.assertFalse(settings.slurm_emulator)
 
@@ -230,6 +301,8 @@ class TestClusterSettings(unittest.TestCase):
         self.assertTrue(settings.slurm_emulator)
 
         # Check values did not change for other parameters
+        self.assertEqual(settings.os, "debian12")
+        self.assertEqual(settings.environment, "ansible-latest")
         self.assertIsNone(settings.racksdb.db)
         self.assertIsNone(settings.racksdb.schema)
         self.assertIsNone(settings.custom)
