@@ -31,7 +31,7 @@ from .state import default_state_dir, UserState, ClusterState
 from .cluster import EmulatedCluster, clusters_list
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
-from .images import OSImagesSources
+from .os import OSDatabase
 from .load import load_clusters
 from .log import TTYFormatter
 from .dumpers import DumperFactory
@@ -334,8 +334,8 @@ class FireHPCExec:
 
     def _execute_deploy(self):
         # Load images sources
-        images = OSImagesSources(self.runtime_settings)
-        if not images.supported(self.args.os):
+        os_db = OSDatabase(self.runtime_settings)
+        if not os_db.supported(self.args.os):
             logger.critical("OS %s is not supported", self.args.os)
             logger.info("Run `firehpc images` to get the list of supported OS")
             sys.exit(1)
@@ -343,7 +343,14 @@ class FireHPCExec:
         # Define cluster settings from args and save
         state = ClusterState(self.user_state, self.args.cluster)
         state.create()
-        cluster_settings = ClusterSettings.from_args(self.args)
+        cluster_settings = ClusterSettings.from_values(
+            os=self.args.os,
+            environment=os_db.environment(self.args.os),
+            slurm_emulator=self.args.slurm_emulator,
+            db=self.args.db,
+            schema=self.args.schema,
+            custom=self.args.custom,
+        )
         state.save(cluster_settings)
 
         # Load RacksDB
@@ -368,7 +375,7 @@ class FireHPCExec:
             ).users_directory
 
         # Deploy cluster
-        cluster.deploy(self.args.os, images, db)
+        cluster.deploy(self.args.os, os_db.url(self.args.os), db)
         cluster.conf(
             db,
             playbooks=["bootstrap", "site"],
@@ -455,11 +462,8 @@ class FireHPCExec:
     def _execute_clean(self):
         # Load cluster settings
         state = ClusterState(self.user_state, self.args.cluster)
-        cluster_settings = state.load()
 
-        cluster = EmulatedCluster(
-            self.runtime_settings, self.args.cluster, state, cluster_settings
-        )
+        cluster = EmulatedCluster(self.runtime_settings, self.args.cluster, state)
         cluster.clean()
 
     def _execute_status(self):
@@ -477,8 +481,8 @@ class FireHPCExec:
         )
 
     def _execute_images(self):
-        images = OSImagesSources(self.runtime_settings)
-        print(str(images), end="")
+        os_db = OSDatabase(self.runtime_settings)
+        print(str(os_db), end="")
 
     def _execute_list(self):
         print("\n".join(clusters_list(self.args.state)))
