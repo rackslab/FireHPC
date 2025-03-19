@@ -63,6 +63,11 @@ All commands accept [.cli-opt]#*-h, --help*# option to get details about
 available option for this particular command (_ex:_ `firehpc deploy --help`).
 Commands are listed in lexicographical order.
 
+[.cli-opt]#*bootstrap*#::
+
+  Create deployment environments with versions of Ansible required to deploy all
+  supported OS.
+
 [.cli-opt]#*clean*#::
 
   Stop and clean and emulated HPC clusters, with the following steps: stop
