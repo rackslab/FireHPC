@@ -22,8 +22,11 @@ and this project adheres to
   subsequent runs of `firehpc conf` and `firehpc restore` (#7).
 - Report cluster settings in `firehpc status`.
 - Introduce `firehpc update` command to change cluster settings.
+- Introduce `firehpc bootstrap` command to create deployment environments.
 - Integrated management of virtual environment to multiple versions of Ansible
   depending on targeted OS (#24).
+- Add PIP requirements files to populate _ansible-latest_ and _ansible-2.16_
+  deployment environments.
 - load:
   - Submit jobs randomly in existing QOS and partitions.
   - Submit jobs of various sizes, with a power of 2 number (1, 2, 4, 8…) of
