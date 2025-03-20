@@ -21,7 +21,6 @@ BASE_SETTINGS = {
 
 
 class TestClusterSettings(unittest.TestCase):
-
     def test_init(self):
         settings = ClusterSettings(
             os="debian12",

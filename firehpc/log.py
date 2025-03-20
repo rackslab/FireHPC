@@ -53,7 +53,6 @@ class TTYFormatter(logging.Formatter):
         self.debug = debug
 
     def format(self, record):
-
         _msg = record.getMessage()
         style = LOG_LEVEL_ANSI_STYLES[record.levelno]
         prefix = ""

@@ -16,7 +16,6 @@ from firehpc.errors import FireHPCRuntimeError
 
 
 class TestUserState(unittest.TestCase):
-
     def test_create(self):
         with tempfile.TemporaryDirectory() as _tmp:
             tmp = Path(_tmp)
@@ -30,7 +29,6 @@ class TestUserState(unittest.TestCase):
 
 
 class TestClusterState(unittest.TestCase):
-
     def test_properties(self):
         state = ClusterState(UserState(Path("/tmp")), "foo")
         self.assertEqual(str(state.path), "/tmp/clusters/foo")

@@ -97,7 +97,6 @@ class EmulatedCluster:
         url: str,
         db: RacksDB,
     ) -> None:
-
         infrastructure = db.infrastructures[self.name]
 
         manager = ContainersManager(self.name)
@@ -132,7 +131,6 @@ class EmulatedCluster:
         skip_tags: Optional[list[str]] = None,
         users_directory: Optional[UsersDirectory] = None,
     ) -> conf:
-
         if reinit:
             self.state.conf_clean()
 
@@ -233,8 +231,7 @@ class EmulatedCluster:
                 fh.write(yaml.dump(extravars))
 
         cmdline = (
-            f"{self.runtime_settings.ansible.args} "
-            f"--extra-vars @{self.state.extravars}"
+            f"{self.runtime_settings.ansible.args} --extra-vars @{self.state.extravars}"
         )
 
         if tags is not None and len(tags):
