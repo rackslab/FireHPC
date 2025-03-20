@@ -155,11 +155,11 @@ so the `mymachines` service can resolve IP addresses of container names:
 @@ -9,7 +9,7 @@
  shadow:         files systemd sss
  gshadow:        files systemd
- 
+
 -hosts:          files resolve [!UNAVAIL=return] dns mymachines myhostname
 +hosts:          files mymachines resolve [!UNAVAIL=return] dns myhostname
  networks:       files
- 
+
  protocols:      db files
 ```
 

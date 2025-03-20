@@ -11,4 +11,3 @@ elif [ $ACTION == "stop" ]; then
 else
     logger --tag firehpc-storage-wrapper --priority local0.error unsupported action ${ACTION}
 fi
-

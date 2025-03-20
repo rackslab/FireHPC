@@ -1,5 +1,5 @@
 ---
-# Restart munge to take into account new IP addresses in /etc/hosts file. 
+# Restart munge to take into account new IP addresses in /etc/hosts file.
 - name: Ensure munge service is started
   ansible.builtin.service:
     name: munge
