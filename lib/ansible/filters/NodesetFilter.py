@@ -1,3 +1,9 @@
+# Copyright (c) 2024 Rackslab
+#
+# This file is part of FireHPC.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 from ClusterShell.NodeSet import NodeSet
 
 
