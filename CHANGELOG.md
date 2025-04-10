@@ -106,6 +106,8 @@ and this project adheres to
   - Rename `slurm_partitions` > `node`→`nodes` key.
   - Change default Slurm authentication plugin from munge to slurm. This can be
     changed by setting `slurm_with_munge: true` in Ansible inventory.
+  - Launch `slurmrestd` with unprivileged system user when JWT authentication is
+    enabled.
 - docs:
   - Explain in manpage ssh command considers admin container by default.
   - Update documentation of `--db`, `--schema`, `--custom` and

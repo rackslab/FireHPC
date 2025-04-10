@@ -39,6 +39,25 @@
     state: latest
   when: slurm_with_accounting
 
+# Create slurmrestd system user/group to run slurmrestd with unprivileged user
+# when using TCP/IP socket (ie. not unix socket).
+- name: Create slurmrestd system group
+  ansible.builtin.group:
+    name: slurmrestd
+    gid: "{{ slurmrestd_gid }}"
+  when: slurm_with_jwt
+
+- name: Create slurmrest system user
+  ansible.builtin.user:
+    name: slurmrestd
+    uid: "{{ slurmrestd_uid }}"
+    group: slurmrestd
+    system: yes
+    shell: /sbin/nologin
+    home: /var/spool/slurmrest
+    create_home: no
+  when: slurm_with_jwt
+
 - name: Install slurmrestd
   ansible.builtin.package:
     name: "{{ slurm_emulator | ternary(slurm_emulator_server_packages, slurm_restd_packages) }}"

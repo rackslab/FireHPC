@@ -5,6 +5,8 @@ slurm_with_accounting: true
 slurm_with_munge: false
 slurm_uid: 432  # picked randomly among 100-499
 slurm_gid: 432  # picked randomly among 100-499
+slurmrestd_uid: 433  # picked randomly among 100-499
+slurmrestd_gid: 433  # picked randomly among 100-499
 slurm_server: admin
 slurm_cluster: hpc
 slurm_local_munge_key_file: munge.key  # dummy
@@ -38,5 +40,6 @@ slurm_with_slurmrestd: True
 # When disabled, slurmrestd fallback to local authentication on unix socket and
 # authentication on other daemons is based on munge only.
 slurm_with_jwt: True
+slurm_restd_with_unix_socket: False
 slurm_restd_socket: /run/slurmrestd/slurmrestd.socket
 slurm_restd_service_override_path: /etc/systemd/system/slurmrestd.service.d/firehpc.conf

@@ -1,18 +1,27 @@
 [Service]
-# Unset vendor unit ExecStart to avoid cumulative definition
+# Unset vendor unit ExecStart and Environment to avoid cumulative definition
 ExecStart=
+Environment=
 {% if slurm_with_jwt %}
 Environment="SLURM_JWT=daemon"
-ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS [::]:6820
 {% else %}
-Environment=
+# Accept running as slurm user
 Environment=SLURMRESTD_SECURITY=disable_user_check
+{% endif %}
+{% if slurm_restd_with_unix_socket %}
 ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS {% if not slurm_with_accounting %}-s openapi/slurmctld {% endif %}unix:{{ slurm_restd_socket }}
 RuntimeDirectory=slurmrestd
 RuntimeDirectoryMode=0755
+{% else %}
+ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS {% if not slurm_with_accounting %}-s openapi/slurmctld {% endif %} [::]:6820
 {% endif %}
+{% if slurm_with_jwt %}
+User=slurmrestd
+Group=slurmrestd
+{% else %}
 User=slurm
 Group=slurm
+{% endif %}
 # There are probably some memory leaks in slurmrestd, it strictly consumes more
 # memory requests after requests. As a workaround to this, set a memory limit so
 # that kernel OOM kills the service when it is reached, and restart the service
