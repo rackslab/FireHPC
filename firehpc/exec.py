@@ -389,9 +389,6 @@ class FireHPCExec:
         cluster = EmulatedCluster(
             self.runtime_settings, self.args.cluster, state, cluster_settings
         )
-        settings = cluster.load()
-        settings.update_from_args(self.args)
-        cluster.save(settings)
 
         playbooks = ["site"]
         if self.args.with_bootstrap:
