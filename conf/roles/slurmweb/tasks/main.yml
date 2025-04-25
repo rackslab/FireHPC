@@ -8,6 +8,30 @@
     name: "{{ slurmweb_packages }}"
     state: latest
 
+- name: Obtain Slurm JWT
+  block:
+  - name: Generate JWT with Slurm scontrol
+    ansible.builtin.command: scontrol token lifespan=infinite username=slurm
+    register: slurmweb_slurm_scontrol_generate
+
+  - name: Setting slurmrestd JWT fact
+    ansible.builtin.set_fact:
+      slurmweb_slurmrestd_jwt_token: "{{ slurmweb_slurm_scontrol_generate.stdout | split('=') | last }}"
+  when:
+  - slurmweb_slurmrestd_auth == 'jwt'
+  - slurmweb_slurmrestd_jwt_mode == 'static'
+
+- name: Deploy slurm JWT signing key
+  ansible.builtin.copy:
+    src: "{{ slurmweb_local_slurmrestd_jwt_key_file }}"
+    dest: "{{ slurmweb_slurmrestd_jwt_key }}"
+    owner: slurm  # FIXME: agent and key must run as slurm-web when uri is http
+    group: slurm
+    mode: 0400
+  when:
+  - slurmweb_slurmrestd_auth == 'jwt'
+  - slurmweb_slurmrestd_jwt_mode == 'auto'
+
 - name: Deploy Slurm-web configuration files
   ansible.builtin.template:
     src: "{{ item }}.ini.j2"
@@ -21,6 +45,9 @@
   notify:
   - Restart slurm-web-{{ item }} uWSGI
 
+#
+# slurm-web-gen-jwt-key needs gateway configuration file.
+#
 - name: Create JWT signing key
   ansible.builtin.command:
     cmd: /usr/libexec/slurm-web/slurm-web-gen-jwt-key

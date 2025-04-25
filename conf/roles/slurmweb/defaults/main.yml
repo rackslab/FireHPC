@@ -4,6 +4,12 @@ slurmweb_hostname: "{{ inventory_hostname }}"
 slurmweb_http_server_names:
 - "{{ slurmweb_hostname }}"
 slurmweb_jwt_key: /var/lib/slurm-web/jwt.key
+slurmweb_slurmrestd_uri: unix:/run/slurmrestd/slurmrestd.socket
+slurmweb_slurmrestd_auth: local
+slurmweb_slurmrestd_jwt_mode: auto
+slurmweb_slurmrestd_jwt_key: /var/lib/slurm-web/slurmrestd_jwt_hs256.key
+slurmweb_slurmrestd_jwt_token: null
+slurmweb_local_slurmrestd_jwt_key_file: jwt_hs256.key  # dummy
 slurmweb_agent_subdir: agent
 slurmweb_agent_settings_defaults: {}
 slurmweb_gateway_settings_defaults: {}

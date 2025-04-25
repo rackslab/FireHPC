@@ -67,6 +67,7 @@ and this project adheres to
     `common_devs_priorities`.
   - Add `slurm_restd_port` variable in inventory to control slurmrestd TCP/IP
     listening port.
+  - Support all Slurm-web to slurmrestd JWT authentication modes.
 - docs:
   - Add sysctl `fs.inotify.max_user_instances` value increase recommendation in
     README.md to avoid weird issue when launching many containers.
