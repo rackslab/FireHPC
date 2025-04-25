@@ -65,6 +65,8 @@ and this project adheres to
   - Support possibility to change priorities of hpck.it and Rackslab development
     repositories derivatives with `common_hpckit_priorities` and
     `common_devs_priorities`.
+  - Add `slurm_restd_port` variable in inventory to control slurmrestd TCP/IP
+    listening port.
 - docs:
   - Add sysctl `fs.inotify.max_user_instances` value increase recommendation in
     README.md to avoid weird issue when launching many containers.

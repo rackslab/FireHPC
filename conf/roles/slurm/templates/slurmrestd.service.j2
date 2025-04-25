@@ -13,7 +13,7 @@ ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS {% if not slurm_with_accounti
 RuntimeDirectory=slurmrestd
 RuntimeDirectoryMode=0755
 {% else %}
-ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS {% if not slurm_with_accounting %}-s openapi/slurmctld {% endif %}-a {% if slurm_with_jwt %}rest_auth/jwt{% else %}rest_auth/local{% endif %} [::]:6820
+ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS {% if not slurm_with_accounting %}-s openapi/slurmctld {% endif %}-a {% if slurm_with_jwt %}rest_auth/jwt{% else %}rest_auth/local{% endif %} [::]:{{ slurm_restd_port }}
 {% endif %}
 {% if slurm_with_jwt %}
 User=slurmrestd
