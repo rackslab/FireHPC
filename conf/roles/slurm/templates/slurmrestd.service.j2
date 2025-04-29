@@ -16,6 +16,7 @@ RuntimeDirectoryMode=0755
 ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS {% if not slurm_with_accounting %}-s openapi/slurmctld {% endif %}-a {% if slurm_with_jwt %}rest_auth/jwt{% else %}rest_auth/local{% endif %} [::]:{{ slurm_restd_port }}
 {% endif %}
 {% if slurm_with_jwt %}
+DynamicUser=yes
 User=slurmrestd
 Group=slurmrestd
 {% else %}
