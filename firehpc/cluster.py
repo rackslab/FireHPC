@@ -175,6 +175,16 @@ class EmulatedCluster:
         # then grouped by node type.
         nodes = {}
 
+        def node_type_gpus(node_type):
+            result = {}
+            if not hasattr(node_type, "gpu"):
+                return result
+            for gpu in node_type.gpu:
+                if gpu.model not in result:
+                    result[gpu.model] = 0
+                result[gpu.model] += 1
+            return result
+
         def insert_in_node_type():
             for node_type in nodes[tag]:
                 if node_type["type"] == node.type.id:
@@ -186,6 +196,7 @@ class EmulatedCluster:
                     "sockets": node.type.cpu.sockets,
                     "cores": node.type.cpu.cores,
                     "memory": node.type.ram.dimm * (node.type.ram.size // 1024**2),
+                    "gpus": node_type_gpus(node.type),
                     "nodes": [node.name],
                 }
             )
