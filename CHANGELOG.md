@@ -43,6 +43,7 @@ and this project adheres to
     submitting less jobs when not at work (#29).
   - Add `--time-off-factor` option to control by how much the load is divided
     outside of business hours.
+  - Request GPUs allocations on partitions with gpu GRES.
 - conf:
   - Add possibility to define additional QOS and alternative partitions in
     Slurm.

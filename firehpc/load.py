@@ -31,7 +31,9 @@ logger = logging.getLogger(__name__)
 JOBS_TIMELIMITS = (["10", "30", "1:0:0", "6:0:0"], [50, 5, 2, 1])
 JOBS_DURATIONS = ([360, 540, 720, 1200], [50, 5, 2, 1])
 
-ClusterPartition = namedtuple("ClusterPartition", ["name", "nodes", "cpus", "time"])
+ClusterPartition = namedtuple(
+    "ClusterPartition", ["name", "nodes", "cpus", "gpus", "time"]
+)
 
 
 def load_clusters(
@@ -140,6 +142,28 @@ class ClusterJobsLoader:
             ):
                 self.accounting = True
 
+    def _get_partition_gpus(self, partition):
+        """Return the total number of GPU GRES in a partition."""
+        result = 0
+        stdout, stderr = self.ssh.exec(
+            [f"admin.{self.cluster.name}", "scontrol", "show", "nodes", "--json"]
+        )
+        try:
+            for node in json.loads(stdout)["nodes"]:
+                if partition not in node["partitions"]:
+                    continue
+                if not len(node["gres"]):
+                    continue
+                gres = node["gres"].split(":")
+                if gres[0] != "gpu":
+                    continue
+                result += int(gres[2])
+        except json.decoder.JSONDecodeError as err:
+            raise FireHPCRuntimeError(
+                f"Unable to retrieve nodes from cluster {self.cluster.name}: {str(err)}"
+            ) from err
+        return result
+
     def _get_partitions(self) -> list[str]:
         stdout, stderr = self.ssh.exec(
             [f"admin.{self.cluster.name}", "scontrol", "show", "partitions", "--json"]
@@ -150,6 +174,7 @@ class ClusterJobsLoader:
                     partition["name"],
                     partition["nodes"]["total"],
                     partition["cpus"]["total"],
+                    self._get_partition_gpus(partition["name"]),
                     partition["maximums"]["time"],
                 )
                 for partition in json.loads(stdout)["partitions"]
@@ -288,6 +313,8 @@ class ClusterJobsLoader:
         # of tasks.
         if self.select_type == "select/linear":
             cmd.extend(["--nodes", str(random_power_two(partition.nodes))])
+        elif partition.gpus:
+            cmd.extend(["--gpus", str(random_power_two(partition.gpus))])
         else:
             cmd.extend(["--ntasks", str(random_power_two(partition.cpus))])
 
