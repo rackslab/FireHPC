@@ -37,6 +37,8 @@ slurm_profiles:
   compute: compute
   server: admin
   login: login
+# GRES GPU enabled if at least one type of compute nodes has gpu
+slurm_with_gres_gpu: "{{ fhpc_nodes['compute'] | map(attribute='gpus') | map('length') | map('bool') | max }}"
 slurm_local_munge_key_file: "{{ fhpc_cluster_state_dir }}/munge/munge.key"
 slurm_local_slurm_key_file: "{{ fhpc_cluster_state_dir }}/slurm/slurm.key"
 slurm_local_mariadb_password_file: "{{ fhpc_cluster_state_dir }}/mariadb/mariadb.password"
