@@ -12,6 +12,25 @@
     name: "{{ slurm_emulator | ternary(slurm_emulator_compute_packages, slurm_compute_packages) }}"
     state: latest
 
+- name: Set slurm current compute node fact
+  ansible.builtin.set_fact:
+    slurm_current_compute_node_type: "{{ slurm_compute_nodes | selectattr('nodes', 'contains', ansible_facts['hostname']) | first }}"
+  when: not slurm_emulator
+
+# Create fake_gpus if current node has gpus
+- name: Deploy slurm fake GPUs configuration file
+  ansible.builtin.template:
+    src: fake_gpus.conf.j2
+    dest: /etc/slurm/fake_gpus.conf
+    owner: slurm
+    group: slurm
+    mode: '0644'
+  notify:
+    - Restart slurmd
+  when:
+  - not slurm_emulator
+  - slurm_current_compute_node_type['gpus'] | length > 0
+
 # This is required on redhat based distributions as the service is not
 # automatically started by the RPM packages, and it does not hurt on Debian.
 - name: Ensure slurmd service is started
