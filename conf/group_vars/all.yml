@@ -37,8 +37,9 @@ slurm_profiles:
   compute: compute
   server: admin
   login: login
+slurm_compute_nodes: "{{ fhpc_nodes['compute'] }}"
 # GRES GPU enabled if at least one type of compute nodes has gpu
-slurm_with_gres_gpu: "{{ fhpc_nodes['compute'] | map(attribute='gpus') | map('length') | map('bool') | max }}"
+slurm_with_gres_gpu: "{{ slurm_compute_nodes | map(attribute='gpus') | map('length') | sum > 0 }}"
 slurm_local_munge_key_file: "{{ fhpc_cluster_state_dir }}/munge/munge.key"
 slurm_local_slurm_key_file: "{{ fhpc_cluster_state_dir }}/slurm/slurm.key"
 slurm_local_mariadb_password_file: "{{ fhpc_cluster_state_dir }}/mariadb/mariadb.password"
@@ -49,7 +50,6 @@ slurm_restd_with_unix_socket: "{{ fhpc_slurmrestd_with_unix_socket }}"
 slurm_restd_socket: "{{ fhpc_slurmrestd_socket }}"
 slurm_restd_port: "{{ fhpc_slurmrestd_port }}"
 slurm_accounts: "{{ fhpc_groups }}"
-slurm_compute_nodes: "{{ fhpc_nodes['compute'] }}"
 racksdb_database: "{{ fhpc_db }}"
 redis_local_password_file: "{{ fhpc_cluster_state_dir }}/redis/redis.password"
 slurmweb_local_slurmrestd_jwt_key_file: "{{ fhpc_local_slurm_jwt_key }}"
