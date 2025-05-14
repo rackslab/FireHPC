@@ -9,7 +9,6 @@
   ansible.builtin.group:
     name: slurm
     gid: "{{ slurm_gid }}"
-  when: ansible_os_family == 'RedHat'
 
 - name: Create slurm system user
   ansible.builtin.user:
@@ -20,7 +19,6 @@
     shell: /sbin/nologin
     home: /var/spool/slurm
     create_home: no
-  when: ansible_os_family == 'RedHat'
 
 - name: Install slurm common packages
   ansible.builtin.package:

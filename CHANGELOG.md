@@ -113,6 +113,7 @@ and this project adheres to
     changed by setting `slurm_with_munge: true` in Ansible inventory.
   - Launch `slurmrestd` with unprivileged system user when JWT authentication is
     enabled.
+  - Adapt _slurm_ role to support Slurm upstream packages on Debian.
 - docs:
   - Explain in manpage ssh command considers admin container by default.
   - Update documentation of `--db`, `--schema`, `--custom` and

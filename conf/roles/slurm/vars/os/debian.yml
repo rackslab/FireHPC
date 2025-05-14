@@ -1,20 +1,20 @@
 ---
 slurm_common_packages:
-  - slurm-client
+  - slurm-smd-client
 slurm_server_packages:
-  - slurmctld
+  - slurm-smd-slurmctld
 slurm_accounting_packages:
-  - slurmdbd
+  - slurm-smd-slurmdbd
 slurm_restd_packages:
-  - slurmrestd
+  - slurm-smd-slurmrestd
 slurm_compute_packages:
-  - slurmd
+  - slurm-smd-slurmd
 slurm_emulator_common_packages:
   - slurm-emulator
 slurm_munge_packages:
   - munge
 slurm_sackd_packages:
-  - sackd
+  - slurm-smd-sackd
 slurm_emulator_server_packages: []
 slurm_emulator_accounting_packages: []
 slurm_emulator_compute_packages: []
