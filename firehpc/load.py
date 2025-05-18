@@ -154,10 +154,11 @@ class ClusterJobsLoader:
                     continue
                 if not len(node["gres"]):
                     continue
-                gres = node["gres"].split(":")
-                if gres[0] != "gpu":
-                    continue
-                result += int(gres[2])
+                for gres in node["gres"].split(","):
+                    gres = gres.split(":")
+                    if gres[0] != "gpu":
+                        continue
+                    result += int(gres[2])
         except json.decoder.JSONDecodeError as err:
             raise FireHPCRuntimeError(
                 f"Unable to retrieve nodes from cluster {self.cluster.name}: {str(err)}"
