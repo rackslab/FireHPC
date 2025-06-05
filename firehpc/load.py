@@ -158,7 +158,7 @@ class ClusterJobsLoader:
                     gres = gres.split(":")
                     if gres[0] != "gpu":
                         continue
-                    result += int(gres[2])
+                    result += int(gres[-1])
         except json.decoder.JSONDecodeError as err:
             raise FireHPCRuntimeError(
                 f"Unable to retrieve nodes from cluster {self.cluster.name}: {str(err)}"
