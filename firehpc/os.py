@@ -35,6 +35,6 @@ class OSDatabase:
 
     def __str__(self):
         result = ""
-        for os, value in self.db.items():
+        for os, value in self.content.items():
             result += f"{os:10s}: {value['url']}\n"
         return result
