@@ -34,5 +34,8 @@
   notify:
     - Update CA certificates
 
+- name: Include OS Rackslab repos tasks"
+  ansible.builtin.include_tasks: "os/{{ ansible_facts.os_family | lower }}-rackslab-repos.yml"
+
 - name: Include OS specific post tasks
   ansible.builtin.include_tasks: "os/{{ ansible_facts.os_family | lower }}-post.yml"

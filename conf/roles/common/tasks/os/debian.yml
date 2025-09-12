@@ -7,58 +7,6 @@
     path: /etc/dpkg/dpkg.cfg.d/01_nodoc
     state: absent
 
-# Add hpck.it deb packages repositories
-- name: Add HPCk.it deb packages repository
-  block:
-
-    - name: Download HPCk.it packages repository keyring
-      ansible.builtin.get_url:
-        url: https://hpck.it/keyring.asc
-        dest: /usr/share/keyrings/hpckit.asc
-
-    - name: Add HPCk.it repository into sources list
-      ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/usr/share/keyrings/hpckit.asc arch=amd64] https://hpck.it/deb {{ ansible_distribution_release }} {{ common_hpckit_derivatives|join(' ') }}"
-        state: present
-        filename: hpckit
-
-    - name: APT preferences files
-      ansible.builtin.template:
-        src: apt-preferences.j2
-        dest: /etc/apt/preferences.d/hpckit
-        owner: root
-        group: root
-        mode: 0644
-      vars:
-        releases_priorities: "{{ common_hpckit_priorities }}"
-
-# Add Rackslab development deb packages repositories
-- name: Add Rackslab development deb packages repository
-  block:
-
-    - name: Download Rackslab development packages repository keyring
-      ansible.builtin.get_url:
-        url: https://build.rackslab.io/devs/keyring.asc
-        dest: /usr/share/keyrings/devs.asc
-
-    - name: Add Rackslab development repository into sources list
-      ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/usr/share/keyrings/devs.asc arch=amd64] https://build.rackslab.io/devs/deb {{ ansible_distribution_release }} {{ common_devs_derivatives|join(' ') }}"
-        state: present
-        filename: devs
-
-    - name: APT preferences files
-      ansible.builtin.template:
-        src: apt-preferences.j2
-        dest: /etc/apt/preferences.d/devs
-        owner: root
-        group: root
-        mode: 0644
-      vars:
-        releases_priorities: "{{ common_devs_priorities }}"
-
-  when: common_with_devs_repos
-
 # Ensure APT repositories metadata is updated
 - name: Update apt repository metadata
   ansible.builtin.apt:

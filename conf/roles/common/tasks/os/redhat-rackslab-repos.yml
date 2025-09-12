@@ -1,0 +1,25 @@
+---
+# Add hpck.it RPM packages repositories
+- name: Add HPCk.it rpm packages repository
+  ansible.builtin.yum_repository:
+    name: "hpck.it-{{ item }}"
+    description: "HPCk.it {{ item }} derivative repository"
+    file: hpckit
+    baseurl: "https://hpck.it/rpm/el$releasever/{{ item }}/$basearch/"
+    gpgcheck: yes
+    gpgkey: https://hpck.it/keyring.asc
+    priority: "{{ common_hpckit_priorities[item] | default(99) }}"
+  loop: "{{ common_hpckit_derivatives }}"
+
+# Add Rackslab development deb packages repositories
+- name: Add Rackslab development rpm packages repository
+  ansible.builtin.yum_repository:
+    name: "Rackslab-devs-{{ item }}"
+    description: "Rackslab development {{ item }} repository"
+    file: rackslab-devs
+    baseurl: "https://build.rackslab.io/devs/rpm/el$releasever/{{ item }}/$basearch/"
+    gpgcheck: yes
+    gpgkey: https://build.rackslab.io/devs/keyring.asc
+    priority: "{{ common_devs_priorities[item] | default(99) }}"
+  when: common_with_devs_repos
+  loop: "{{ common_devs_derivatives }}"
