@@ -10,7 +10,12 @@ CLUSTER=${2}
 CLUSTER_DIR=/var/lib/firehpc/${CLUSTER}
 
 if [ $ACTION == "start" ]; then
-    mkdir ${CLUSTER_DIR} ${CLUSTER_DIR}/home
+    if [ ! -d ${CLUSTER_DIR} ]; then
+        mkdir ${CLUSTER_DIR}
+    fi
+    if [ ! -d ${CLUSTER_DIR}/home ]; then
+        mkdir ${CLUSTER_DIR}/home
+    fi
 elif [ $ACTION == "stop" ]; then
     rm -rf ${CLUSTER_DIR}
 else

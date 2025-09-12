@@ -128,6 +128,8 @@ and this project adheres to
   - Set jobs time limit to partition time limit when set to avoid jobs that
     exceed partition time limit.
   - Remove cluster state on cluster clean.
+- lib: Fix `firehpc-storage-wrapper` start failure due to already existing
+  cluster and home directories.
 - load:
   - Order of partition/qos variables in job submission informational message.
   - Support of Slurm 24.05 `sacctmgr show qos --json` format to retrieve the
