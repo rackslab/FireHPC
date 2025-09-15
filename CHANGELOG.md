@@ -12,6 +12,7 @@ and this project adheres to
 - images:
   - Add rocky9
   - Add debian13
+  - Add debian14 (#42).
 - Introduce `fhpc_namespace` extra variable with the name of containers
   namespace.
 - Add bash-completion script for `firehpc` command (#12).

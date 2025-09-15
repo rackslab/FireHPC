@@ -8,6 +8,9 @@ debian12:
 debian13:
   url: https://hpck.it/osi/firehpc/main/node-debian13_1.raw.xz
   environment: ansible-latest
+debian14:
+  url: https://hpck.it/osi/firehpc/main/node-debian14_1.raw.xz
+  environment: ansible-latest
 rocky8:
   url: https://hpck.it/osi/firehpc/main/node-rocky8_1.raw.xz
   environment: ansible-2.16
