@@ -60,7 +60,7 @@ _firehpc_conf() {
         [CLUSTER]='--cluster'
         [DIR]='-c --custom'
         [FILE]='--db --schema'
-        [ARG]='--tags'
+        [ARG]='--tags --ansible-opts'
     )
     if __contains_word "$prev" ${OPTS[CLUSTER]}; then
         comps=$( __firehpc_clusters_list )
@@ -104,7 +104,7 @@ _firehpc_deploy() {
         [OS]='--os'
         [DIR]='-c --custom'
         [FILE]='--db --schema'
-        [ARG]='--tags'
+        [ARG]='--ansible-opts'
     )
     if __contains_word "$prev" ${OPTS[CLUSTER]}; then
         comps=$( __firehpc_clusters_list )
