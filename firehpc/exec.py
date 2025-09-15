@@ -107,6 +107,11 @@ class FireHPCExec:
             "--users",
             help="Extract users directory from another emulated cluster",
         )
+        parser_deploy.add_argument(
+            "--ansible-opts",
+            help="Additional ansible-playbook options",
+            nargs="*",
+        )
         parser_deploy.set_defaults(func=self._execute_deploy)
 
         # conf command
@@ -148,6 +153,11 @@ class FireHPCExec:
             "--slurm-emulator",
             help="Enable Slurm emulator mode",
             action="store_true",
+        )
+        parser_conf.add_argument(
+            "--ansible-opts",
+            help="Additional ansible-playbook options",
+            nargs="*",
         )
         parser_conf.set_defaults(func=self._execute_conf)
 
@@ -377,6 +387,7 @@ class FireHPCExec:
             db,
             playbooks=["bootstrap", "site"],
             users_directory=users_directory,
+            ansible_opts=self.args.ansible_opts,
         )
 
     def _execute_conf(self):
@@ -398,6 +409,7 @@ class FireHPCExec:
             playbooks=playbooks,
             reinit=False,
             tags=self.args.tags,
+            ansible_opts=self.args.ansible_opts,
         )
 
     def _execute_restore(self):

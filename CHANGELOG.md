@@ -23,6 +23,8 @@ and this project adheres to
 - Report cluster settings in `firehpc status`.
 - Introduce `firehpc update` command to change cluster settings.
 - Introduce `firehpc bootstrap` command to create deployment environments.
+- Add `firehpc {conf,deploy} --ansible-opts` option to append additional options
+  to `ansible-playbook` command (#44).
 - Integrated management of virtual environment to multiple versions of Ansible
   depending on targeted OS (#24).
 - Add PIP requirements files to populate _ansible-latest_ and _ansible-2.16_

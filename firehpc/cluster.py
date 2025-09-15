@@ -117,6 +117,7 @@ class EmulatedCluster:
         tags: Optional[list[str]] = None,
         skip_tags: Optional[list[str]] = None,
         users_directory: Optional[UsersDirectory] = None,
+        ansible_opts: Optional[list[str]] = None,
     ) -> conf:
         if reinit:
             self.state.conf_clean()
@@ -231,6 +232,9 @@ class EmulatedCluster:
         cmdline = (
             f"{self.runtime_settings.ansible.args} --extra-vars @{self.state.extravars}"
         )
+
+        if ansible_opts is not None and len(ansible_opts):
+            cmdline += f" {' '.join(ansible_opts)}"
 
         if tags is not None and len(tags):
             cmdline += f" --tags {','.join(tags)}"
