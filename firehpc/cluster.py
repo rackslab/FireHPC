@@ -258,7 +258,7 @@ class EmulatedCluster:
             os.environ["PATH"] = f"{environment.bin}:{old_path}"
 
             # Run ansible-playbook
-            ansible_runner.run(
+            runner = ansible_runner.run(
                 private_data_dir=self.state.conf,
                 playbook=f"{self.runtime_settings.ansible.path}/{playbook}.yml",
                 cmdline=cmdline,
@@ -269,6 +269,11 @@ class EmulatedCluster:
                     "fhpc_nodes": nodes,
                 },
             )
+            # Raise exception on playbook failure
+            if runner.rc:
+                raise FireHPCRuntimeError(
+                    f"Error while running ansible playbook {playbook}"
+                )
 
             # Restore $PATH
             os.environ["PATH"] = old_path

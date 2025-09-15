@@ -128,6 +128,7 @@ and this project adheres to
   - Set jobs time limit to partition time limit when set to avoid jobs that
     exceed partition time limit.
   - Remove cluster state on cluster clean.
+  - Check ansible playbook RC code and stop execution on failure.
 - lib: Fix `firehpc-storage-wrapper` start failure due to already existing
   cluster and home directories.
 - load:
