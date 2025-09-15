@@ -119,6 +119,10 @@ This command accepts the following options:
   container and with a specific version of Slurm compiled to support emulation
   of arbitrary large number of fakes nodes. By default, value from cluster
   settings is used.
+
+[.cli-opt]#*--ansible-opts*# [.cli-optval]##_OPT …_##::
+  Additional option to add to ansible-playbook command. Multiple options can be
+  given.
 --
 
 [.cli-opt]#*deploy*#::
@@ -162,6 +166,10 @@ This command accepts the following options:
   Instead of randomly generating a new users directory, extract users directory
   from another existing cluster. This is useful to create the have the same user
   accounts on several clusters.
+
+[.cli-opt]#*--ansible-opts*# [.cli-optval]##_OPT …_##::
+  Additional option to add to ansible-playbook command. Multiple options can be
+  given.
 --
 +
 This command saves values of [.cli-opt]#*--db*#, [.cli-opt]#*--schema*#,
