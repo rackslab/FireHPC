@@ -156,6 +156,7 @@ and this project adheres to
   - Support Rackslab development repository derivatives on RHEL.
   - Add admin hostname with namespace in addition to just the admin hostname in
     Slurm-web nginx site server names.
+  - Replace embedded templates by string concatenations.
 - docs: Various formatting errors in manpage.
 
 ### Removed
