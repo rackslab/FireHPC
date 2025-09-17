@@ -157,6 +157,7 @@ and this project adheres to
 - docs: Various formatting errors in manpage.
 
 ### Removed
+- conf: Drop DSA SSH host keys.
 - docs: Remove `fhpc-emulate-slurm-usage` manpage.
 
 ## [1.1.0] - 2024-05-07
