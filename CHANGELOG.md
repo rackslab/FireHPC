@@ -123,6 +123,8 @@ and this project adheres to
   - Update documentation of `--db`, `--schema`, `--custom` and
     `--slurm-emulator` options of `conf` and `restore` commands with their new
     semantics regarding management of cluster settings.
+  - Use standard `tomllib` instead of `tomlib` external library of documentation
+    Makefile.
 
 ### Fixed
 - core:
