@@ -1,4 +1,4 @@
-// Allow any user in the 'sudo' group to launch FireHPC without entering a password.
+// Allow any user in the 'firehpc' group to launch FireHPC without entering a password.
 
 polkit.addRule(function(action, subject) {
     if ((action.id.startsWith("org.freedesktop.machine1.") ||
