@@ -330,7 +330,7 @@ FireHPC web site: https://github.com/rackslab/firehpc
 
 == Copying
 
-Copyright (C) 2023 {author}. +
+Copyright (C) 2023-2025 {author}. +
 
 FireHPC is distributed under the terms of the GNU General Public License v3.0
 or later (GPLv3+).
