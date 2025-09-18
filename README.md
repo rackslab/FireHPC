@@ -2,8 +2,8 @@
 
 ## Description
 
-FireHPC is a tool designed to quickly start and setup a tiny emulated HPC
-cluster based on Linux containers, ready to run non-intensive MPI jobs with
+FireHPC is a tool designed to quickly deploy a tiny emulated HPC cluster based
+on Linux containers, ready to run non-intensive MPI jobs with
 [Slurm](https://slurm.schedmd.com/overview.html).
 
 Obviously, FireHPC does not aim at performances as you get better performances
@@ -11,7 +11,7 @@ out of your computer without containers overhead.
 
 The purposes are the following:
 
-- Setup development, CI and tests environment
+- Setup development, CI and tests environments
 - Learn tools and software in breakable environment
 - Testing and discovering new technologies in isolated environment
 
@@ -39,23 +39,17 @@ FireHPC requires Python >= 3.9.
 
 FireHPC relies on:
 
-- [`systemd-nspawn`](https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html) containers controlled with `systemd-{networkd,machined}`
+- [RacksDB](https://github.com/rackslab/RacksDB) to get emulated clusters
+  description.
+- [`systemd-nspawn`](https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html)
+  containers controlled with `systemd-{networkd,machined}`
 - [Ansible](https://docs.ansible.com/ansible/latest/index.html) automation tool
-
-FireHPC also requires the following community Ansible collections:
-
-- [community.general](https://docs.ansible.com/ansible/latest/collections/community/general/index.html) >= 3.8.1
-- [community.crypto](https://docs.ansible.com/ansible/latest/collections/community/crypto/index.html)
-- [community.mysql](https://docs.ansible.com/ansible/latest/collections/community/mysql/index.html)
-
-They may not be installed within Ansible on your distribution. In this case,
-you can install on your system using `ansible-galaxy`.
 
 ## Quickstart
 
 Download and install Rackslab packages repository signing keyring:
 
-```
+```console
 $ curl -sS https://pkgs.rackslab.io/keyring.asc | gpg --dearmor | sudo tee /usr/share/keyrings/rackslab.gpg > /dev/null
 ```
 
@@ -83,6 +77,17 @@ Architectures: amd64
 Signed-By: /usr/share/keyrings/rackslab.gpg
 ```
 
+* For Debian 14 _Forky_:
+
+```
+Types: deb
+URIs: https://pkgs.rackslab.io/deb
+Suites: forky
+Components: main
+Architectures: amd64
+Signed-By: /usr/share/keyrings/rackslab.gpg
+```
+
 * For Debian _sid_:
 
 ```
@@ -94,73 +99,33 @@ Architectures: amd64
 Signed-By: /usr/share/keyrings/rackslab.gpg
 ```
 
-Update packages database:
+Update packages database and install `firehpc`:
 
-```
-$ sudo apt update
-```
-
-Install `firehpc`:
-
-```
-$ sudo apt install firehpc
+```console
+$ sudo apt update && sudo apt install firehpc
 ```
 
 Add your user in `firehpc` system group:
 
-```
+```console
 $ sudo usermod -a -G firehpc ${USERNAME}
 ```
 
-```
+Import [hpck.it](https://hpck.it/) repository keyring to verify container images
+signatures:
+
+```console
 $ curl -s https://hpck.it/keyring.asc | \
   sudo gpg --no-default-keyring --keyring=/etc/systemd/import-pubring.gpg --import
-```
-
-```
 gpg: key F2EB7900E8151A0D: public key "HPCk.it team <contact@hpck.it>" imported
 gpg: Total number processed: 1
 gpg:               imported: 1
 ```
 
-Start and enable `systemd-networkd` service:
+Enable and start `systemd-networkd` service:
 
 ```
-$ sudo systemctl start systemd-networkd.service
-$ sudo systemctl enable systemd-networkd.service
-```
-
-Install `systemd-resolved`:
-
-```
-$ sudo apt install systemd-resolved
-```
-
-Unfortunarly, there is on ongoing [bug #1031236 in Debian](https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1031236)
-on `ifupdown`/`systemd-resolved` automatic integration. One workaround is to
-define DNS servers IP addresses and domains in `systemd-resolved` configuration
-file `/etc/systemd/resolved.conf`. Then restart the service so changes can take
-effect:
-
-```
-$ sudo systemctl restart systemd-resolved.service
-```
-
-Fix the order between `mymachine` and `resolve` services in `/etc/nsswitch.conf`
-so the `mymachines` service can resolve IP addresses of container names:
-
-```diff
---- a/etc/nsswitch.conf
-+++ b/etc/nsswitch.conf
-@@ -9,7 +9,7 @@
- shadow:         files systemd sss
- gshadow:        files systemd
-
--hosts:          files resolve [!UNAVAIL=return] dns mymachines myhostname
-+hosts:          files mymachines resolve [!UNAVAIL=return] dns myhostname
- networks:       files
-
- protocols:      db files
+$ sudo systemctl enable --now systemd-networkd.service
 ```
 
 It is also recommended to increase maximum inotify instances from default 128 to
@@ -208,7 +173,7 @@ With your regular user, run FireHPC with a cluster name and an OS in arguments.
 For example:
 
 ```
-$ firehpc deploy --db racksdb.yml --cluster hpc --os debian12
+$ firehpc deploy --db racksdb.yml --cluster hpc --os debian13
 ```
 
 The available OS are reported by this command:
@@ -229,10 +194,10 @@ This reports the started containers and the randomly generated user accounts.
 
 ### MPI
 
-You can connect to your containers (eg. _admin_) with this command:
+You can connect to cluster with this command:
 
 ```
-$ firehpc ssh admin.hpc
+$ firehpc ssh hpc
 ```
 
 Connect with a generated user account on the login node:
