@@ -12,7 +12,9 @@ and this project adheres to
 - conf: Add pkgs.rackslab.io packages repositories by default.
 
 ### Fixed
-- conf: Slurm-web v5 JWT for slurmrestd authentification ownership.
+- conf:
+  - Slurm-web v5 JWT for slurmrestd authentification ownership.
+  - Run Slurm-web agent as slurm special user when authentication is local.
 
 ## [1.2.0] - 2025-09-18
 

@@ -50,7 +50,7 @@
 #
 - name: Create JWT signing key
   ansible.builtin.command:
-    cmd: /usr/libexec/slurm-web/slurm-web-gen-jwt-key
+    cmd: "/usr/libexec/slurm-web/slurm-web-gen-jwt-key{% if slurmweb_slurmrestd_auth == 'local' %} --with-slurm{% endif %}"
     creates: "{{ slurmweb_jwt_key }}"
 
 - name: Install systemd services for components
@@ -64,6 +64,30 @@
   loop:
   - agent
   - gateway
+
+- name: Setup slurm-web agent to run as slurm system user
+  block:
+  - name: Create slurm-web agent service override directory
+    ansible.builtin.file:
+      path: "{{ slurmweb_agent_service_override_path | dirname }}"
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: Deploy slurm-web agent service override file
+    ansible.builtin.copy:
+      content: |
+        [Service]
+        User=slurm
+        Group=slurm
+      dest: "{{ slurmweb_agent_service_override_path }}"
+      owner: slurm
+      group: slurm
+      mode: 0644
+    notify: Restart slurm-web-agent uWSGI
+  when:
+  - slurmweb_slurmrestd_auth == 'local'
 
 - name: Ensure Slurm-web uWGSI are started
   ansible.builtin.systemd_service:

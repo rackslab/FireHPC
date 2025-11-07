@@ -11,6 +11,7 @@ slurmweb_slurmrestd_jwt_key: /var/lib/slurm-web/slurmrestd_jwt_hs256.key
 slurmweb_slurmrestd_jwt_token: null
 slurmweb_local_slurmrestd_jwt_key_file: jwt_hs256.key  # dummy
 slurmweb_agent_subdir: agent
+slurmweb_agent_service_override_path: /etc/systemd/system/slurm-web-agent-uwsgi.service.d/firehpc.conf
 slurmweb_agent_settings_defaults: {}
 slurmweb_gateway_settings_defaults: {}
 slurmweb_agent_settings: {}
