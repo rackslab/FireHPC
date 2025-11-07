@@ -4,6 +4,10 @@ common_hpckit_derivatives:
 - main
 - slurm23.02
 common_hpckit_priorities: {}
+common_with_pkgs_repos: true
+common_pkgs_derivatives:
+- main
+common_pkgs_priorities: {}
 common_with_devs_repos: false
 common_devs_derivatives:
 - main

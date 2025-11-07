@@ -24,6 +24,33 @@
       vars:
         releases_priorities: "{{ common_hpckit_priorities }}"
 
+# Add Rackslab pkgs deb packages repositories
+- name: Add Rackslab pkgs deb packages repository
+  block:
+
+    - name: Download Rackslab pkgs repository keyring
+      ansible.builtin.get_url:
+        url: https://pkgs.rackslab.io/keyring.asc
+        dest: /usr/share/keyrings/pkgs.asc
+
+    - name: Add Rackslab pkgs repository into sources list
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/pkgs.asc arch=amd64] https://pkgs.rackslab.io/deb {{ ansible_distribution_release }} {{ common_pkgs_derivatives|join(' ') }}"
+        state: present
+        filename: pkgs
+
+    - name: APT preferences files
+      ansible.builtin.template:
+        src: apt-preferences.j2
+        dest: /etc/apt/preferences.d/pkgs
+        owner: root
+        group: root
+        mode: 0644
+      vars:
+        releases_priorities: "{{ common_pkgs_priorities }}"
+
+  when: common_with_pkgs_repos
+
 # Add Rackslab development deb packages repositories
 - name: Add Rackslab development deb packages repository
   block:

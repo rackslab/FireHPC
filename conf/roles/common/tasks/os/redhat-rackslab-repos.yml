@@ -11,7 +11,20 @@
     priority: "{{ common_hpckit_priorities[item] | default(99) }}"
   loop: "{{ common_hpckit_derivatives }}"
 
-# Add Rackslab development deb packages repositories
+# Add Rackslab pkgs RPM packages repositories
+- name: Add Rackslab pkgs rpm packages repository
+  ansible.builtin.yum_repository:
+    name: "Rackslab-pkgs-{{ item }}"
+    description: "Rackslab pkgs {{ item }} repository"
+    file: rackslab-devs
+    baseurl: "https://pkgs.rackslab.io/rpm/el$releasever/{{ item }}/$basearch/"
+    gpgcheck: yes
+    gpgkey: https://pkgs.rackslab.io/keyring.asc
+    priority: "{{ common_pkgs_priorities[item] | default(99) }}"
+  when: common_with_pkgs_repos
+  loop: "{{ common_pkgs_derivatives }}"
+
+# Add Rackslab development RPM packages repositories
 - name: Add Rackslab development rpm packages repository
   ansible.builtin.yum_repository:
     name: "Rackslab-devs-{{ item }}"
