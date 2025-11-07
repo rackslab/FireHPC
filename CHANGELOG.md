@@ -11,6 +11,9 @@ and this project adheres to
 ### Added
 - conf: Add pkgs.rackslab.io packages repositories by default.
 
+### Fixed
+- conf: Slurm-web v5 JWT for slurmrestd authentification ownership.
+
 ## [1.2.0] - 2025-09-18
 
 ### Added

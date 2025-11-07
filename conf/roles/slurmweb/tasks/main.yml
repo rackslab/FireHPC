@@ -25,8 +25,8 @@
   ansible.builtin.copy:
     src: "{{ slurmweb_local_slurmrestd_jwt_key_file }}"
     dest: "{{ slurmweb_slurmrestd_jwt_key }}"
-    owner: slurm  # FIXME: agent and key must run as slurm-web when uri is http
-    group: slurm
+    owner: slurm-web
+    group: slurm-web
     mode: 0400
   when:
   - slurmweb_slurmrestd_auth == 'jwt'
