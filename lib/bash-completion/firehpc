@@ -56,7 +56,7 @@ _firehpc_clean() {
 _firehpc_conf() {
     local cur=$1 prev=$2 comps
     local -A OPTS=(
-        [STANDALONE]='--with-bootstrap --slurm-emulator'
+        [STANDALONE]='--update-os-image --with-bootstrap --slurm-emulator'
         [CLUSTER]='--cluster'
         [DIR]='-c --custom'
         [FILE]='--db --schema'

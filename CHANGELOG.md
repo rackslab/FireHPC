@@ -14,6 +14,7 @@ and this project adheres to
   - Support GPU gres without model in Slurm configuration.
 - cli: Add `deploy --update-os-image` option to force download of base OS image
   when already present on host.
+- lib: Add `deploy --update-os-image` option in bash-completion.
 - docs: Mention `deploy --update-os-image` option in manpage.
 
 ### Changed
