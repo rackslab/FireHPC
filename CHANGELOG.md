@@ -9,7 +9,9 @@ and this project adheres to
 ## [unreleased]
 
 ### Added
-- conf: Add pkgs.rackslab.io packages repositories by default.
+- conf:
+  - Add pkgs.rackslab.io packages repositories by default.
+  - Support GPU gres without model in Slurm configuration.
 
 ### Fixed
 - conf:

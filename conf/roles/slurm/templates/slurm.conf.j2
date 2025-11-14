@@ -35,7 +35,7 @@ GresTypes=gpu
 {% endif %}
 
 {% for node_type in slurm_compute_nodes %}
-NodeName={{ node_type.nodes | nodeset_fold }} Sockets={{ node_type.sockets }} CoresPerSocket={{ node_type.cores }} RealMemory={{ node_type.memory }}{% if not slurm_emulator and node_type.gpus | length > 0 %} Gres={% for model, nb in node_type.gpus.items() %}gpu:{{ slurm_gpus_models_map.get(model, 'nvidia') }}:{{ nb }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if slurm_emulator %} NodeHostName={{ slurm_server }}{% endif %} State=UNKNOWN
+NodeName={{ node_type.nodes | nodeset_fold }} Sockets={{ node_type.sockets }} CoresPerSocket={{ node_type.cores }} RealMemory={{ node_type.memory }}{% if not slurm_emulator and node_type.gpus | length > 0 %} Gres={% for model, nb in node_type.gpus.items() %}gpu{% set has_model = (model in slurm_gpus_models_map and slurm_gpus_models_map.get(model) is not none) %}{% if has_model %}:{{ slurm_gpus_models_map.get(model, 'nvidia') }}{% endif %}:{{ nb }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if slurm_emulator %} NodeHostName={{ slurm_server }}{% endif %} State=UNKNOWN
 {% endfor %}
 {% for slurm_partition in slurm_partitions %}
 PartitionName={{ slurm_partition.name }} Nodes={{ slurm_partition.nodes }} Default={{ "YES" if "default" in slurm_partition and slurm_partition.default else "NO" }}{% for param, value in slurm_partition.params.items() %} {{param}}={{value}}{% endfor %}

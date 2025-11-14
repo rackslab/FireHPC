@@ -2,7 +2,7 @@
 {% set ns = namespace(index=0) %}
 {% for model in slurm_current_compute_node_type['gpus'] %}
 {% for _ in range(slurm_current_compute_node_type['gpus'][model]) %}
-{{ slurm_gpus_models_map.get(model, 'nvidia') }}|1|~|{% for _index in range(total) %}{% if ns.index == _index %}-1{% else %}0{% endif %}{% if not loop.last %},{% endif %}{% endfor %}|/dev/nvidia{{ ns.index }}
+{{ slurm_gpus_models_map.get(model) or 'nvidia' }}|1|~|{% for _index in range(total) %}{% if ns.index == _index %}-1{% else %}0{% endif %}{% if not loop.last %},{% endif %}{% endfor %}|/dev/nvidia{{ ns.index }}
 {% set ns.index = ns.index + 1 %}
 {% endfor %}
 {% endfor %}
