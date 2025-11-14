@@ -152,6 +152,10 @@ This command accepts the following options:
   Name of the operating system of downloaded the container image. See
   `firehpc images` for available values. This option is required.
 
+[.cli-opt]#*--update-os-image*#::
+  Force download of OS image before deployment, even when already present in
+  host local registry.
+
 [.cli-opt]#*-c, --custom*=#[.cli-optval]##_CUSTOM_##::
   Path to directory with custom Ansible variables to override default variables
   provided in FireHPC. The given path must contain a [.path]#`group_vars/`# or a
