@@ -80,31 +80,47 @@ class EmulatedCluster:
 
     def deploy(
         self,
-        os: str,
         url: str,
+        update_os_image: bool,
         db: RacksDB,
     ) -> None:
         infrastructure = db.infrastructures[self.name]
 
         manager = ContainersManager(self.name)
 
-        admin_node = infrastructure.nodes.filter(tags=["admin"]).first()
-        admin_image = manager.download(
-            admin_node.name,
-            url,
-        )
-        if not self.cluster_settings.slurm_emulator:
-            for node in infrastructure.nodes:
-                if "admin" not in node.tags:
-                    logger.info(
-                        "Cloning admin container image for %s.%s", node.name, self.name
-                    )
-                    admin_image.clone(node.name)
+        base_image_name = os.path.basename(url).split(".")[0]
+
+        # Check if base image is already present. If not or update_os_image is
+        # True, download it. Otherwise, just use it in place.
+        if not manager.image_exists(base_image_name):
+            logger.info("Base image %s must be imported", base_image_name)
+            base_image = manager.download(
+                url,
+                base_image_name,
+            )
+        else:
+            logger.info("Base image %s is already imported", base_image_name)
+            base_image = manager.base_image(base_image_name)
+            if update_os_image:
+                logger.info(
+                    "Base image %s must be updated, removing it", base_image_name
+                )
+                base_image.remove()
+                base_image = manager.download(
+                    url,
+                    base_image_name,
+                )
+
+        for node in infrastructure.nodes:
+            if "admin" in node.tags or not self.cluster_settings.slurm_emulator:
+                logger.info("Cloning base image for %s.%s", node.name, self.name)
+                manager.clone_base(base_image, node.name)
 
         logger.info("Starting cluster storage service %s", self.name)
         manager.storage().start()
 
         if self.cluster_settings.slurm_emulator:
+            admin_node = infrastructure.nodes.filter(tags=["admin"]).first()
             manager.start([admin_node.name])
         else:
             manager.start([node.name for node in infrastructure.nodes])
@@ -292,7 +308,7 @@ class EmulatedCluster:
 
         manager.stop()
 
-        for image in manager.images():
+        for image in manager.cluster_images():
             logger.info("Removing image %s", image.name)
             image.remove()
 

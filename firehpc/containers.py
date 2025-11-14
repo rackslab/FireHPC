@@ -117,6 +117,77 @@ class ImageImporter(DBusObject):
             )
 
 
+class Image(DBusObject):
+    INTERFACE = "org.freedesktop.machine1"
+
+    def __init__(
+        self,
+        name: str,
+        creation: int,
+        modification: int,
+        volume: int,
+        path: str,
+    ):
+        super().__init__(path)
+        self.name = name
+        self.creation = datetime.utcfromtimestamp(creation / 10**6)
+        self.modification = datetime.utcfromtimestamp(modification / 10**6)
+        self.volume = volume
+
+    def remove(self, retries=3) -> None:
+        left = retries
+        while left:
+            try:
+                self.proxy.Remove()
+            except DBusError as err:
+                if str(err) == "Device or resource busy":
+                    logger.debug(
+                        "Image (%s) busy, retrying (%d)…",
+                        self.name,
+                        left,
+                    )
+                    time.sleep(1)
+                    left -= 1
+                    continue
+                else:
+                    raise FireHPCRuntimeError(
+                        f"Unable to remove image {self.name}: {err}"
+                    ) from err
+            else:
+                return
+        raise FireHPCRuntimeError(
+            f"Unable to remove image {self.name} after {retries} tries"
+        )
+
+    def clone(self, target: str) -> None:
+        self.proxy.Clone(target, False)
+
+    @classmethod
+    def from_machine_image(cls, image) -> Image:
+        return cls(
+            image[0],
+            image[3],
+            image[4],
+            image[5],
+            image[6],
+        )
+
+    @classmethod
+    def from_machine_image_path(cls, path: str) -> Image:
+        obj = DBus().proxy(cls.INTERFACE, path)
+        return cls(
+            obj.Name,
+            obj.CreationTimestamp,
+            obj.CreationTimestamp,
+            obj.Usage,
+            path,
+        )
+
+
+class BaseImage(Image):
+    """Cluster base image"""
+
+
 class ClusterStateModifier(DBusObject):
     INTERFACE = "org.freedesktop.machine1"
 
@@ -294,9 +365,7 @@ class Container(DBusObject):
         )
 
 
-class ContainerImage(DBusObject):
-    INTERFACE = "org.freedesktop.machine1"
-
+class ContainerImage(Image):
     def __init__(
         self,
         name: str,
@@ -307,42 +376,9 @@ class ContainerImage(DBusObject):
         volume: int,
         path: str,
     ):
-        super().__init__(path)
-        self.name = name
-        self.cluster = cluster
-        self.namespace = namespace
-        self.creation = datetime.utcfromtimestamp(creation / 10**6)
-        self.modification = datetime.utcfromtimestamp(modification / 10**6)
-        self.volume = volume
-
-    def remove(self, retries=3) -> None:
-        left = retries
-        while left:
-            try:
-                self.proxy.Remove()
-            except DBusError as err:
-                if str(err) == "Device or resource busy":
-                    logger.debug(
-                        "Container image (%s) busy, retrying (%d)…",
-                        self.name,
-                        left,
-                    )
-                    time.sleep(1)
-                    left -= 1
-                    continue
-                else:
-                    raise FireHPCRuntimeError(
-                        f"Unable to remove container image {self.name}: {err}"
-                    ) from err
-            else:
-                return
-        raise FireHPCRuntimeError(
-            f"Unable to remove container image {self.name} after {retries} tries"
+        super().__init__(
+            f"{name}.{cluster}.{namespace}", creation, modification, volume, path
         )
-
-    def clone(self, node: str) -> None:
-        target = f"{node}.{self.cluster}.{self.namespace}"
-        self.proxy.Clone(target, False)
 
     @classmethod
     def from_machine_image(cls, image) -> ContainerImage:
@@ -393,20 +429,26 @@ class ContainersManager(DBusObject):
             self.proxy.GetMachine(f"{name}.{self.cluster}.{self.namespace}")
         )
 
-    def images(self) -> list:
+    def cluster_images(self) -> list:
         return [
             ContainerImage.from_machine_image(image)
             for image in self.proxy.ListImages()
             if image[0].endswith(f".{self.cluster}.{self.namespace}")
         ]
 
-    def image(self, name) -> ContainerImage:
-        return ContainerImage.from_machine_image_path(self.proxy.GetImage(name))
+    def base_image(self, name) -> BaseImage:
+        return BaseImage.from_machine_image_path(self.proxy.GetImage(name))
 
-    def download(self, node: str, url: str) -> ContainerImage:
-        name = f"{node}.{self.cluster}.{self.namespace}"
+    def image_exists(self, name) -> bool:
+        return name in [image[0] for image in self.proxy.ListImages()]
+
+    def download(self, url: str, name: str) -> BaseImage:
+        """Download cluster base image"""
         ImageImporter(url, name).transfer()
-        return ContainerImage.from_machine_image_path(self.proxy.GetImage(name))
+        return BaseImage.from_machine_image_path(self.proxy.GetImage(name))
+
+    def clone_base(self, base: BaseImage, node: str) -> None:
+        base.clone(f"{node}.{self.cluster}.{self.namespace}")
 
     def storage(self) -> StorageService:
         return StorageService(self.cluster, self.namespace)

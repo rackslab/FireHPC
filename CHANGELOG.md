@@ -12,6 +12,12 @@ and this project adheres to
 - conf:
   - Add pkgs.rackslab.io packages repositories by default.
   - Support GPU gres without model in Slurm configuration.
+- cli: Add `deploy --update-os-image` option to force download of base OS image
+  when already present on host.
+
+### Changed
+- core: Cache base OS image locally to avoid systematic download on cluster
+  deployment.
 
 ### Fixed
 - conf:

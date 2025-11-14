@@ -88,6 +88,11 @@ class FireHPCExec:
             required=True,
         )
         parser_deploy.add_argument(
+            "--update-os-image",
+            help="Force OS image download",
+            action="store_true",
+        )
+        parser_deploy.add_argument(
             "--cluster",
             help="Name of the cluster to deploy",
             required=True,
@@ -382,7 +387,7 @@ class FireHPCExec:
             ).users_directory
 
         # Deploy cluster
-        cluster.deploy(self.args.os, os_db.url(self.args.os), db)
+        cluster.deploy(os_db.url(self.args.os), self.args.update_os_image, db)
         cluster.conf(
             db,
             playbooks=["bootstrap", "site"],
