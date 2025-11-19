@@ -1,0 +1,30 @@
+---
+- name: Create local slurm-web CA certificate directory
+  ansible.builtin.file:
+    path: "{{ slurmweb_local_ca_dir }}"
+    state: directory
+    recurse: true
+
+- name: Create Slurm-web private key for TLS certificate
+  community.crypto.openssl_privatekey:
+    path: "{{ slurmweb_local_tls_key_file }}"
+
+- name: Create certificate signing request (CSR) for Slurm-web TLS certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: "{{ slurmweb_local_tls_key_file }}"
+    common_name: "{{ slurmweb_hostname }}"
+    subject_alt_name:
+      - "DNS:{{ slurmweb_hostname }}"
+  register: csr
+
+- name: Sign Slurm-web certificate with internal CA
+  community.crypto.x509_certificate:
+    csr_content: "{{ csr.csr }}"
+    provider: ownca
+    ownca_path: "{{ slurmweb_local_ca_cert_file }}"
+    ownca_privatekey_path: "{{ slurmweb_local_ca_key_file }}"
+    ownca_privatekey_passphrase: "{{ lookup('ansible.builtin.file', slurmweb_local_ca_password_file) }}"
+    ownca_not_after: +365d  # valid for one year
+    ownca_not_before: "-1d"  # valid since yesterday
+    path: "{{ slurmweb_local_tls_cert_file }}"
+    force: true  # override possibly existing certificate

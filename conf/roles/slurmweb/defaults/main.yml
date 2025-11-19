@@ -1,5 +1,6 @@
 ---
 slurmweb_enabled: false
+slurmweb_bootstrap: false
 slurmweb_hostname: "{{ inventory_hostname }}"
 slurmweb_http_server_names:
 - "{{ slurmweb_hostname }}"
@@ -16,3 +17,14 @@ slurmweb_agent_settings_defaults: {}
 slurmweb_gateway_settings_defaults: {}
 slurmweb_agent_settings: {}
 slurmweb_gateway_settings: {}
+slurmweb_local_ca_dir: ca  # dummy
+slurmweb_local_ca_password_file: "{{ slurmweb_local_ca_dir }}/ca.password"
+slurmweb_local_ca_key_file: "{{ slurmweb_local_ca_dir }}/key.pem"
+slurmweb_local_ca_cert_file: "{{ slurmweb_local_ca_dir }}/ca.crt"
+slurmweb_local_tls_key_file: "{{ slurmweb_local_ca_dir }}/key-slurmweb.pem"
+slurmweb_local_tls_cert_file: "{{ slurmweb_local_ca_dir }}/cert-slurmweb.crt"
+
+slurmweb_tls_dir: /etc/slurm-web/tls
+slurmweb_tls_ca_cert_file: "{{ slurmweb_tls_dir }}/ca.crt"
+slurmweb_tls_cert_file: "{{ slurmweb_tls_dir }}/cert.crt"
+slurmweb_tls_key_file: "{{ slurmweb_tls_dir }}/key.pem"

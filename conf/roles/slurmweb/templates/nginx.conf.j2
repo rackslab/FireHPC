@@ -4,6 +4,19 @@ server {
     listen [::]:80;
     server_name {{ slurmweb_http_server_names | join(' ') }};
 
+    # Redirect HTTP to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+# {{ slurmweb_http_server_names | join(',')}}:443
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name {{ slurmweb_http_server_names | join(' ') }};
+
+    ssl_certificate {{ slurmweb_tls_cert_file }};
+    ssl_certificate_key {{ slurmweb_tls_key_file }};
+
     location / {
         include uwsgi_params;
         uwsgi_pass unix:/run/slurm-web-gateway/uwsgi.sock;

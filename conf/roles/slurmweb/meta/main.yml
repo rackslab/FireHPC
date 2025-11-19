@@ -3,4 +3,6 @@ dependencies:
   - role: nginx
     nginx_site_template: ../../slurmweb/templates/nginx.conf.j2
     nginx_site_filename: slurm-web
+    when: not slurmweb_bootstrap
   - role: redis
+    when: not slurmweb_bootstrap

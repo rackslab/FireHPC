@@ -89,6 +89,28 @@
   when:
   - slurmweb_slurmrestd_auth == 'local'
 
+- name: Create Slurm-web SSL directory
+  ansible.builtin.file:
+    path: "{{ slurmweb_tls_dir }}"
+    state: directory
+    recurse: true
+
+- name: Deploy Slurm-web TLS certificate
+  ansible.builtin.copy:
+    src: "{{ slurmweb_local_tls_cert_file }}"
+    dest: "{{ slurmweb_tls_cert_file }}"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Deploy Slurm-web TLS key
+  ansible.builtin.copy:
+    src: "{{ slurmweb_local_tls_key_file }}"
+    dest: "{{ slurmweb_tls_key_file }}"
+    owner: root
+    group: root
+    mode: 0600
+
 - name: Ensure Slurm-web uWGSI are started
   ansible.builtin.systemd_service:
     name: "slurm-web-{{ item }}-uwsgi"

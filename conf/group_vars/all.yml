@@ -1,7 +1,7 @@
 # shared variables
 fhpc_local_ssh_dir: "{{ fhpc_cluster_state_dir }}/ssh"
 fhpc_local_ca_dir: "{{ fhpc_cluster_state_dir }}/ca"
-fhpc_ldap_server: "{{ groups['admin'][0] }}"
+fhpc_admin_server: "{{ groups['admin'][0] }}"
 fhpc_ldap_base: "dc=cluster,dc={{ fhpc_cluster }}"
 fhpc_primary_group: "{{ fhpc_groups[0].name }}"
 fhpc_slurm_with_jwt: false
@@ -16,7 +16,7 @@ common_ip_addresses: "{{ fhpc_addresses }}"
 common_cluster: "{{ fhpc_cluster }}"
 ssh_key_dir: "{{ fhpc_local_ssh_dir }}"
 ldap_local_ca_dir: "{{ fhpc_local_ca_dir }}"
-ldap_server_hostname: "{{ fhpc_ldap_server }}"
+ldap_server_hostname: "{{ fhpc_admin_server }}"
 ldap_local_admin_password_file: "{{ fhpc_cluster_state_dir }}/ldap/ldap.password"
 ldap_base: "dc=cluster,dc={{ fhpc_cluster }}"
 ldap_domain: "cluster.{{ fhpc_cluster }}"
@@ -24,12 +24,12 @@ ldap_email_domain: "cluster.{{ fhpc_cluster }}"
 ldap_users: "{{ fhpc_users }}"
 ldap_groups: "{{ fhpc_groups }}"
 sssd_ldap_base: "{{ fhpc_ldap_base }}"
-sssd_ldap_server: "{{ fhpc_ldap_server }}"
+sssd_ldap_server: "{{ fhpc_admin_server }}"
 users_ssh_host_key_dir: "{{ fhpc_local_ssh_dir }}"
 users_defs: "{{ fhpc_users }}"
 users_group: "{{ fhpc_primary_group }}"
 slurm_emulator: "{{ fhpc_emulator_mode }}"
-slurm_server: "{{ groups['admin'][0] }}"
+slurm_server: "{{ fhpc_admin_server }}"
 # This hash associates slurm profiles in keys with a group of nodes on which the
 # the profile must be applied when slurm_emulator is false. When slurm_emulator
 # is true, all slurm profiles are applied on the single admin node.
@@ -52,6 +52,8 @@ slurm_restd_port: "{{ fhpc_slurmrestd_port }}"
 slurm_accounts: "{{ fhpc_groups }}"
 racksdb_database: "{{ fhpc_db }}"
 redis_local_password_file: "{{ fhpc_cluster_state_dir }}/redis/redis.password"
+slurmweb_local_ca_dir: "{{ fhpc_local_ca_dir }}"
+slurmweb_hostname: "{{ fhpc_admin_server }}"
 slurmweb_local_slurmrestd_jwt_key_file: "{{ fhpc_local_slurm_jwt_key }}"
 slurmweb_slurmrestd_uri: "{{ fhpc_slurmrestd_with_unix_socket | ternary('unix:' ~ fhpc_slurmrestd_socket, 'http://localhost:' ~ fhpc_slurmrestd_port ) }}"
 slurmweb_slurmrestd_auth: "{{ fhpc_slurm_with_jwt | ternary('jwt', 'local') }}"
@@ -73,14 +75,14 @@ slurmweb_agent_settings_defaults:
     password: "{{ lookup('ansible.builtin.file', redis_local_password_file) }}"
 slurmweb_gateway_settings_defaults:
   ui:
-    host: "http://{{ slurmweb_hostname }}.{{ fhpc_namespace }}"
+    host: "https://{{ slurmweb_hostname }}.{{ fhpc_namespace }}"
   agents:
-    url: "http://{{ slurmweb_hostname }}/{{ slurmweb_agent_subdir }}"
+    url: "https://{{ slurmweb_hostname }}/{{ slurmweb_agent_subdir }}"
   authentication:
     enabled: yes
   ldap:
-    uri: "ldaps://{{ fhpc_ldap_server }}/"
+    uri: "ldaps://{{ fhpc_admin_server }}/"
     user_base: "ou=people,{{ fhpc_ldap_base }}"
     group_base: "ou=groups,{{ fhpc_ldap_base }}"
-metrics_ldap_server: "{{ fhpc_ldap_server }}"
+metrics_ldap_server: "{{ fhpc_admin_server }}"
 metrics_ldap_search_base: "{{ fhpc_ldap_base }}"

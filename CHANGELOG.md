@@ -12,6 +12,7 @@ and this project adheres to
 - conf:
   - Add pkgs.rackslab.io packages repositories by default.
   - Support GPU gres without model in Slurm configuration.
+  - Add SSL/TLS certificate for Slurm-web with internal CA.
 - cli: Add `deploy --update-os-image` option to force download of base OS image
   when already present on host.
 - lib: Add `deploy --update-os-image` option in bash-completion.
