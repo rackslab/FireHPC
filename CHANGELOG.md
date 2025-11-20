@@ -26,6 +26,7 @@ and this project adheres to
 - conf:
   - Slurm-web v5 JWT for slurmrestd authentification ownership.
   - Run Slurm-web agent as slurm special user when authentication is local.
+  - Replace embedded template by simple variable reference in redis role.
 
 ## [1.2.0] - 2025-09-18
 
