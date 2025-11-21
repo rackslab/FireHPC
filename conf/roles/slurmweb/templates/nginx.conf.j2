@@ -17,7 +17,7 @@ server {
     ssl_certificate {{ slurmweb_tls_cert_file }};
     ssl_certificate_key {{ slurmweb_tls_key_file }};
 
-    location / {
+    location /{{ slurmweb_gateway_subdir }} {
         include uwsgi_params;
         uwsgi_pass unix:/run/slurm-web-gateway/uwsgi.sock;
     }
