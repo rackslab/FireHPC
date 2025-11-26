@@ -27,6 +27,9 @@ scrape_configs:
     # in presence of 1000+ jobs.
     scrape_timeout: 20s
 
+    scheme: https
     metrics_path: /agent/metrics
     static_configs:
-      - targets: ['localhost:80']
+      - targets: ['localhost:443']
+    tls_config:
+      insecure_skip_verify: yes

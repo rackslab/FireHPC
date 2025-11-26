@@ -20,6 +20,10 @@ and this project adheres to
 - docs: Mention `deploy --update-os-image` option in manpage.
 
 ### Changed
+- conf: Make prometheus connect to Slurm-web agent metrics with https. The
+  certificate validation is disabled because it connects to localhost (not a
+  security issue then) and localhost is obviously not declared in HTTP server
+  host certicate SANs.
 - core: Cache base OS image locally to avoid systematic download on cluster
   deployment.
 
