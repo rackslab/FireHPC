@@ -325,7 +325,7 @@ class EmulatedCluster:
         manager.storage().start()
 
         # Search for the list of available images.
-        containers = [image.name for image in manager.images()]
+        containers = [image.name for image in manager.cluster_images()]
         # Look for the running container and start the other.
         running = [container.name for container in manager.running()]
         manager.start(
