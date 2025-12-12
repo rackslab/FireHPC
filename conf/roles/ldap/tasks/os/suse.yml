@@ -1,6 +1,8 @@
 ---
-- name: RedHat specific post-installation tasks
+- name: Suse specific post-installation tasks
   block:
+
+
   - name: Fill LDAP schema with essential objects
     ansible.builtin.command:
       cmd: "/usr/bin/ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/{{ item }}.ldif"

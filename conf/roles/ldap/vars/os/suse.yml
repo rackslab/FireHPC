@@ -1,0 +1,7 @@
+---
+ldap_server_package: openldap2
+ldap_extra_packages:
+- openldap2-client
+- python3-ldap
+ldap_system_user: ldap
+ldap_system_group: ldap

@@ -22,7 +22,7 @@
   # not installed yet. It is pointless to define these debconf parameters if
   # LDAP server package is already installed.
   - ldap_phase == 'pre_install'
-  - ldap_server_package not in ansible_facts.packages
+  - ldap_packages_installation is changed
 
 - name: Debian specific post-installation tasks
   block:
