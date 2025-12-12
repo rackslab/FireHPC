@@ -17,3 +17,6 @@ rocky8:
 rocky9:
   url: https://hpck.it/osi/firehpc/main/node-rocky9_1.raw.xz
   environment: ansible-latest
+rocky10:
+  url: https://hpck.it/osi/firehpc/main/node-rocky10_1.raw.xz
+  environment: ansible-latest
