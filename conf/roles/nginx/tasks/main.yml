@@ -29,8 +29,3 @@
   - Restart nginx
   when:
   - ansible_facts.os_family == 'debian'
-
-- name: Ensure nginx service is started
-  ansible.builtin.service:
-    name: nginx
-    state: started
