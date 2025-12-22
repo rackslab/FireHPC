@@ -17,3 +17,9 @@ rocky8:
 rocky9:
   url: https://hpck.it/osi/firehpc/main/node-rocky9_1.raw.xz
   environment: ansible-latest
+opensuse15:
+  url: https://hpck.it/osi/firehpc/main/node-opensuse15_1.raw.xz
+  environment: ansible-2.16
+opensuse16:
+  url: https://hpck.it/osi/firehpc/main/node-opensuse16_1.raw.xz
+  environment: ansible-latest

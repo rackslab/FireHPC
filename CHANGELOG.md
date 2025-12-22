@@ -14,6 +14,7 @@ and this project adheres to
   - Support GPU gres without model in Slurm configuration.
   - Add SSL/TLS certificate for Slurm-web with internal CA.
   - Support serving Slurm-web gateway in HTTP server subfolder.
+- Add support of opensuse15 and opensuse16
 - cli: Add `deploy --update-os-image` option to force download of base OS image
   when already present on host.
 - lib: Add `deploy --update-os-image` option in bash-completion.
