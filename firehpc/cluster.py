@@ -330,8 +330,8 @@ class EmulatedCluster:
         running = [container.name for container in manager.running()]
         manager.start(
             [
-                # The name of the cluster must be removed from container name.
-                container.rsplit(".", 1)[0]
+                # .<cluster>.<namespace> suffix must be removed from container name.
+                container.split(".", 1)[0]
                 for container in containers
                 if container not in running
             ]
