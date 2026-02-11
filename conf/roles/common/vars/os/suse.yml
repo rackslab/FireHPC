@@ -1,0 +1,12 @@
+---
+common_packages:
+  - neovim
+  - file
+  - htop
+  - rsync
+  - man
+  - bash-completion
+  - socat
+  - openssh-clients
+common_ca_system_dir: /var/lib/ca-certificates/openssl
+common_ca_update_cmd: update-ca-certificates

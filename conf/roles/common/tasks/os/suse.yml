@@ -1,0 +1,8 @@
+---
+- name: Define system locale
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/localectl
+      - set-locale
+      - LANG=en_US.UTF-8
+    creates: /etc/locale.conf

@@ -3,9 +3,8 @@
   ansible.builtin.include_vars:
     file: "os/{{ ansible_facts.os_family | lower }}.yml"
 
-- name: Gather the package facts
-  ansible.builtin.package_facts: {}
-
+# misses python3-rpm library on openSUSE
+# https://ipv6.rs/tutorial/OpenSUSE_Latest/OpenLDAP/
 - name: Include OS specific pre-installation tasks
   ansible.builtin.include_tasks: "os/{{ ansible_facts.os_family | lower }}.yml"
   vars:
@@ -66,7 +65,7 @@
       olcTLSCertificateFile: "{{ ldap_tls_cert_file }}"
       olcTLSCertificateKeyFile: "{{ ldap_tls_key_file }}"
     state: exact
-  when: ldap_server_package not in ansible_facts.packages
+  when: ldap_packages_installation is changed
 
 - name: Generate bootstrap LDIF
   ansible.builtin.template:
