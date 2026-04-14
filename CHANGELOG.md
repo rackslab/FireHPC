@@ -32,6 +32,8 @@ and this project adheres to
   - Move HTTP certificate boostrap and deployment from slurm-web to nginx role.
 - core: Cache base OS image locally to avoid systematic download on cluster
   deployment.
+- load: Submit jobs with GPU types when GPU GRES are declared with types on
+  nodes.
 
 ### Fixed
 - conf:
