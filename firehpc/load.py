@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 import logging
 import sys
 import json
@@ -32,8 +32,70 @@ JOBS_TIMELIMITS = (["10", "30", "1:0:0", "6:0:0"], [50, 5, 2, 1])
 JOBS_DURATIONS = ([360, 540, 720, 1200], [50, 5, 2, 1])
 
 ClusterPartition = namedtuple(
-    "ClusterPartition", ["name", "nodes", "cpus", "gpus", "time"]
+    "ClusterPartition",
+    [
+        "name",
+        "nodes",
+        "cpus",
+        "gpus",
+        "gpu_untyped_max",
+        "gpu_typed_max",
+        "time",
+    ],
 )
+
+
+def _accumulate_node_gpu_gres(gres: str) -> Tuple[int, Dict[str, int], int]:
+    """Parse one node's Gres= string.
+
+    Returns (total_gpu_count, counts_per_type, untyped_count) for that node.
+    Untyped segments look like ``gpu:4``; typed like ``gpu:h100:2``.
+    """
+    typed: Dict[str, int] = {}
+    untyped = 0
+    total = 0
+    if not gres or not gres.strip():
+        return 0, typed, 0
+    for segment in gres.split(","):
+        parts = segment.strip().split(":")
+        if not parts or parts[0] != "gpu":
+            continue
+        try:
+            count = int(parts[-1])
+        except ValueError:
+            continue
+        total += count
+        if len(parts) == 2:
+            untyped += count
+        else:
+            gpu_type = parts[1]
+            typed[gpu_type] = typed.get(gpu_type, 0) + count
+    return total, typed, untyped
+
+
+def _partition_gpu_totals(
+    nodes: list, partition_name: str
+) -> Tuple[int, int, Dict[str, int]]:
+    """Aggregate GPU GRES for nodes in a partition.
+
+    Returns (gpus_total, max_untyped_per_node, max_typed_per_node_per_type).
+    """
+    gpus_total = 0
+    max_untyped = 0
+    max_typed: Dict[str, int] = {}
+    for node in nodes:
+        if partition_name not in node["partitions"]:
+            continue
+        gres = node.get("gres") or ""
+        if not len(gres):
+            continue
+        node_total, typed, untyped = _accumulate_node_gpu_gres(gres)
+        gpus_total += node_total
+        if untyped:
+            max_untyped = max(max_untyped, untyped)
+        for gpu_type, count in typed.items():
+            max_typed[gpu_type] = max(max_typed.get(gpu_type, 0), count)
+    return gpus_total, max_untyped, max_typed
 
 
 def load_clusters(
@@ -142,49 +204,38 @@ class ClusterJobsLoader:
             ):
                 self.accounting = True
 
-    def _get_partition_gpus(self, partition):
-        """Return the total number of GPU GRES in a partition."""
-        result = 0
-        stdout, stderr = self.ssh.exec(
+    def _get_partitions(self) -> List[ClusterPartition]:
+        stdout_partitions, _stderr_p = self.ssh.exec(
+            [f"admin.{self.cluster.name}", "scontrol", "show", "partitions", "--json"]
+        )
+        stdout_nodes, _stderr_n = self.ssh.exec(
             [f"admin.{self.cluster.name}", "scontrol", "show", "nodes", "--json"]
         )
         try:
-            for node in json.loads(stdout)["nodes"]:
-                if partition not in node["partitions"]:
-                    continue
-                if not len(node["gres"]):
-                    continue
-                for gres in node["gres"].split(","):
-                    gres = gres.split(":")
-                    if gres[0] != "gpu":
-                        continue
-                    result += int(gres[-1])
+            partitions = json.loads(stdout_partitions)["partitions"]
+            nodes = json.loads(stdout_nodes)["nodes"]
         except json.decoder.JSONDecodeError as err:
             raise FireHPCRuntimeError(
-                f"Unable to retrieve nodes from cluster {self.cluster.name}: {str(err)}"
+                f"Unable to retrieve partitions or nodes from cluster "
+                f"{self.cluster.name}: {str(err)}"
             ) from err
-        return result
-
-    def _get_partitions(self) -> list[str]:
-        stdout, stderr = self.ssh.exec(
-            [f"admin.{self.cluster.name}", "scontrol", "show", "partitions", "--json"]
-        )
-        try:
-            return [
+        result = []
+        for partition in partitions:
+            gpus_total, gpu_untyped_max, gpu_typed_max = _partition_gpu_totals(
+                nodes, partition["name"]
+            )
+            result.append(
                 ClusterPartition(
                     partition["name"],
                     partition["nodes"]["total"],
                     partition["cpus"]["total"],
-                    self._get_partition_gpus(partition["name"]),
+                    gpus_total,
+                    gpu_untyped_max,
+                    gpu_typed_max,
                     partition["maximums"]["time"],
                 )
-                for partition in json.loads(stdout)["partitions"]
-            ]
-        except json.decoder.JSONDecodeError as err:
-            raise FireHPCRuntimeError(
-                f"Unable to retrieve partitions from cluster {self.cluster.name}: "
-                f"{str(err)}"
-            ) from err
+            )
+        return result
 
     def _get_qos(self) -> list[str]:
         if not self.accounting:
@@ -315,7 +366,32 @@ class ClusterJobsLoader:
         if self.select_type == "select/linear":
             cmd.extend(["--nodes", str(random_power_two(partition.nodes))])
         elif partition.gpus:
-            cmd.extend(["--gpus", str(random_power_two(partition.gpus))])
+            choices: List[Tuple[str, Optional[str], int]] = []
+            weights: List[int] = []
+            if partition.gpu_untyped_max > 0:
+                choices.append(("untyped", None, partition.gpu_untyped_max))
+                weights.append(partition.gpu_untyped_max)
+            for gpu_type, limit in partition.gpu_typed_max.items():
+                if limit > 0:
+                    choices.append(("typed", gpu_type, limit))
+                    weights.append(limit)
+            if not choices:
+                logger.warning(
+                    "cluster %s: partition %s has gpus=%s but no schedulable "
+                    "GRES caps; falling back to CPU tasks",
+                    self.cluster.name,
+                    partition.name,
+                    partition.gpus,
+                )
+                cmd.extend(["--ntasks", str(random_power_two(partition.cpus))])
+            else:
+                picked = random.choices(choices, weights=weights)[0]
+                kind, gpu_type, limit = picked
+                n_gpus = random_power_two(limit)
+                if kind == "untyped":
+                    cmd.extend(["--gpus", str(n_gpus)])
+                else:
+                    cmd.extend(["--gres", f"gpu:{gpu_type}:{n_gpus}"])
         else:
             cmd.extend(["--ntasks", str(random_power_two(partition.cpus))])
 
