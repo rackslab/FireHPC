@@ -2,4 +2,18 @@
 nginx_packages:
 - nginx
 nginx_site_template: "{{ undef(hint='Nginx file template must be defined') }}"
-nginx_conf_filename: default
+nginx_site_filename: default
+nginx_conf_filename: "{{ nginx_site_filename }}"
+
+nginx_hostname: "{{ inventory_hostname }}"
+nginx_local_ca_dir: ca  # dummy
+nginx_local_ca_password_file: "{{ nginx_local_ca_dir }}/ca.password"
+nginx_local_ca_key_file: "{{ nginx_local_ca_dir }}/key.pem"
+nginx_local_ca_cert_file: "{{ nginx_local_ca_dir }}/ca.crt"
+nginx_local_tls_key_file: "{{ nginx_local_ca_dir }}/key-nginx.pem"
+nginx_local_tls_cert_file: "{{ nginx_local_ca_dir }}/cert-nginx.crt"
+
+nginx_tls_dir: /etc/nginx/tls
+nginx_tls_ca_cert_file: "{{ nginx_tls_dir }}/ca.crt"
+nginx_tls_cert_file: "{{ nginx_tls_dir }}/cert.crt"
+nginx_tls_key_file: "{{ nginx_tls_dir }}/key.pem"

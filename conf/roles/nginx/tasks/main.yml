@@ -8,6 +8,36 @@
     name: "{{ nginx_packages }}"
     state: latest
 
+- name: Create nginx TLS directory
+  ansible.builtin.file:
+    path: "{{ nginx_tls_dir }}"
+    state: directory
+    recurse: true
+
+- name: Deploy nginx TLS CA certificate
+  ansible.builtin.copy:
+    src: "{{ nginx_local_ca_cert_file }}"
+    dest: "{{ nginx_tls_ca_cert_file }}"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Deploy nginx TLS certificate
+  ansible.builtin.copy:
+    src: "{{ nginx_local_tls_cert_file }}"
+    dest: "{{ nginx_tls_cert_file }}"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Deploy nginx TLS key
+  ansible.builtin.copy:
+    src: "{{ nginx_local_tls_key_file }}"
+    dest: "{{ nginx_tls_key_file }}"
+    owner: root
+    group: root
+    mode: 0600
+
 - name: Setup site
   ansible.builtin.template:
     src: "{{ nginx_site_template }}"

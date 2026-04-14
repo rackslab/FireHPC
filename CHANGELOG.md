@@ -28,6 +28,7 @@ and this project adheres to
   - Skip ensuring nginx service is started in role tasks as it can fail when
     setup with https as dependency of other role before certificate and key are
     deployed. This should be handled by handlers only.
+  - Move HTTP certificate boostrap and deployment from slurm-web to nginx role.
 - core: Cache base OS image locally to avoid systematic download on cluster
   deployment.
 
