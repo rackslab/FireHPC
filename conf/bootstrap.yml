@@ -20,11 +20,9 @@
     include_role:
       name: redis
       tasks_from: bootstrap
-  - name: Generate Slurm-web CA certificate
-    vars:
-      slurmweb_bootstrap: true  # used to skip role dependencies
+  - name: Generate shared nginx TLS certificate
     include_role:
-      name: slurmweb
+      name: nginx
       tasks_from: bootstrap
 
 - hosts: all
