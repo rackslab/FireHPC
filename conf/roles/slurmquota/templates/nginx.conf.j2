@@ -1,0 +1,31 @@
+# {{ slurmquota_web_http_server_names | join(',')}}:80
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ slurmquota_web_http_server_names | join(' ') }};
+
+    # Redirect HTTP to HTTPS
+    return 301 https://$host$request_uri;
+}
+
+# {{ slurmquota_web_http_server_names | join(',')}}:443
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name {{ slurmquota_web_http_server_names | join(' ') }};
+
+    ssl_certificate {{ slurmquota_web_tls_cert_file }};
+    ssl_certificate_key {{ slurmquota_web_tls_key_file }};
+
+    location /{{ slurmquota_web_subdir }}/static/ {
+        alias {{ slurmquota_web_static_dir }}/;
+        try_files $uri =404;
+    }
+
+    location /{{ slurmquota_web_subdir }}/ {
+        include uwsgi_params;
+        uwsgi_param SCRIPT_NAME /{{ slurmquota_web_subdir }};
+        rewrite ^/{{ slurmquota_web_subdir }}/(.*)$ /$1 break;
+        uwsgi_pass unix:{{ slurmquota_web_uwsgi_socket }};
+    }
+}

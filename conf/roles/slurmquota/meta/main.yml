@@ -1,0 +1,6 @@
+---
+dependencies:
+  - role: nginx
+    nginx_site_template: ../../slurmquota/templates/nginx.conf.j2
+    nginx_site_filename: slurm-quota
+    when: slurmquota_controller_group in group_names
