@@ -1,0 +1,20 @@
+[Unit]
+Description=Slurm-quota web uWSGI service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/uwsgi \
+  --master \
+  --die-on-term \
+  --plugin python3 \
+  --socket {{ slurmquota_web_uwsgi_socket }} \
+  --chmod-socket=660 \
+  --chown-socket=nginx:nginx \
+  --wsgi-file {{ slurmquota_web_app_file }}
+RuntimeDirectory=slurm-quota-web
+RuntimeDirectoryMode=0755
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -30,6 +30,12 @@
 - hosts: all
   remote_user: root
   roles:
+    # Deploy slurm-quota before slurm because slurm needs job_submit.lua script
+    # from slurm-quota.
+    - role: slurmquota
+      when:
+      - slurmquota_enabled
+      tags: [ slurmquota ]
     - role: slurm
       tags: [ slurm ]
     - role: racksdb

@@ -1,0 +1,74 @@
+---
+- name: Ensure slurm-quota role only runs on EL9
+  ansible.builtin.assert:
+    that:
+    - ansible_facts.os_family == 'RedHat'
+    - ansible_distribution_major_version == '9'
+    fail_msg: "slurmquota role is supported only on EL9 hosts."
+
+- name: Determine if host is slurm controller
+  ansible.builtin.set_fact:
+    slurmquota_is_controller: "{{ slurmquota_controller_group in group_names }}"
+
+- name: Define slurm-quota package list for host
+  ansible.builtin.set_fact:
+    slurmquota_packages: >-
+      {{
+        slurmquota_common_packages
+        + (
+          (slurmquota_controller_group in group_names)
+          | ternary(slurmquota_controller_packages, [])
+        )
+      }}
+
+- name: Install slurm-quota RPM packages
+  ansible.builtin.dnf:
+    name: "{{ slurmquota_packages }}"
+    state: present
+
+- name: Start and enable slurm-quota socket activation
+  ansible.builtin.systemd_service:
+    name: slurm-quota.socket
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: slurmquota_is_controller
+
+- name: Install uWSGI packages for slurm-quota-web
+  ansible.builtin.dnf:
+    name: "{{ slurmquota_uwsgi_packages }}"
+    state: present
+  when: slurmquota_is_controller
+
+- name: Deploy slurm-quota web uWSGI systemd service
+  ansible.builtin.template:
+    src: slurm-quota-web-uwsgi.service.j2
+    dest: "/etc/systemd/system/{{ slurmquota_web_uwsgi_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart slurm-quota-web uWSGI
+  when: slurmquota_is_controller
+
+- name: Start and enable slurm-quota-web uWSGI service
+  ansible.builtin.systemd_service:
+    name: "{{ slurmquota_web_uwsgi_service_name }}"
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: slurmquota_is_controller
+
+- name: Configure SLURM_QUOTA_URL on non-controller nodes
+  ansible.builtin.template:
+    src: slurm-quota.sh.j2
+    dest: "{{ slurmquota_client_env_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: not slurmquota_is_controller
+
+- name: Remove SLURM_QUOTA_URL profile snippet on controller
+  ansible.builtin.file:
+    path: "{{ slurmquota_client_env_file }}"
+    state: absent
+  when: slurmquota_is_controller

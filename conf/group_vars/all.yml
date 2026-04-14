@@ -97,3 +97,9 @@ slurmweb_gateway_settings_defaults:
     group_base: "ou=groups,{{ fhpc_ldap_base }}"
 metrics_ldap_server: "{{ fhpc_admin_server }}"
 metrics_ldap_search_base: "{{ fhpc_ldap_base }}"
+slurmquota_web_hostname: "{{ fhpc_admin_server }}"
+slurmquota_web_tls_cert_file: "{{ fhpc_web_tls_cert_file }}"
+slurmquota_web_tls_key_file: "{{ fhpc_web_tls_key_file }}"
+slurmquota_web_http_server_names:
+- "{{ slurmquota_web_hostname }}"
+- "{{ slurmquota_web_hostname }}.{{ fhpc_namespace }}"

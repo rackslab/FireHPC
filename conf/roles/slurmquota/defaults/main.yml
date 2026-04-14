@@ -1,0 +1,25 @@
+---
+slurmquota_enabled: false
+
+slurmquota_controller_group: "{{ (slurm_profiles | default({})).get('server', 'admin') }}"
+slurmquota_common_packages:
+- slurm-quota
+slurmquota_controller_packages:
+- slurm-quota-controller
+- slurm-quota-web
+slurmquota_uwsgi_packages:
+- uwsgi
+- uwsgi-plugin-python3
+
+slurmquota_client_env_file: /etc/profile.d/slurm-quota.sh
+slurmquota_client_env_url: "http://{{ groups[slurmquota_controller_group][0] }}:9911/"
+slurmquota_web_hostname: "{{ inventory_hostname }}"
+slurmquota_web_http_server_names:
+- "{{ slurmquota_web_hostname }}"
+slurmquota_web_subdir: quota
+slurmquota_web_static_dir: /usr/share/slurm-quota-web/static
+slurmquota_web_tls_cert_file: /etc/nginx/tls/cert.crt
+slurmquota_web_tls_key_file: /etc/nginx/tls/key.pem
+slurmquota_web_app_file: /usr/libexec/slurm-quota/slurm-quota-web
+slurmquota_web_uwsgi_socket: /run/slurm-quota-web/uwsgi.sock
+slurmquota_web_uwsgi_service_name: slurm-quota-web-uwsgi
