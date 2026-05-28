@@ -18,6 +18,18 @@ CredType = cred/slurm
 AccountingStorageType=accounting_storage/slurmdbd # default: accounting_storage/none
 AccountingStorageHost={{ slurm_server }}          # must be specified, as soon as slurmdbd is used
 AccountingStorageEnforce=qos,limits,associations  # default: none
+{% if slurm_with_gres_gpu and 'AccountingStorageTRES' not in slurm_params %}
+{% set gpu_tres = ['gres/gpu'] %}
+{% for node_type in slurm_compute_nodes %}
+{% for model in node_type.gpus %}
+{% set has_model = (model in slurm_gpus_models_map and slurm_gpus_models_map.get(model) is not none) %}
+{% if has_model %}
+{% set _ = gpu_tres.append('gres/gpu:' ~ slurm_gpus_models_map.get(model, 'nvidia')) %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+AccountingStorageTRES={{ gpu_tres | unique | sort | join(',') }}
+{% endif %}
 {% endif %}
 {% if slurm_with_jwt %}
 AuthAltTypes=auth/jwt

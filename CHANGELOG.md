@@ -12,6 +12,8 @@ and this project adheres to
 - conf:
   - Add pkgs.rackslab.io packages repositories by default.
   - Support GPU gres without model in Slurm configuration.
+  - Set `AccountingStorageTRES` for GPU GRES when Slurm accounting is enabled
+    and the cluster defines GPUs.
   - Add SSL/TLS certificate for Slurm-web with internal CA.
   - Support serving Slurm-web gateway in HTTP server subfolder.
   - Add support of slurm-quota (#52).
