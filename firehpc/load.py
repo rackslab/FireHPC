@@ -31,6 +31,50 @@ logger = logging.getLogger(__name__)
 JOBS_TIMELIMITS = (["10", "30", "1:0:0", "6:0:0"], [50, 5, 2, 1])
 JOBS_DURATIONS = ([360, 540, 720, 1200], [50, 5, 2, 1])
 
+# Realistic Slurm job names for synthetic load (random choice per submission).
+JOB_NAMES = [
+    "train_resnet50",
+    "pytorch_ddp_epoch",
+    "gromacs_npt_equil",
+    "openfoam_cavity",
+    "dft_scf_relax",
+    "variant_call_chr21",
+    "hpl_weak_scale",
+    "nextflow_rnaseq",
+    "jax_pmap_train",
+    "mpi_io_bandwidth",
+    "tensorflow_benchmark",
+    "monte_carlo_sampling",
+    "bayesian_mcmc_chain",
+    "weather forecast ensemble",
+    "finetune bert base",
+    "lattice qcd beta 4.2",
+    "production_molecular_dynamics_equilibration_extended_300k",
+    "weak_scaling_hpl_benchmark_custom_matrix_size_1048576",
+    "large_eddy_simulation_turbulent_channel_reynolds_180",
+    "distributed_imagenet1k_resnet152_mixed_precision_fp16",
+    "ab_initio_molecular_dynamics_car_parrinello_benzene_298k_1fs",
+    "multi_node_mpi_io_bandwidth_stripe_16_lustre_ost_rotation",
+    "continued equilibration production run restraints off v3",
+    "genome wide association study european ancestry batch 07",
+    "radiative_hydrodynamics_supernova_remant_post_shock_turb",
+    "Train ResNet50 v2",
+    "PyTorch DDP Epoch",
+    "GROMACS NPT Equilibration",
+    "OpenFOAM Cavity Flow",
+    "HPL Weak Scaling Benchmark",
+    "MD Production Run Stage 2",
+    "Nextflow RNAseq Pipeline",
+    "WGS Variant Call Chr21",
+    "Large Eddy Simulation Channel Re180",
+    "Distributed Training ImageNet1k FP16",
+    "Ab Initio MD Car Parrinello 298K",
+    "Train_ResNet50_Production",
+    "PyTorch_DDP_MultiNode",
+    "CFD_LES_Channel_Re180",
+    "MPI IO Bandwidth Test",
+]
+
 ClusterPartition = namedtuple(
     "ClusterPartition",
     [
@@ -335,6 +379,8 @@ class ClusterJobsLoader:
         cmd = [
             f"{user.login}@{dest}.{self.cluster.name}",
             "sbatch",
+            "--job-name",
+            random.choice(JOB_NAMES),
             "--partition",
             partition.name,
             "--time",
