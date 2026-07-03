@@ -1,0 +1,36 @@
+---
+- name: Create private key for slurm-quota API TLS certificate
+  community.crypto.openssl_privatekey:
+    path: "{{ slurmquota_local_tls_key_file }}"
+
+- name: Create certificate signing request (CSR) for slurm-quota API certificate
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: "{{ slurmquota_local_tls_key_file }}"
+    common_name: "{{ slurmquota_api_hostname }}"
+    subject_alt_name:
+    - "DNS:{{ slurmquota_api_hostname }}"
+    - "DNS:{{ slurmquota_api_hostname }}.{{ fhpc_namespace }}"
+  register: slurmquota_api_tls_csr
+
+- name: Sign slurm-quota API certificate with internal CA
+  community.crypto.x509_certificate:
+    csr_content: "{{ slurmquota_api_tls_csr.csr }}"
+    provider: ownca
+    ownca_path: "{{ slurmquota_local_ca_cert_file }}"
+    ownca_privatekey_path: "{{ slurmquota_local_ca_key_file }}"
+    ownca_privatekey_passphrase: "{{ lookup('ansible.builtin.file', slurmquota_local_ca_password_file) }}"
+    ownca_not_after: +365d  # valid for one year
+    ownca_not_before: "-1d"  # valid since yesterday
+    path: "{{ slurmquota_local_tls_cert_file }}"
+    force: true  # override possibly existing certificate
+
+- name: Create local slurm-quota directory
+  ansible.builtin.file:
+    path: "{{ slurmquota_local_web_session_key_file | dirname }}"
+    state: directory
+    recurse: true
+
+- name: Generate slurm-quota web session key file
+  ansible.builtin.shell:
+    cmd: "openssl rand -hex 32 > {{ slurmquota_local_web_session_key_file }}"
+    creates: "{{ slurmquota_local_web_session_key_file }}"

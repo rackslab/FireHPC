@@ -1,0 +1,19 @@
+# Managed by Ansible (slurmquota role)
+[authentication]
+method={{ slurmquota_auth_method }}
+
+[ldap]
+uri={{ slurmquota_ldap_uri }}
+user_base={{ slurmquota_ldap_user_base }}
+group_base={{ slurmquota_ldap_group_base }}
+
+[authorization]
+admins=
+{% for admin in slurmquota_admins %}
+  {{ admin }}
+{% endfor %}
+
+[tls]
+enabled=true
+cert={{ slurmquota_api_tls_cert }}
+key={{ slurmquota_api_tls_key }}

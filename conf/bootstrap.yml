@@ -24,6 +24,10 @@
     include_role:
       name: nginx
       tasks_from: bootstrap
+  - name: Generate slurm-quota API TLS certificate and session key
+    include_role:
+      name: slurmquota
+      tasks_from: bootstrap
 
 - hosts: all
   connection: machinectl
