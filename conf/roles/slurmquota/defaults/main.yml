@@ -12,14 +12,37 @@ slurmquota_uwsgi_packages:
 - uwsgi-plugin-python3
 
 slurmquota_client_env_file: /etc/profile.d/slurm-quota.sh
-slurmquota_client_env_url: "http://{{ groups[slurmquota_controller_group][0] }}:9911/"
+slurmquota_client_env_url: "https://{{ groups[slurmquota_controller_group][0] }}:9911/"
 slurmquota_web_hostname: "{{ inventory_hostname }}"
 slurmquota_web_http_server_names:
 - "{{ slurmquota_web_hostname }}"
 slurmquota_web_subdir: quota
-slurmquota_web_static_dir: /usr/share/slurm-quota-web/static
+slurmquota_web_static_dir: /usr/share/slurm-quota/web/static
 slurmquota_web_tls_cert_file: /etc/nginx/tls/cert.crt
 slurmquota_web_tls_key_file: /etc/nginx/tls/key.pem
-slurmquota_web_app_file: /usr/libexec/slurm-quota/slurm-quota-web
+slurmquota_web_app_file: /usr/share/slurm-quota/web/wsgi/slurm-quota-web.wsgi
 slurmquota_web_uwsgi_socket: /run/slurm-quota-web/uwsgi.sock
 slurmquota_web_uwsgi_service_name: slurm-quota-web-uwsgi
+
+slurmquota_serve_ini: /etc/slurm-quota/serve.ini
+slurmquota_api_tls_dir: /etc/slurm-quota/tls
+slurmquota_api_tls_cert: "{{ slurmquota_api_tls_dir }}/cert.pem"
+slurmquota_api_tls_key: "{{ slurmquota_api_tls_dir }}/key.pem"
+slurmquota_api_hostname: "{{ fhpc_admin_server }}"
+slurmquota_local_ca_dir: "{{ common_local_ca_dir }}"
+slurmquota_local_tls_cert_file: "{{ slurmquota_local_ca_dir }}/cert-slurm-quota.crt"
+slurmquota_local_tls_key_file: "{{ slurmquota_local_ca_dir }}/key-slurm-quota.pem"
+slurmquota_local_ca_cert_file: "{{ slurmquota_local_ca_dir }}/ca.crt"
+slurmquota_local_ca_key_file: "{{ slurmquota_local_ca_dir }}/key.pem"
+slurmquota_local_ca_password_file: "{{ slurmquota_local_ca_dir }}/ca.password"
+
+slurmquota_web_env_file: /etc/default/slurm-quota-web
+slurmquota_web_session_key_file: /etc/slurm-quota/web-session.key
+slurmquota_local_web_session_key_file: slurm-quota/web-session.key  # dummy
+slurmquota_web_api_url: "https://{{ groups[slurmquota_controller_group][0] }}:9911/"
+
+slurmquota_auth_method: ldap
+slurmquota_ldap_uri: "ldaps://{{ fhpc_admin_server }}/"
+slurmquota_ldap_user_base: "ou=people,{{ fhpc_ldap_base }}"
+slurmquota_ldap_group_base: "ou=groups,{{ fhpc_ldap_base }}"
+slurmquota_admins: []

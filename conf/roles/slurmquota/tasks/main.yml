@@ -26,37 +26,89 @@
     name: "{{ slurmquota_packages }}"
     state: present
 
-- name: Start and enable slurm-quota socket activation
-  ansible.builtin.systemd_service:
-    name: slurm-quota.socket
-    state: started
-    enabled: true
-    daemon_reload: true
+- name: Configure slurm-quota controller
   when: slurmquota_is_controller
+  block:
+  - name: Create slurm-quota API TLS directory
+    ansible.builtin.file:
+      path: "{{ slurmquota_api_tls_dir }}"
+      state: directory
+      owner: root
+      group: slurm
+      mode: "0750"
 
-- name: Install uWSGI packages for slurm-quota-web
-  ansible.builtin.dnf:
-    name: "{{ slurmquota_uwsgi_packages }}"
-    state: present
-  when: slurmquota_is_controller
+  - name: Deploy slurm-quota API TLS certificate
+    ansible.builtin.copy:
+      src: "{{ slurmquota_local_tls_cert_file }}"
+      dest: "{{ slurmquota_api_tls_cert }}"
+      owner: slurm
+      group: slurm
+      mode: "0644"
+    notify: Restart slurm-quota API
 
-- name: Deploy slurm-quota web uWSGI systemd service
-  ansible.builtin.template:
-    src: slurm-quota-web-uwsgi.service.j2
-    dest: "/etc/systemd/system/{{ slurmquota_web_uwsgi_service_name }}.service"
-    owner: root
-    group: root
-    mode: "0644"
-  notify: Restart slurm-quota-web uWSGI
-  when: slurmquota_is_controller
+  - name: Deploy slurm-quota API TLS private key
+    ansible.builtin.copy:
+      src: "{{ slurmquota_local_tls_key_file }}"
+      dest: "{{ slurmquota_api_tls_key }}"
+      owner: slurm
+      group: slurm
+      mode: "0640"
+    notify: Restart slurm-quota API
 
-- name: Start and enable slurm-quota-web uWSGI service
-  ansible.builtin.systemd_service:
-    name: "{{ slurmquota_web_uwsgi_service_name }}"
-    state: started
-    enabled: true
-    daemon_reload: true
-  when: slurmquota_is_controller
+  - name: Deploy slurm-quota web session key
+    ansible.builtin.copy:
+      src: "{{ slurmquota_local_web_session_key_file }}"
+      dest: "{{ slurmquota_web_session_key_file }}"
+      owner: root
+      group: root
+      mode: "0400"
+    notify: Restart slurm-quota-web uWSGI
+
+  - name: Deploy slurm-quota serve.ini
+    ansible.builtin.template:
+      src: serve.ini.j2
+      dest: "{{ slurmquota_serve_ini }}"
+      owner: root
+      group: root
+      mode: "0644"
+    notify: Restart slurm-quota API
+
+  - name: Deploy slurm-quota web environment file
+    ansible.builtin.template:
+      src: slurm-quota-web.default.j2
+      dest: "{{ slurmquota_web_env_file }}"
+      owner: root
+      group: root
+      mode: "0644"
+    notify: Restart slurm-quota-web uWSGI
+
+  - name: Start and enable slurm-quota socket activation
+    ansible.builtin.systemd_service:
+      name: slurm-quota.socket
+      state: started
+      enabled: true
+      daemon_reload: true
+
+  - name: Install uWSGI packages for slurm-quota-web
+    ansible.builtin.dnf:
+      name: "{{ slurmquota_uwsgi_packages }}"
+      state: present
+
+  - name: Deploy slurm-quota web uWSGI systemd service
+    ansible.builtin.template:
+      src: slurm-quota-web-uwsgi.service.j2
+      dest: "/etc/systemd/system/{{ slurmquota_web_uwsgi_service_name }}.service"
+      owner: root
+      group: root
+      mode: "0644"
+    notify: Restart slurm-quota-web uWSGI
+
+  - name: Start and enable slurm-quota-web uWSGI service
+    ansible.builtin.systemd_service:
+      name: "{{ slurmquota_web_uwsgi_service_name }}"
+      state: started
+      enabled: true
+      daemon_reload: true
 
 - name: Configure SLURM_QUOTA_URL on non-controller nodes
   ansible.builtin.template:

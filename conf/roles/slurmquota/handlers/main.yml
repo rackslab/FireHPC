@@ -1,4 +1,10 @@
 ---
+- name: Restart slurm-quota API
+  ansible.builtin.systemd_service:
+    name: slurm-quota.socket
+    state: restarted
+    daemon_reload: true
+
 - name: Restart slurm-quota-web uWSGI
   ansible.builtin.systemd_service:
     name: "{{ slurmquota_web_uwsgi_service_name }}"
