@@ -9,6 +9,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import logging
+from os.path import basename
 
 import yaml
 
@@ -32,6 +33,9 @@ class OSDatabase:
 
     def environment(self, os: str) -> str:
         return self.content[os]["environment"]
+
+    def image_name(self, os: str) -> str:
+        return basename(self.url(os)).split(".")[0]
 
     def __str__(self):
         result = ""
