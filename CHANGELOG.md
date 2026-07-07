@@ -33,6 +33,11 @@ and this project adheres to
     setup with https as dependency of other role before certificate and key are
     deployed. This should be handled by handlers only.
   - Move HTTP certificate boostrap and deployment from slurm-web to nginx role.
+  - Refactor _slurm_ role to create system user/group in the first place,
+    before slurmquota is possibly run.
+  - Move _mariadb_ dependency from _slurm_ metadata to _server_ tasks in order
+    to avoid this dependency from being triggered with system user/group
+    creation.
 - core: Cache base OS image locally to avoid systematic download on cluster
   deployment.
 - load: Submit jobs with GPU types when GPU GRES are declared with types on

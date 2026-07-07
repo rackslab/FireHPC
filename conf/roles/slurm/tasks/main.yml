@@ -1,24 +1,6 @@
 ---
-- name: Gather OS specific variables
-  ansible.builtin.include_vars:
-    file: "os/{{ ansible_facts.os_family | lower }}.yml"
-
-# On Debian, the packages create the slurm system user and group by default. On
-# redhat based distributions, the user must be created manually.
-- name: Create slurm system group
-  ansible.builtin.group:
-    name: slurm
-    gid: "{{ slurm_gid }}"
-
-- name: Create slurm system user
-  ansible.builtin.user:
-    name: slurm
-    uid: "{{ slurm_uid }}"
-    group: slurm
-    system: yes
-    shell: /sbin/nologin
-    home: /var/spool/slurm
-    create_home: no
+- name: Ensure slurm system user and group exist
+  ansible.builtin.include_tasks: user.yml
 
 - name: Install slurm common packages
   ansible.builtin.package:
