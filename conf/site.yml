@@ -29,6 +29,15 @@
 
 - hosts: all
   remote_user: root
+  pre_tasks:
+    # Create slurm system user/group before slurm-quota because the controller
+    # configures files owned by slurm. pre_tasks run before roles; listing slurm
+    # twice under roles would deduplicate the role.
+    - name: Create slurm system user and group
+      ansible.builtin.include_role:
+        name: slurm
+        tasks_from: user
+      tags: [ slurm, slurmquota ]
   roles:
     # Deploy slurm-quota before slurm because slurm needs job_submit.lua script
     # from slurm-quota.

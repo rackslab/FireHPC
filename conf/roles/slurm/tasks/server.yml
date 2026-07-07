@@ -1,4 +1,19 @@
 ---
+- name: Install MariaDB for Slurm accounting
+  ansible.builtin.include_role:
+    name: mariadb
+    apply:
+      tags:
+      - mariadb
+      - dependencies
+  vars:
+    mariadb_users:
+    - name: slurm
+      host: localhost
+      password: "{{ slurm_db_password }}"
+      priv: slurm_acct_db.*:ALL
+  when: slurm_with_accounting
+
 - name: Create slurmctld state directory
   ansible.builtin.file:
     path: "{{ slurm_state_save_loc }}"
