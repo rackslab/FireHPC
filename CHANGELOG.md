@@ -9,6 +9,7 @@ and this project adheres to
 ## [unreleased]
 
 ### Added
+- images: Add rocky10.
 - conf:
   - Add pkgs.rackslab.io packages repositories by default.
   - Support GPU gres without model in Slurm configuration.
