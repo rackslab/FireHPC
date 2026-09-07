@@ -5,3 +5,4 @@ ldap_extra_packages:
 - python3-ldap
 ldap_system_user: openldap
 ldap_system_group: openldap
+ldap_admin_dn: "cn=admin,{{ ldap_base }}"

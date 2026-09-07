@@ -77,12 +77,12 @@
     mode: '0600'
   when: ldap_packages_installation is changed
 
-- name: Insert boostrap LDIF in LDAP directory
-  become: true
-  become_method: su
-  # shell of ldap system user is disabled, flag is used to force real shell
-  become_flags: '-s /bin/sh'
-  become_user: "{{ ldap_system_user }}"
+- name: Insert bootstrap LDIF in LDAP directory
   ansible.builtin.command:
-    cmd: "/usr/sbin/slapadd -v -l {{ ldap_ldif_path }}"
+    cmd: >-
+      ldapadd -x -H ldap://127.0.0.1/
+      -D "{{ ldap_admin_dn }}"
+      -w "{{ ldap_admin_password }}"
+      -f {{ ldap_ldif_path }}
   when: ldap_packages_installation is changed
+  no_log: true

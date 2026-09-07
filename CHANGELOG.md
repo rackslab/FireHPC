@@ -45,6 +45,8 @@ and this project adheres to
 
 ### Fixed
 - conf:
+  - Load LDAP bootstrap LDIF with `ldapadd` instead of `su`+`slapadd`, which
+    failed on debian14 because the `openldap` system account is expired.
   - Slurm-web v5 JWT for slurmrestd authentification ownership.
   - Run Slurm-web agent as slurm special user when authentication is local.
   - Replace embedded template by simple variable reference in redis role.
