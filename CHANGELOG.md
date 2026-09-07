@@ -57,6 +57,9 @@ and this project adheres to
   - Create slurm system user and group on Debian before deploying slurm.conf.
     SchedMD upstream packages do not create this account, unlike legacy Debian
     slurm-wlm packages.
+  - Enable nginx sites on Debian by fixing `os_family` comparison in the nginx
+    role. Slurm-web and slurm-quota configs were deployed to
+    `sites-available` but never symlinked into `sites-enabled`.
 
 ## [1.2.0] - 2025-09-18
 
