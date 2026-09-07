@@ -7,6 +7,7 @@
 import os
 import dataclasses
 from pathlib import Path
+from typing import Optional
 import shutil
 import logging
 
@@ -108,3 +109,20 @@ class ClusterState:
             raise FireHPCRuntimeError(
                 f"Unable to load cluster settings: {err}"
             ) from err
+
+
+def clusters_list(state: Path):
+    """Return list of cluster names present in state directory."""
+    return [path.name for path in UserState(state).clusters.glob("*")]
+
+
+def os_used_by_clusters(
+    user_state: UserState, os_key: str, exclude: Optional[str] = None
+) -> bool:
+    for cluster in clusters_list(user_state.path):
+        if cluster == exclude:
+            continue
+        settings = ClusterState(user_state, cluster).load()
+        if settings.os == os_key:
+            return True
+    return False

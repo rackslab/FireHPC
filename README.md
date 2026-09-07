@@ -248,6 +248,19 @@ When you are done, you can clean up everything for a cluster with this command:
 $ firehpc clean --cluster hpc
 ```
 
+To also remove the cached base OS image (when no other cluster uses the same
+OS):
+
+```
+$ firehpc clean --cluster hpc --remove-base-image
+```
+
+You can also remove a base OS image explicitly:
+
+```
+$ firehpc images --remove debian13
+```
+
 ## Authors
 
 FireHPC is developed by [Rackslab](https://rackslab.io).

@@ -17,10 +17,11 @@ import yaml
 
 from .templates import Templater
 from .users import UsersDirectory
-from .containers import ContainersManager
+from .containers import BaseImagesManager, ContainersManager
 from .errors import FireHPCRuntimeError
+from .os import OSDatabase
 from .settings import ClusterSettings
-from .state import ClusterState, UserState
+from .state import ClusterState, UserState, os_used_by_clusters
 from .environments import DeploymentEnvironment
 
 if TYPE_CHECKING:
@@ -31,9 +32,19 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def clusters_list(state: Path):
-    """Return list of cluster names present in state directory."""
-    return [path.name for path in UserState(state).clusters.glob("*")]
+def remove_os_base_image(
+    runtime_settings: RuntimeSettings,
+    user_state: UserState,
+    os_key: str,
+    exclude_cluster: Optional[str] = None,
+) -> None:
+    if os_used_by_clusters(user_state, os_key, exclude=exclude_cluster):
+        logger.info(
+            "Base image for OS %s is still used by another cluster, skipping removal",
+            os_key,
+        )
+        return
+    BaseImagesManager(OSDatabase(runtime_settings)).remove(os_key)
 
 
 @dataclass
@@ -80,36 +91,30 @@ class EmulatedCluster:
 
     def deploy(
         self,
-        url: str,
+        os: str,
         update_os_image: bool,
         db: RacksDB,
     ) -> None:
         infrastructure = db.infrastructures[self.name]
 
         manager = ContainersManager(self.name)
-
-        base_image_name = os.path.basename(url).split(".")[0]
+        base_images = BaseImagesManager(OSDatabase(self.runtime_settings))
 
         # Check if base image is already present. If not or update_os_image is
         # True, download it. Otherwise, just use it in place.
-        if not manager.image_exists(base_image_name):
-            logger.info("Base image %s must be imported", base_image_name)
-            base_image = manager.download(
-                url,
-                base_image_name,
-            )
+        if not base_images.exists(os):
+            logger.info("Base image %s must be imported", base_images.image_name(os))
+            base_image = base_images.download(os)
         else:
-            logger.info("Base image %s is already imported", base_image_name)
-            base_image = manager.base_image(base_image_name)
+            logger.info("Base image %s is already imported", base_images.image_name(os))
+            base_image = base_images.get(os)
             if update_os_image:
                 logger.info(
-                    "Base image %s must be updated, removing it", base_image_name
+                    "Base image %s must be updated, removing it",
+                    base_images.image_name(os),
                 )
                 base_image.remove()
-                base_image = manager.download(
-                    url,
-                    base_image_name,
-                )
+                base_image = base_images.download(os)
 
         for node in infrastructure.nodes:
             if "admin" in node.tags or not self.cluster_settings.slurm_emulator:
@@ -303,7 +308,15 @@ class EmulatedCluster:
             logger.debug("Removing ansible generated directory %s", generated_path)
             shutil.rmtree(generated_path)
 
-    def clean(self) -> None:
+    def clean(self, remove_base_image: bool = False) -> None:
+        os_key = None
+        if remove_base_image:
+            if self.cluster_settings is None:
+                raise FireHPCRuntimeError(
+                    "Cluster settings are required to remove base image"
+                )
+            os_key = self.cluster_settings.os
+
         manager = ContainersManager(self.name)
 
         manager.stop()
@@ -317,6 +330,14 @@ class EmulatedCluster:
 
         # Remove cluster state directory
         self.state.clean()
+
+        if remove_base_image:
+            remove_os_base_image(
+                self.runtime_settings,
+                self.state.user_state,
+                os_key,
+                exclude_cluster=self.name,
+            )
 
     def start(self) -> None:
         manager = ContainersManager(self.name)
