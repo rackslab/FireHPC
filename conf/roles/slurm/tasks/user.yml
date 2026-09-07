@@ -1,7 +1,7 @@
 ---
-# On Debian, slurm packages create the system user and group. On Red Hat based
-# distributions, they must be created before installing Slurm or components
-# such as slurm-quota that run services as the slurm user.
+# SchedMD upstream packages do not create the slurm system user and group. They
+# must exist on all nodes before installing Slurm or deploying files owned by
+# slurm, such as slurm.conf or slurm-quota job_submit.lua.
 - name: Gather OS specific variables
   ansible.builtin.include_vars:
     file: "os/{{ ansible_facts.os_family | lower }}.yml"
@@ -10,7 +10,6 @@
   ansible.builtin.group:
     name: slurm
     gid: "{{ slurm_gid }}"
-  when: ansible_facts.os_family == 'RedHat'
 
 - name: Create slurm system user
   ansible.builtin.user:
@@ -21,4 +20,3 @@
     shell: /sbin/nologin
     home: /var/spool/slurm
     create_home: no
-  when: ansible_facts.os_family == 'RedHat'

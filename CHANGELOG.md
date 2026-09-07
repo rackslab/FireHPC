@@ -54,6 +54,9 @@ and this project adheres to
   - Run Slurm-web agent as slurm special user when authentication is local.
   - Replace embedded Jinja templates by inline variable references in redis,
     ldap and users role.
+  - Create slurm system user and group on Debian before deploying slurm.conf.
+    SchedMD upstream packages do not create this account, unlike legacy Debian
+    slurm-wlm packages.
 
 ## [1.2.0] - 2025-09-18
 
