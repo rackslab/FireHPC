@@ -9,7 +9,7 @@ ldap_local_admin_password_file:  ldap.password  # dummy
 # The lookup errors are ignored because the variable is loaded by boostrap
 # tasks file (in bootstrap playbook) before it generates the file. This way, a
 # warning is displayed but Ansible continues instead of failing with the error.
-ldap_admin_password: "{{ lookup('file', '{{ ldap_local_admin_password_file }}', errors='ignore') }}"
+ldap_admin_password: "{{ lookup('file', ldap_local_admin_password_file, errors='ignore') }}"
 ldap_domain: cluster.local  # dummy
 ldap_ldif_path: /tmp/bootstrap.ldif
 ldap_first_uid: 10001
