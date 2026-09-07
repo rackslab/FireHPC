@@ -45,6 +45,9 @@ and this project adheres to
 
 ### Fixed
 - conf:
+  - Pin Ansible target Python interpreter to `/usr/bin/python3` instead of
+    `auto_silent`, which could select an older interpreter (eg. Python 3.13)
+    without distro-packaged modules such as `python3-ldap` on debian14.
   - Load LDAP bootstrap LDIF with `ldapadd` instead of `su`+`slapadd`, which
     failed on debian14 because the `openldap` system account is expired.
   - Slurm-web v5 JWT for slurmrestd authentification ownership.

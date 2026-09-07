@@ -2,7 +2,10 @@
 inventory = hosts
 connection_plugins = /usr/share/firehpc/extra/connection_plugins
 filter_plugins = /usr/share/firehpc/extra/filter_plugins
-interpreter_python = auto_silent
+# Use the system default Python so Ansible matches distro-packaged modules
+# (eg. python3-ldap). auto_silent can pick an older interpreter such as
+# /usr/bin/python3.13 when the default python3 is a newer version.
+interpreter_python = /usr/bin/python3
 roles_path = /usr/share/firehpc/conf/roles
 # Default Ansible precedence is:
 #
