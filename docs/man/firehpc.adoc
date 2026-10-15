@@ -78,6 +78,10 @@ This command accepts the following options:
 
 [.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
   Name of the cluster to clean. This option is required.
+
+[.cli-opt]#*--remove-base-image*#::
+  Also remove the cached base OS image used by the cluster. The base image is
+  not removed if another cluster still uses the same OS.
 --
 
 [.cli-opt]#*conf*#::
@@ -183,7 +187,17 @@ settings file.
 [.cli-opt]#*images*#::
 
   List available operating systems and the URL of the corresponding container
-  images to download.
+  images to download. With [.cli-opt]#*--remove*# option, remove a cached base
+  OS image instead.
++
+--
+This command accepts the following options:
+
+[.cli-opt]#*--remove*=#[.cli-optval]##_OS_##::
+  Remove a cached base OS image. The base image is not removed if a cluster
+  still uses this OS. Run `firehpc images` without option to get the list of
+  supported OS.
+--
 
 [.cli-opt]#*list*#::
 

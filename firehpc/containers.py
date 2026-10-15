@@ -19,6 +19,7 @@ from dasbus.loop import EventLoop
 from dasbus.error import DBusError
 
 from .errors import FireHPCRuntimeError
+from .os import OSDatabase
 
 logger = logging.getLogger(__name__)
 
@@ -186,6 +187,38 @@ class Image(DBusObject):
 
 class BaseImage(Image):
     """Cluster base image"""
+
+
+class BaseImagesManager(DBusObject):
+    INTERFACE = "org.freedesktop.machine1"
+
+    def __init__(self, os_db: OSDatabase) -> None:
+        super().__init__("/org/freedesktop/machine1")
+        self.os_db = os_db
+
+    def exists(self, os: str) -> bool:
+        return self.image_name(os) in [image[0] for image in self.proxy.ListImages()]
+
+    def get(self, os: str) -> BaseImage:
+        return BaseImage.from_machine_image_path(
+            self.proxy.GetImage(self.image_name(os))
+        )
+
+    def download(self, os: str) -> BaseImage:
+        name = self.image_name(os)
+        ImageImporter(self.os_db.url(os), name).transfer()
+        return BaseImage.from_machine_image_path(self.proxy.GetImage(name))
+
+    def remove(self, os: str) -> None:
+        name = self.image_name(os)
+        if not self.exists(os):
+            logger.info("Base image %s is not present, nothing to remove", name)
+            return
+        logger.info("Removing base image %s", name)
+        self.get(os).remove()
+
+    def image_name(self, os: str) -> str:
+        return self.os_db.image_name(os)
 
 
 class ClusterStateModifier(DBusObject):
@@ -435,17 +468,6 @@ class ContainersManager(DBusObject):
             for image in self.proxy.ListImages()
             if image[0].endswith(f".{self.cluster}.{self.namespace}")
         ]
-
-    def base_image(self, name) -> BaseImage:
-        return BaseImage.from_machine_image_path(self.proxy.GetImage(name))
-
-    def image_exists(self, name) -> bool:
-        return name in [image[0] for image in self.proxy.ListImages()]
-
-    def download(self, url: str, name: str) -> BaseImage:
-        """Download cluster base image"""
-        ImageImporter(url, name).transfer()
-        return BaseImage.from_machine_image_path(self.proxy.GetImage(name))
 
     def clone_base(self, base: BaseImage, node: str) -> None:
         base.clone(f"{node}.{self.cluster}.{self.namespace}")

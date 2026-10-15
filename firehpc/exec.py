@@ -14,8 +14,8 @@ from racksdb.errors import RacksDBFormatError, RacksDBSchemaError
 
 from .version import get_version
 from .settings import RuntimeSettings, ClusterSettings
-from .state import default_state_dir, UserState, ClusterState
-from .cluster import EmulatedCluster, clusters_list
+from .state import default_state_dir, UserState, ClusterState, clusters_list
+from .cluster import EmulatedCluster, remove_os_base_image
 from .environments import bootstrap
 from .ssh import SSHClient
 from .errors import FireHPCRuntimeError
@@ -214,6 +214,11 @@ class FireHPCExec:
             help="Name of the cluster to clean",
             required=True,
         )
+        parser_clean.add_argument(
+            "--remove-base-image",
+            help="Remove base OS image used by the cluster",
+            action="store_true",
+        )
         parser_clean.set_defaults(func=self._execute_clean)
 
         # start command
@@ -252,6 +257,11 @@ class FireHPCExec:
 
         # images command
         parser_images = subparsers.add_parser("images", help="List available OS images")
+        parser_images.add_argument(
+            "--remove",
+            help="Remove a cached base OS image",
+            metavar="OS",
+        )
         parser_images.set_defaults(func=self._execute_images)
 
         # list command
@@ -387,7 +397,7 @@ class FireHPCExec:
             ).users_directory
 
         # Deploy cluster
-        cluster.deploy(os_db.url(self.args.os), self.args.update_os_image, db)
+        cluster.deploy(self.args.os, self.args.update_os_image, db)
         cluster.conf(
             db,
             playbooks=["bootstrap", "site"],
@@ -471,11 +481,15 @@ class FireHPCExec:
         ssh.exec(self.args.args)
 
     def _execute_clean(self):
-        # Load cluster settings
         state = ClusterState(self.user_state, self.args.cluster)
+        cluster_settings = None
+        if self.args.remove_base_image:
+            cluster_settings = state.load()
 
-        cluster = EmulatedCluster(self.runtime_settings, self.args.cluster, state)
-        cluster.clean()
+        cluster = EmulatedCluster(
+            self.runtime_settings, self.args.cluster, state, cluster_settings
+        )
+        cluster.clean(remove_base_image=self.args.remove_base_image)
 
     def _execute_status(self):
         # Load cluster settings
@@ -493,7 +507,17 @@ class FireHPCExec:
 
     def _execute_images(self):
         os_db = OSDatabase(self.runtime_settings)
-        print(str(os_db), end="")
+        if self.args.remove is not None:
+            if not os_db.supported(self.args.remove):
+                raise FireHPCRuntimeError(
+                    f"OS {self.args.remove} is not supported, run `firehpc images` to "
+                    "get the list of supported OS"
+                )
+            remove_os_base_image(
+                self.runtime_settings, self.user_state, self.args.remove
+            )
+        else:
+            print(str(os_db), end="")
 
     def _execute_list(self):
         print("\n".join(clusters_list(self.args.state)))

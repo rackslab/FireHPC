@@ -19,9 +19,16 @@ and this project adheres to
   - Add support of slurm-quota (#52).
 - cli: Add `deploy --update-os-image` option to force download of base OS image
   when already present on host.
+- cli: Add `clean --remove-base-image` option to remove base OS image on cluster
+  cleanup.
+- cli: Add `images --remove` option to remove a cached base OS image.
 - load: Add random yet realistic job names.
 - lib: Add `deploy --update-os-image` option in bash-completion.
+- lib: Add `clean --remove-base-image` and `images --remove` options in
+  bash-completion.
 - docs: Mention `deploy --update-os-image` option in manpage.
+- docs: Mention `clean --remove-base-image` and `images --remove` options in
+  manpage.
 
 ### Changed
 - conf:
