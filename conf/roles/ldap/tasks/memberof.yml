@@ -1,0 +1,105 @@
+---
+# Enable the memberOf overlay before the directory is first loaded, so group
+# membership is maintained on user entries. Skipped unless ldap_with_memberof
+# is set.
+
+# The memberOf overlay maintains memberOf from the member attribute of
+# groupOfNames entries. That object class is structural, and the stock
+# posixGroup class is structural as well, so slapd rejects one entry that
+# carries both. posixGroup is therefore switched to AUXILIARY before any
+# group entry is added, which leaves groupOfNames as the structural class.
+# The object class kind cannot be edited in place because olcObjectClasses
+# is multi-valued, so the definition is deleted and added again in a single
+# ldapmodify.
+- name: Write posixGroup schema update
+  ansible.builtin.copy:
+    dest: "{{ ldap_posixgroup_ldif_path }}"
+    mode: "0600"
+    content: |
+      dn: {{ ldap_posixgroup_schema_dn }}
+      changetype: modify
+      delete: olcObjectClasses
+      olcObjectClasses: {{ ldap_posixgroup_objectclass }}
+      -
+      add: olcObjectClasses
+      olcObjectClasses: {{ ldap_posixgroup_objectclass | replace('STRUCTURAL', 'AUXILIARY') }}
+
+- name: Make posixGroup auxiliary
+  ansible.builtin.command:
+    cmd: "ldapmodify -Y EXTERNAL -H ldapi:/// -f {{ ldap_posixgroup_ldif_path }}"
+
+- name: Remove posixGroup schema update
+  ansible.builtin.file:
+    path: "{{ ldap_posixgroup_ldif_path }}"
+    state: absent
+
+# memberof and refint are dynamic modules, so cn=module{0},cn=config must
+# exist with olcModulePath set before olcModuleLoad can name them.
+#
+# Debian slapd already creates that entry for back_mdb, with olcModulePath
+# /usr/lib/ldap (slapd-config(5)). Red Hat openldap-servers does not. Its
+# overlay files are memberof.la and refint.la under /usr/lib64/openldap
+# (RHEL 7 OpenLDAP guide, section 9.2.3.8).
+#
+# ldap_module_path is set only in the Red Hat vars, so this block is skipped
+# on Debian. On Red Hat the entry is created when the search does not find it.
+- name: Ensure Red Hat module list entry
+  when: ldap_module_path is defined
+  block:
+    - name: Check Red Hat module list entry
+      community.general.ldap_search:
+        dn: "{{ ldap_module_dn }}"
+        scope: base
+        filter: "(objectClass=olcModuleList)"
+      register: ldap_module_entry
+      failed_when: false
+
+    - name: Create Red Hat module list entry
+      community.general.ldap_entry:
+        dn: "{{ ldap_module_dn }}"
+        objectClass:
+          - olcModuleList
+        attributes:
+          cn: "module{0}"
+          olcModulePath: "{{ ldap_module_path }}"
+      when: ldap_module_entry.results | default([]) | length == 0
+
+- name: Load memberof and refint modules
+  community.general.ldap_attrs:
+    dn: "{{ ldap_module_dn }}"
+    attributes:
+      olcModuleLoad:
+        - "{{ ldap_memberof_module }}"
+        - "{{ ldap_refint_module }}"
+    state: present
+
+- name: Enable memberof overlay
+  community.general.ldap_entry:
+    dn: "olcOverlay=memberof,{{ ldap_database_dn }}"
+    objectClass:
+      - olcOverlayConfig
+      - olcMemberOf
+    attributes:
+      olcOverlay: memberof
+      olcMemberOfRefInt: "TRUE"
+
+- name: Enable refint overlay
+  community.general.ldap_entry:
+    dn: "olcOverlay=refint,{{ ldap_database_dn }}"
+    objectClass:
+      - olcOverlayConfig
+      - olcRefintConfig
+    attributes:
+      olcOverlay: refint
+      olcRefintAttribute:
+        - member
+        - memberof
+
+- name: Index member and memberOf
+  community.general.ldap_attrs:
+    dn: "{{ ldap_database_dn }}"
+    attributes:
+      olcDbIndex:
+        - "member eq"
+        - "memberOf eq"
+    state: present
