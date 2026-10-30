@@ -100,11 +100,11 @@ _firehpc_deploy() {
     local cur=$1 prev=$2 comps
     local -A OPTS=(
         [STANDALONE]='--slurm-emulator'
-        [CLUSTER]='--cluster --users'
+        [CLUSTER]='--cluster --users-from'
         [OS]='--os'
         [DIR]='-c --custom'
         [FILE]='--db --schema'
-        [ARG]='--ansible-opts'
+        [ARG]='--ansible-opts --users'
     )
     if __contains_word "$prev" ${OPTS[CLUSTER]}; then
         comps=$( __firehpc_clusters_list )
