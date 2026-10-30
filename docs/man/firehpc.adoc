@@ -166,10 +166,15 @@ This command accepts the following options:
   container and install a specific version of Slurm compiled to support
   emulation of arbitrary large number of fakes nodes.
 
-[.cli-opt]#*--users*=#[.cli-optval]##_CLUSTER_##::
+[.cli-opt]#*--users*=#[.cli-optval]##_N_##::
+  Number of users to generate in the directory. The minimum value is 5 and the
+  default is 10. This option cannot be combined with
+  [.cli-opt]#*--users-from*#.
+
+[.cli-opt]#*--users-from*=#[.cli-optval]##_CLUSTER_##::
   Instead of randomly generating a new users directory, extract users directory
-  from another existing cluster. This is useful to create the have the same user
-  accounts on several clusters.
+  from another existing cluster. This is useful to have the same user accounts
+  on several clusters.
 
 [.cli-opt]#*--ansible-opts*# [.cli-optval]##_OPT …_##::
   Additional option to add to ansible-playbook command. Multiple options can be

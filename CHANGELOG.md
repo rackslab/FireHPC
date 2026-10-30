@@ -21,6 +21,7 @@ and this project adheres to
   when already present on host.
 - cli: Add `deploy --users` option to set the number of generated users (#26).
 - lib: Add `deploy --users` option in bash-completion.
+- docs: Mention `deploy --users` option in manpage.
 - load: Add random yet realistic job names.
 - lib: Add `deploy --update-os-image` option in bash-completion.
 - docs: Mention `deploy --update-os-image` option in manpage.
@@ -28,6 +29,7 @@ and this project adheres to
 ### Changed
 - cli: Rename `deploy --users` option to `deploy --users-from`.
 - lib: Rename `deploy --users` to `deploy --users-from` in bash-completion.
+- docs: Rename `deploy --users` to `deploy --users-from` in manpage.
 - conf:
   - Make prometheus connect to Slurm-web agent metrics with https. The
     certificate validation is disabled because it connects to localhost (not a
