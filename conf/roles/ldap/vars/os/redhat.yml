@@ -6,3 +6,7 @@ ldap_extra_packages:
 ldap_system_user: ldap
 ldap_system_group: ldap
 ldap_admin_dn: "cn=Manager,{{ ldap_base }}"
+ldap_module_path: /usr/lib64/openldap
+ldap_memberof_module: memberof.la
+ldap_refint_module: refint.la
+ldap_database_dn: "olcDatabase={2}mdb,cn=config"

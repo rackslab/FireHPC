@@ -68,6 +68,12 @@
     state: exact
   when: ldap_server_package not in ansible_facts.packages
 
+- name: Configure memberOf overlay
+  ansible.builtin.include_tasks: memberof.yml
+  when:
+    - ldap_with_memberof
+    - ldap_packages_installation is changed
+
 - name: Generate bootstrap LDIF
   ansible.builtin.template:
     src: bootstrap.ldif.j2

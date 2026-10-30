@@ -16,19 +16,8 @@ dn: ou=groups,{{ ldap_base }}
 ou: groups
 objectClass: organizationalUnit
 
-{% for group in ldap_groups %}
-dn: cn={{ group.name }},ou=groups,{{ ldap_base }}
-cn: {{ group.name }}
-gidNumber: {{ ldap_first_gid + loop.index0 }}
-objectClass: top
-objectClass: posixGroup
-{% if loop.index0 != 0 %}
-{% for member in group.members %}
-memberUid: {{ member }}
-{% endfor %}
-{% endif %}
-
-{% endfor %}
+{# People are created before groups. The memberOf overlay writes memberOf as
+   each member DN is added, so the user entry must already exist. #}
 {% for user in ldap_users %}
 dn: uid={{ user.login }},ou=people,{{ ldap_base }}
 objectClass: person
@@ -46,5 +35,31 @@ gidNumber: {{ ldap_first_gid }}
 userPassword: {{ ldap_user_password }}
 homeDirectory: /home/{{ user.login }}
 loginShell: /bin/bash
+
+{% endfor %}
+{% for group in ldap_groups %}
+dn: cn={{ group.name }},ou=groups,{{ ldap_base }}
+cn: {{ group.name }}
+gidNumber: {{ ldap_first_gid + loop.index0 }}
+objectClass: top
+objectClass: posixGroup
+{# With memberOf, a group that lists members is also groupOfNames, the class
+   the overlay watches. A group with no member DN cannot be groupOfNames, and
+   posixGroup is auxiliary, so organizationalRole is its structural class.
+   Without memberOf the entry stays posixGroup only. -#}
+{% if ldap_with_memberof and loop.index0 != 0 and group.members | length > 0 -%}
+objectClass: groupOfNames
+{% elif ldap_with_memberof -%}
+objectClass: organizationalRole
+{% endif -%}
+{% if loop.index0 != 0 and group.members | length > 0 -%}
+{% for member in group.members -%}
+memberUid: {{ member }}
+{# With memberOf, member is the DN the overlay uses to maintain memberOf. -#}
+{% if ldap_with_memberof -%}
+member: uid={{ member }},ou=people,{{ ldap_base }}
+{% endif -%}
+{% endfor -%}
+{% endif %}
 
 {% endfor %}
