@@ -134,6 +134,7 @@ class EmulatedCluster:
         skip_tags: Optional[list[str]] = None,
         users_directory: Optional[UsersDirectory] = None,
         ansible_opts: Optional[list[str]] = None,
+        users: int = 10,
     ) -> conf:
         if reinit:
             self.state.conf_clean()
@@ -233,7 +234,7 @@ class EmulatedCluster:
             if users_directory is None:
                 # Generate new random users directory
                 logger.info("Generating new random users directory")
-                users_directory = UsersDirectory(10, self.name)
+                users_directory = UsersDirectory(users, self.name)
 
             extravars = {
                 "fhpc_cluster_state_dir": str(self.state.path),

@@ -9,6 +9,8 @@ from dataclasses import dataclass
 
 from faker import Faker
 
+from .errors import FireHPCRuntimeError
+
 
 @dataclass
 class UserEntry:
@@ -65,10 +67,22 @@ class UsersDirectory:
         self.users = list()
         self.groups = list()
         fake = Faker()
-        self.users = [
-            UserEntry(fake.first_name(), fake.last_name(), cluster)
-            for _ in range(self.size)
-        ]
+        logins = set()
+        # Login is the first initial plus the last name, so Faker repeats it
+        # once the directory grows past a few dozen accounts.
+        attempts = 0
+        max_attempts = size * 100
+        while len(self.users) < size:
+            if attempts >= max_attempts:
+                raise FireHPCRuntimeError(
+                    f"Unable to generate {size} users with unique logins"
+                )
+            attempts += 1
+            user = UserEntry(fake.first_name(), fake.last_name(), cluster)
+            if user.login in logins:
+                continue
+            logins.add(user.login)
+            self.users.append(user)
         if size > 4:
             self.groups = [
                 GroupEntry("scientists", self.users),
