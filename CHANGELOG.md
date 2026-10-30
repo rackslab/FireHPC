@@ -17,6 +17,11 @@ and this project adheres to
   - Add SSL/TLS certificate for Slurm-web with internal CA.
   - Support serving Slurm-web gateway in HTTP server subfolder.
   - Add support of slurm-quota (#52).
+  - Add optional OpenLDAP memberOf overlay, disabled by default (#5). Set
+    `ldap_with_memberof` before the first directory bootstrap. Secondary
+    groups then also use `groupOfNames` and `member`, and `posixGroup` is
+    auxiliary so both classes can share an entry. Groups that do not list
+    members use `organizationalRole` as their structural class.
 - cli: Add `deploy --update-os-image` option to force download of base OS image
   when already present on host.
 - cli: Add `deploy --users` option to set the number of generated users (#26).
