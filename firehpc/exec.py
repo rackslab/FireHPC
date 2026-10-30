@@ -26,6 +26,22 @@ from .dumpers import DumperFactory
 
 logger = logging.getLogger(__name__)
 
+# Groups and the primary POSIX group require at least five accounts.
+MIN_USERS = 5
+
+
+def users_count(value: str) -> int:
+    """Parse deploy --users. Reject directories too small for the group layout."""
+    try:
+        count = int(value)
+    except ValueError as err:
+        raise argparse.ArgumentTypeError(f"invalid integer value: {value!r}") from err
+    if count < MIN_USERS:
+        raise argparse.ArgumentTypeError(
+            f"number of users must be at least {MIN_USERS}"
+        )
+    return count
+
 
 class FireHPCExec:
     @classmethod
@@ -33,6 +49,18 @@ class FireHPCExec:
         cls()
 
     def __init__(self):
+        parser = self._parser()
+        self.args = parser.parse_args()
+        self._setup_logger()
+        self.runtime_settings = RuntimeSettings()
+        self.user_state = UserState(self.args.state)
+        try:
+            self.args.func()
+        except FireHPCRuntimeError as e:
+            logger.critical(str(e))
+            sys.exit(1)
+
+    def _parser(self):
         parser = argparse.ArgumentParser(
             description="Instantly fire up container-based emulated HPC cluster."
         )
@@ -108,8 +136,15 @@ class FireHPCExec:
             help="Enable Slurm emulator mode",
             action="store_true",
         )
-        parser_deploy.add_argument(
+        users_options = parser_deploy.add_mutually_exclusive_group()
+        users_options.add_argument(
             "--users",
+            help="Number of users to generate in directory (default: %(default)s)",
+            type=users_count,
+            default=10,
+        )
+        users_options.add_argument(
+            "--users-from",
             help="Extract users directory from another emulated cluster",
         )
         parser_deploy.add_argument(
@@ -307,15 +342,7 @@ class FireHPCExec:
         )
         parser_update.set_defaults(func=self._execute_update)
 
-        self.args = parser.parse_args()
-        self._setup_logger()
-        self.runtime_settings = RuntimeSettings()
-        self.user_state = UserState(self.args.state)
-        try:
-            self.args.func()
-        except FireHPCRuntimeError as e:
-            logger.critical(str(e))
-            sys.exit(1)
+        return parser
 
     def _setup_logger(self):
         if self.args.debug:
@@ -376,12 +403,14 @@ class FireHPCExec:
         # If user specified another cluster name to extract its users directory, load
         # this users directory.
         users_directory = None
-        if self.args.users:
-            users_cluster_state = ClusterState(self.user_state, self.args.users)
-            logger.info("Extracting users directory from cluster %s", self.args.users)
+        if self.args.users_from:
+            users_cluster_state = ClusterState(self.user_state, self.args.users_from)
+            logger.info(
+                "Extracting users directory from cluster %s", self.args.users_from
+            )
             users_directory = EmulatedCluster(
                 self.runtime_settings,
-                self.args.users,
+                self.args.users_from,
                 users_cluster_state,
                 users_cluster_state.load(),
             ).users_directory
@@ -393,6 +422,7 @@ class FireHPCExec:
             playbooks=["bootstrap", "site"],
             users_directory=users_directory,
             ansible_opts=self.args.ansible_opts,
+            users=self.args.users,
         )
 
     def _execute_conf(self):
