@@ -40,9 +40,11 @@ users_defs: "{{ fhpc_users }}"
 users_group: "{{ fhpc_primary_group }}"
 slurm_emulator: "{{ fhpc_emulator_mode }}"
 slurm_server: "{{ fhpc_admin_server }}"
+# Hostname of the compute container. In emulator mode that container is named
+# compute and runs one slurmd instance per virtual compute node.
+slurm_emulator_host: "{{ groups['compute'][0] }}"
 # This hash associates slurm profiles in keys with a group of nodes on which the
-# the profile must be applied when slurm_emulator is false. When slurm_emulator
-# is true, all slurm profiles are applied on the single admin node.
+# the profile must be applied when slurm_emulator is false.
 slurm_profiles:
   compute: compute
   server: admin

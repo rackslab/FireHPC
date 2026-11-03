@@ -35,6 +35,8 @@ and this project adheres to
 - core: In Slurm emulator mode, start every admin and login node and a
   container named `compute`. Compute nodes from the database are virtual slurmd
   instances on that container.
+- conf: Run one slurmd per virtual compute node with the `slurm-emulator`
+  packages. Each instance gets its own TCP port, pid file and spool directory.
 - cli: Rename `deploy --users` option to `deploy --users-from`.
 - lib: Rename `deploy --users` to `deploy --users-from` in bash-completion.
 - docs: Rename `deploy --users` to `deploy --users-from` in manpage.

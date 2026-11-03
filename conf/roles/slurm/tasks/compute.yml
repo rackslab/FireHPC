@@ -5,12 +5,103 @@
     state: directory
     owner: slurm
     group: slurm
-    mode: 0755
+    mode: "0755"
 
 - name: Install slurm compute specific packages
   ansible.builtin.package:
     name: "{{ slurm_emulator | ternary(slurm_emulator_compute_packages, slurm_compute_packages) }}"
     state: latest
+
+- name: Manage emulated slurmd instances
+  when: slurm_emulator
+  block:
+    - name: Check emulator slurmd port range
+      ansible.builtin.assert:
+        that:
+          - (slurm_emulator_port_base | int) + (slurm_compute_nodes | map(attribute='nodes') | flatten | nodeset_fold | nodeset_expand | length) - 1 < 60001
+        fail_msg: >-
+          Emulated slurmd ports would overlap SrunPortRange (60001-63000).
+          Reduce the number of compute nodes or lower slurm_emulator_port_base.
+
+    - name: List emulated compute node names
+      ansible.builtin.set_fact:
+        slurm_emulator_nodes: "{{ slurm_compute_nodes | map(attribute='nodes') | flatten | nodeset_fold | nodeset_expand }}"
+
+    - name: Create per-node slurmd spool directories
+      ansible.builtin.file:
+        path: "{{ slurm_slurmd_spool_dir }}/{{ item }}"
+        state: directory
+        owner: slurm
+        group: slurm
+        mode: "0755"
+      loop: "{{ slurm_emulator_nodes }}"
+
+    - name: Create slurmd runtime directory
+      ansible.builtin.file:
+        path: /run/slurm
+        state: directory
+        owner: slurm
+        group: slurm
+        mode: "0755"
+
+    - name: Deploy slurmd runtime tmpfiles snippet
+      ansible.builtin.copy:
+        dest: /etc/tmpfiles.d/slurmd-emulator.conf
+        content: "d /run/slurm 0755 slurm slurm -\n"
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Deploy slurmd instance service
+      ansible.builtin.template:
+        src: slurmd@.service.j2
+        dest: /etc/systemd/system/slurmd@.service
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart slurmd
+
+    # Load the slurmd@.service unit deployed above. This is the only reload:
+    # repeating it for every instance makes systemd fork a generator sandbox
+    # hundreds of times.
+    - name: Disable vendor slurmd service
+      ansible.builtin.systemd:
+        name: slurmd
+        state: stopped
+        enabled: false
+        daemon_reload: true
+
+    # Do not reload here. After a few hundred slurmd processes the generator
+    # sandbox fork fails, and the failed reload drops the open ssh socket units.
+    - name: Start one slurmd instance per emulated node
+      ansible.builtin.systemd:
+        name: "slurmd@{{ item }}"
+        state: started
+        enabled: true
+      loop: "{{ slurm_emulator_nodes }}"
+
+    - name: List slurmd instance units
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - list-unit-files
+          - slurmd@*.service
+          - --no-legend
+          - --no-pager
+      register: slurm_emulator_slurmd_units
+      changed_when: false
+      failed_when: slurm_emulator_slurmd_units.rc not in [0, 1]
+
+    - name: Stop removed slurmd instances
+      ansible.builtin.systemd:
+        name: "{{ item.split()[0] }}"
+        state: stopped
+        enabled: false
+      loop: "{{ slurm_emulator_slurmd_units.stdout_lines | select | list }}"
+      when:
+        - item | length > 0
+        - item.split()[0] != 'slurmd@.service'
+        - (item.split('@')[1].split('.service')[0]) not in slurm_emulator_nodes
 
 - name: Set slurm current compute node fact
   ansible.builtin.set_fact:
@@ -24,12 +115,12 @@
     dest: /etc/slurm/fake_gpus.conf
     owner: slurm
     group: slurm
-    mode: '0644'
+    mode: "0644"
   notify:
     - Restart slurmd
   when:
-  - not slurm_emulator
-  - slurm_current_compute_node_type['gpus'] | length > 0
+    - not slurm_emulator
+    - slurm_current_compute_node_type['gpus'] | length > 0
 
 # This is required on redhat based distributions as the service is not
 # automatically started by the RPM packages, and it does not hurt on Debian.
@@ -38,3 +129,4 @@
     name: slurmd
     state: started
     enabled: yes
+  when: not slurm_emulator

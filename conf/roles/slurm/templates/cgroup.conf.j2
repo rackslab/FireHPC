@@ -1,0 +1,4 @@
+# One slurmd per virtual node would otherwise keep a system D-Bus connection
+# to create its systemd scope. dbus refuses connections after 256 per UID.
+CgroupPlugin=cgroup/v2
+IgnoreSystemd=yes

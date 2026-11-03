@@ -11,13 +11,21 @@ slurm_compute_packages:
   - slurm-smd-slurmd
 slurm_emulator_common_packages:
   - slurm-emulator
+  - slurm-emulator-client
+slurm_emulator_server_packages:
+  - slurm-emulator-slurmctld
+slurm_emulator_accounting_packages:
+  - slurm-emulator-slurmdbd
+slurm_emulator_restd_packages:
+  - slurm-emulator-slurmrestd
+slurm_emulator_compute_packages:
+  - slurm-emulator-slurmd
+slurm_emulator_sackd_packages:
+  - slurm-emulator-sackd
 slurm_munge_packages:
   - munge
 slurm_sackd_packages:
   - slurm-smd-sackd
-slurm_emulator_server_packages: []
-slurm_emulator_accounting_packages: []
-slurm_emulator_compute_packages: []
 slurm_state_save_loc: /var/lib/slurm/slurmctld
 slurm_slurmd_spool_dir: /var/lib/slurm/slurmd
 slurm_jwt_key_path: /var/lib/slurm/jwt_hs256.key

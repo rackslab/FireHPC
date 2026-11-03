@@ -25,7 +25,6 @@
   register: sinfo
   when:
   - slurm_profiles['server'] in group_names
-  - not slurm_emulator
 
 - name: Resume unavailable nodes
   ansible.builtin.command:
@@ -35,4 +34,3 @@
     label: "Resuming node {{ item.nodes.nodes | nodeset_fold }}"
   when:
   - slurm_profiles['server'] in group_names
-  - not slurm_emulator

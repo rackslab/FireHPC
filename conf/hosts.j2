@@ -6,7 +6,6 @@ all:
         {{ node.name }}.{{ cluster }}:
           ansible_host: {{ node.name }}.{{ cluster }}.{{ namespace }}
 {% endfor %}
-{% if not emulator_mode %}
     login:
       hosts:
 {% for node in infrastructure.nodes.filter(tags=["login"]) %}
@@ -15,6 +14,10 @@ all:
 {% endfor %}
     compute:
       hosts:
+{% if emulator_mode %}
+        compute.{{ cluster }}:
+          ansible_host: compute.{{ cluster }}.{{ namespace }}
+{% else %}
 {% for node in infrastructure.nodes.filter(tags=["compute"]) %}
         {{ node.name }}.{{ cluster }}:
           ansible_host: {{ node.name }}.{{ cluster }}.{{ namespace }}

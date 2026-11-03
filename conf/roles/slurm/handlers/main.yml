@@ -21,13 +21,14 @@
   - slurm_with_accounting
   - slurm_profiles['server'] in group_names
 
-# slurmd service is deployed and must be restard on compute nodes or the single
-# server node when slurm_emulator is true.
+# Restart the vendor slurmd unit, or every emulated instance on the compute
+# container.
 - name: Restart slurmd
   ansible.builtin.service:
-    name: slurmd
+    name: "{{ item }}"
     state: restarted
-  when: slurm_profiles['compute'] in group_names or slurm_emulator
+  loop: "{{ ['slurmd'] if not (slurm_emulator | bool) else (slurm_compute_nodes | map(attribute='nodes') | flatten | nodeset_fold | nodeset_expand | map('regex_replace', '^', 'slurmd@')) }}"
+  when: slurm_profiles['compute'] in group_names
 
 - name: Restart munge
   ansible.builtin.service:

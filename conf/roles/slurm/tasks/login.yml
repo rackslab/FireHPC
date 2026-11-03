@@ -1,11 +1,10 @@
 ---
 - name: Install sackd packages
   ansible.builtin.package:
-    name: "{{ slurm_sackd_packages }}"
+    name: "{{ slurm_emulator | ternary(slurm_emulator_sackd_packages, slurm_sackd_packages) }}"
     state: latest
   when:
   - not slurm_with_munge
-  - not slurm_emulator
 
 # This is required on redhat based distributions as the service is not
 # automatically started by the RPM packages, and it does not hurt on Debian.
@@ -14,3 +13,5 @@
     name: sackd
     state: started
     enabled: yes
+  when:
+  - not slurm_with_munge

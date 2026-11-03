@@ -9,6 +9,18 @@ slurm_restd_packages:
   - slurm-slurmrestd
 slurm_compute_packages:
   - slurm-slurmd
+slurm_emulator_common_packages:
+  - slurm-emulator
+slurm_emulator_server_packages:
+  - slurm-emulator-slurmctld
+slurm_emulator_accounting_packages:
+  - slurm-emulator-slurmdbd
+slurm_emulator_restd_packages:
+  - slurm-emulator-slurmrestd
+slurm_emulator_compute_packages:
+  - slurm-emulator-slurmd
+slurm_emulator_sackd_packages:
+  - slurm-emulator-sackd
 slurm_munge_packages:
   - munge
 slurm_sackd_packages:

@@ -46,3 +46,6 @@ slurm_restd_with_unix_socket: False
 slurm_restd_socket: /run/slurmrestd/slurmrestd.socket
 slurm_restd_port: 6820
 slurm_restd_service_override_path: /etc/systemd/system/slurmrestd.service.d/firehpc.conf
+# First TCP port used by slurmd instances in emulator mode. Each virtual compute
+# node consumes the next port. The last port must stay below SrunPortRange.
+slurm_emulator_port_base: 17001

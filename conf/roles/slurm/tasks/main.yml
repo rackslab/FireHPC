@@ -32,6 +32,23 @@
     - Restart slurmctld
     - Restart slurmd
 
+# In emulator mode, cgroups are disabled in slurm.conf, but each slurmd still
+# contacts systemd over D-Bus to create its own scope by default. D-Bus has a
+# limit of 256 connections per UID, it refuses further connections after this
+# limit is reached. This prevents additional slurmd instances from starting.
+#
+# To workaround this, cgroup.conf is deployed with IgnoreSystemd. This way,
+# slurmd creates its own scope without contacting systemd over D-Bus.
+- name: Deploy emulator cgroup configuration
+  ansible.builtin.template:
+    src: cgroup.conf.j2
+    dest: /etc/slurm/cgroup.conf
+    owner: slurm
+    group: slurm
+    mode: '0644'
+  notify: Restart slurmd
+  when: slurm_emulator
+
 - name: Deploy munge key
   ansible.builtin.copy:
     src: "{{ slurm_local_munge_key_file }}"
@@ -65,12 +82,10 @@
     enabled: yes
   when: slurm_with_munge
 
-# Each profile is applied in the group associated the keys or slurm_profiles
-# hash or all the profiles are applied on the unique server node when
-# slurm_emulator is true.
+# Each profile is applied on the group associated with the slurm_profiles key.
 - name: "Run slurm profiles specific tasks"
   ansible.builtin.include_tasks: "{{ slurm_profile.key }}.yml"
-  when: slurm_profile.value in group_names or slurm_emulator
+  when: slurm_profile.value in group_names
   loop: "{{ slurm_profiles | dict2items }}"
   loop_control:
     loop_var: slurm_profile

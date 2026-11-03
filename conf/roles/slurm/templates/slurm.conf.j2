@@ -3,10 +3,24 @@ SlurmctldHost={{ slurm_server }}                  # must be specified
 # Disable compute nodes sockets/cores/memory configuration matching check and
 # avoid nodes from being set to INVALID state. This is especially useful with
 # FireHPC to emulate large compute nodes on more reasonable host.
+{% if slurm_emulator %}
+# auth/slurm sizes its connection thread pool from the host CPU count, up to
+# 32 threads. Hundreds of slurmd processes then exhaust the container task
+# limit and pthread_create fails. Two is the minimum Slurm accepts.
+SlurmdParameters=config_overrides,conmgr_threads=2
+{% else %}
 SlurmdParameters=config_overrides                 # default: none
+{% endif %}
 SlurmUser=slurm                                   # default: root
 StateSaveLocation={{ slurm_state_save_loc }}      # default: /var/spool
+{% if slurm_emulator %}
+# One slurmd per virtual node shares this host, so pid and spool paths must
+# expand the node name.
+SlurmdSpoolDir={{ slurm_slurmd_spool_dir }}/%n
+SlurmdPidFile=/run/slurm/slurmd-%n.pid
+{% else %}
 SlurmdSpoolDir={{ slurm_slurmd_spool_dir }}       # default: /var/spool/slurmd
+{% endif %}
 {% if slurm_with_munge %}
 AuthType = auth/munge
 CredType = cred/munge
@@ -36,8 +50,10 @@ AuthAltTypes=auth/jwt
 AuthAltParameters=jwt_key={{ slurm_jwt_key_path }}
 {% endif %}
 {% if slurm_emulator %}
-{# Avoid cgroup on frontend node in emulator that would generate too many files/dirs in virtual FS #}
+# The compute container runs every virtual slurmd. Skip cgroup tracking so the
+# container does not accumulate one cgroup hierarchy per node.
 ProctrackType=proctrack/linuxproc
+TaskPlugin=task/affinity
 {% endif %}
 {% for key, value in slurm_params.items() %}
 {{ key }}={{ value }}
@@ -46,8 +62,14 @@ ProctrackType=proctrack/linuxproc
 GresTypes=gpu
 {% endif %}
 
-{% for node_type in slurm_compute_nodes %}
-NodeName={{ node_type.nodes | nodeset_fold }} Sockets={{ node_type.sockets }} CoresPerSocket={{ node_type.cores }} RealMemory={{ node_type.memory }}{% if not slurm_emulator and node_type.gpus | length > 0 %} Gres={% for model, nb in node_type.gpus.items() %}gpu{% set has_model = (model in slurm_gpus_models_map and slurm_gpus_models_map.get(model) is not none) %}{% if has_model %}:{{ slurm_gpus_models_map.get(model, 'nvidia') }}{% endif %}:{{ nb }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if slurm_emulator %} NodeHostName={{ slurm_server }}{% endif %} State=UNKNOWN
+{% set slurm_emulator_ports = namespace(port=(slurm_emulator_port_base | int)) %}
+{% for node_type in slurm_compute_nodes -%}
+{% set node_names = node_type.nodes | nodeset_fold -%}
+{% set node_count = (node_names | nodeset_expand) | length -%}
+NodeName={{ node_names }} Sockets={{ node_type.sockets }} CoresPerSocket={{ node_type.cores }} RealMemory={{ node_type.memory }}{% if not slurm_emulator and node_type.gpus | length > 0 %} Gres={% for model, nb in node_type.gpus.items() %}gpu{% set has_model = (model in slurm_gpus_models_map and slurm_gpus_models_map.get(model) is not none) %}{% if has_model %}:{{ slurm_gpus_models_map.get(model, 'nvidia') }}{% endif %}:{{ nb }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if slurm_emulator %} NodeHostname={{ slurm_emulator_host }} NodeAddr={{ slurm_emulator_host }} Port=[{{ slurm_emulator_ports.port }}-{{ slurm_emulator_ports.port + node_count - 1 }}]{% endif %} State=UNKNOWN
+{% if slurm_emulator -%}
+{% set slurm_emulator_ports.port = slurm_emulator_ports.port + node_count -%}
+{% endif -%}
 {% endfor %}
 {% for slurm_partition in slurm_partitions %}
 PartitionName={{ slurm_partition.name }} Nodes={{ slurm_partition.nodes }} Default={{ "YES" if "default" in slurm_partition and slurm_partition.default else "NO" }}{% for param, value in slurm_partition.params.items() %} {{param}}={{value}}{% endfor %}
