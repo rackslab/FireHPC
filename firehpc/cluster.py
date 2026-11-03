@@ -64,6 +64,24 @@ class EmulatedCluster:
         self.state = state
         self.cluster_settings = cluster_settings
 
+    @staticmethod
+    def _emulator_container_names(infrastructure):
+        """Return every admin and login node name, plus the compute container.
+
+        The compute container is always named "compute". Compute nodes declared
+        in RacksDB are virtual slurmd instances on that container.
+        """
+        names = []
+        seen = set()
+        for tag in ("admin", "login"):
+            for node in infrastructure.nodes.filter(tags=[tag]):
+                if node.name not in seen:
+                    names.append(node.name)
+                    seen.add(node.name)
+        if "compute" not in seen:
+            names.append("compute")
+        return names
+
     @property
     def users_directory(self) -> UsersDirectory:
         try:
@@ -111,19 +129,21 @@ class EmulatedCluster:
                     base_image_name,
                 )
 
-        for node in infrastructure.nodes:
-            if "admin" in node.tags or not self.cluster_settings.slurm_emulator:
-                logger.info("Cloning base image for %s.%s", node.name, self.name)
-                manager.clone_base(base_image, node.name)
+        # Emulator mode starts every admin and login node, and a container named
+        # compute. RacksDB compute names stay virtual slurmd instances.
+        if self.cluster_settings.slurm_emulator:
+            names = self._emulator_container_names(infrastructure)
+        else:
+            names = [node.name for node in infrastructure.nodes]
+
+        for name in names:
+            logger.info("Cloning base image for %s.%s", name, self.name)
+            manager.clone_base(base_image, name)
 
         logger.info("Starting cluster storage service %s", self.name)
         manager.storage().start()
 
-        if self.cluster_settings.slurm_emulator:
-            admin_node = infrastructure.nodes.filter(tags=["admin"]).first()
-            manager.start([admin_node.name])
-        else:
-            manager.start([node.name for node in infrastructure.nodes])
+        manager.start(names)
 
     def conf(
         self,

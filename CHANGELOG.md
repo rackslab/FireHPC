@@ -32,6 +32,9 @@ and this project adheres to
 - docs: Mention `deploy --update-os-image` option in manpage.
 
 ### Changed
+- core: In Slurm emulator mode, start every admin and login node and a
+  container named `compute`. Compute nodes from the database are virtual slurmd
+  instances on that container.
 - cli: Rename `deploy --users` option to `deploy --users-from`.
 - lib: Rename `deploy --users` to `deploy --users-from` in bash-completion.
 - docs: Rename `deploy --users` to `deploy --users-from` in manpage.
