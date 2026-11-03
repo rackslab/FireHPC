@@ -37,6 +37,7 @@ and this project adheres to
   instances on that container.
 - conf: Run one slurmd per virtual compute node with the `slurm-emulator`
   packages. Each instance gets its own TCP port, pid file and spool directory.
+- docs: Describe the Slurm emulator layout in `firehpc(1)`.
 - cli: Rename `deploy --users` option to `deploy --users-from`.
 - lib: Rename `deploy --users` to `deploy --users-from` in bash-completion.
 - docs: Rename `deploy --users` to `deploy --users-from` in manpage.

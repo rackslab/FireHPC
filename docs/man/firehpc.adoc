@@ -115,10 +115,13 @@ This command accepts the following options:
   phase. By default, only the _deployment_ phase is run.
 
 [.cli-opt]#*--slurm-emulator*#::
-  Enable Slurm emulator mode. In this mode, FireHPC configures only one _admin_
-  container and with a specific version of Slurm compiled to support emulation
-  of arbitrary large number of fakes nodes. By default, value from cluster
-  settings is used.
+  Enable Slurm emulator mode. FireHPC starts every _admin_ and _login_ node from
+  the cluster database and a container named _compute_. It installs the Slurm
+  emulator packages from the configured Slurm repository. The compute container
+  runs one slurmd daemon for every compute node defined in the database. Each
+  virtual node needs a dedicated TCP port, so the number of emulated nodes is
+  limited by the available port range. By default, value from cluster settings
+  is used.
 
 [.cli-opt]#*--ansible-opts*# [.cli-optval]##_OPT …_##::
   Additional option to add to ansible-playbook command. Multiple options can be
@@ -162,9 +165,12 @@ This command accepts the following options:
   [.path]#`host_vars/`# directory with files supported by Ansible.
 
 [.cli-opt]#*--slurm-emulator*#::
-  Enable Slurm emulator mode. In this mode, FireHPC spawns only one _admin_
-  container and install a specific version of Slurm compiled to support
-  emulation of arbitrary large number of fakes nodes.
+  Enable Slurm emulator mode. FireHPC starts every _admin_ and _login_ node from
+  the cluster database and a container named _compute_. It installs the Slurm
+  emulator packages from the configured Slurm repository. The compute container
+  runs one slurmd daemon for every compute node defined in the database. Each
+  virtual node needs a dedicated TCP port, so the number of emulated nodes is
+  limited by the available port range.
 
 [.cli-opt]#*--users*=#[.cli-optval]##_N_##::
   Number of users to generate in the directory. The minimum value is 5 and the
@@ -235,10 +241,13 @@ This command accepts the following options:
   value from cluster settings is used.
 
 [.cli-opt]#*--slurm-emulator*#::
-  Enable Slurm emulator mode. In this mode, FireHPC configures only one _admin_
-  container and with a specific version of Slurm compiled to support emulation
-  of arbitrary large number of fakes nodes. By default, value from cluster
-  settings is used.
+  Enable Slurm emulator mode. FireHPC starts every _admin_ and _login_ node from
+  the cluster database and a container named _compute_. It installs the Slurm
+  emulator packages from the configured Slurm repository. The compute container
+  runs one slurmd daemon for every compute node defined in the database. Each
+  virtual node needs a dedicated TCP port, so the number of emulated nodes is
+  limited by the available port range. By default, value from cluster settings
+  is used.
 --
 
 [.cli-opt]#*ssh*#::
@@ -320,9 +329,12 @@ This command accepts the following options:
   supported by Ansible.
 
 [.cli-opt]#*--slurm-emulator*#::
-  Enable Slurm emulator mode. In this mode, FireHPC configures only one _admin_
-  container and with a specific version of Slurm compiled to support emulation
-  of arbitrary large number of fakes nodes.
+  Enable Slurm emulator mode. FireHPC starts every _admin_ and _login_ node from
+  the cluster database and a container named _compute_. It installs the Slurm
+  emulator packages from the configured Slurm repository. The compute container
+  runs one slurmd daemon for every compute node defined in the database. Each
+  virtual node needs a dedicated TCP port, so the number of emulated nodes is
+  limited by the available port range.
 --
 
 == Exit status
