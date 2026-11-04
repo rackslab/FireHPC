@@ -36,6 +36,8 @@ and this project adheres to
 - docs: Mention `deploy --update-os-image` option in manpage.
 
 ### Changed
+- conf: `slurm_gpus_models_map` values are records with `type` and `topology`.
+  An omitted `topology` key defaults to true. Set `topology: false` for none.
 - core: Remove the per-container task limit. `TasksMax=16384` is exhausted by
   the emulator compute container, where each virtual node runs its own slurmd,
   and `pthread_create` then fails.

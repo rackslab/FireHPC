@@ -4,6 +4,24 @@ slurm_emulator: False
 slurm_with_accounting: true
 slurm_with_munge: false
 slurm_with_gres_gpu: false
+# Per RacksDB GPU model. Examples:
+#   h100: {type: h100}
+#   a100: {type: a100, topology: false}
+#   v100: {}
+#   t4: {topology: false}
+#
+# Each value is a record with optional type and topology keys. type is the
+# Slurm GRES type. Omit it or set it null for an untyped GPU. topology
+# registers per-GPU topology in slurmd. Omit it to register topology. Set it
+# false for none. A model missing from the map is the same
+# as {}.
+#
+# On one node, either every GPU has both type and topology, or none of them
+# does. Slurm reads that node's GPUs as one layout.
+#
+# Shards make Slurm build GPU topology for the node. A GPU with topology
+# false does not provide it, so when a node type sets slurm_shards_per_gpu
+# every GPU on that node needs topology true.
 slurm_gpus_models_map: {}
 # Shards per GPU, keyed by RacksDB node type id. Omitted types get no shard
 # GRES. The slurm.conf count is this value times the number of GPUs on the

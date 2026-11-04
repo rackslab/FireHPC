@@ -1,8 +1,55 @@
+{# One line per GPU: <type>|<cpu_count>|<cpu_range>|<links>|<device>.
+   (null) leaves that field unset. ~ is handed to the GPU plugin and, with
+   gpu/generic, becomes no cores at all. It is not a CPU binding.
+
+   Slurm builds a topology record when the line has a type name or a real
+   cpu_range. Those two are substitutes, so a real range is written only
+   when topology is requested and the type must stay unset. The range is
+   every core (sockets * cores). A shorter list fails Slurm's socket check
+   and the topology is dropped. It does not pin the GPU to part of the node.
+
+   type and topology: the type name creates the topology, so the CPU columns
+   stay 1 and ~.
+     h100|1|~|-1,0|/dev/nvidia0
+
+   topology, no type: (null) keeps gres_used as gpu:(null):…(IDX:…). The
+   core list is the only remaining way to create topology.
+     (null)|8|0-7|-1,0|/dev/nvidia0
+
+   topology off, with or without a type. There is no typed line for this
+   case. h100|1|~|… would still carry a type name, and that name alone makes
+   Slurm build topology, so gres_used would be gpu:h100:…(IDX:…) rather than
+   gpu:h100:…. The type stays on the Gres= line in slurm.conf. This line has
+   neither a type name nor a core list, so topo_cnt stays 0.
+     (null)|1|~|-1,0|/dev/nvidia0
+#}
+{% macro gpu_links(gpu_index, gpu_total) -%}
+{%- for link_index in range(gpu_total) -%}
+{{- '-1' if gpu_index == link_index else '0' -}}
+{%- if not loop.last %},{% endif -%}
+{%- endfor -%}
+{%- endmacro %}
 {% set total = slurm_current_compute_node_type['gpus'].values() | sum %}
+{% set ncores = (slurm_current_compute_node_type['sockets'] | int) * (slurm_current_compute_node_type['cores'] | int) %}
+{% set cpu_range = '0' if ncores <= 1 else '0-' ~ (ncores - 1) %}
 {% set ns = namespace(index=0) %}
 {% for model in slurm_current_compute_node_type['gpus'] %}
+{% set spec = slurm_gpus_models_map.get(model, {}) %}
+{% set gpu_type = spec.type | default(none, true) %}
+{# Omitted topology defaults to true. An explicit false stays off. #}
+{% set topology = spec.topology | default(true) | bool %}
 {% for _ in range(slurm_current_compute_node_type['gpus'][model]) %}
-{{ slurm_gpus_models_map.get(model) or 'nvidia' }}|1|~|{% for _index in range(total) %}{% if ns.index == _index %}-1{% else %}0{% endif %}{% if not loop.last %},{% endif %}{% endfor %}|/dev/nvidia{{ ns.index }}
+{# Type name creates topology; ~ stores no cores. #}
+{% if gpu_type and topology -%}
+{{ gpu_type }}|1|~|{{ gpu_links(ns.index, total) }}|/dev/nvidia{{ ns.index }}
+{# No type name, so the full core list is what creates topology. #}
+{% elif topology -%}
+(null)|{{ ncores }}|{{ cpu_range }}|{{ gpu_links(ns.index, total) }}|/dev/nvidia{{ ns.index }}
+{# Topology off. A typed line (h100|1|~|…) is not used: the type name would
+   create topology. The type, if any, is only on Gres= in slurm.conf. #}
+{% else -%}
+(null)|1|~|{{ gpu_links(ns.index, total) }}|/dev/nvidia{{ ns.index }}
+{% endif %}
 {% set ns.index = ns.index + 1 %}
 {% endfor %}
 {% endfor %}
