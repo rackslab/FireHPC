@@ -32,6 +32,9 @@ and this project adheres to
 - docs: Mention `deploy --update-os-image` option in manpage.
 
 ### Changed
+- core: Remove the per-container task limit. `TasksMax=16384` is exhausted by
+  the emulator compute container, where each virtual node runs its own slurmd,
+  and `pthread_create` then fails.
 - core: In Slurm emulator mode, start every admin and login node and a
   container named `compute`. Compute nodes from the database are virtual slurmd
   instances on that container.
