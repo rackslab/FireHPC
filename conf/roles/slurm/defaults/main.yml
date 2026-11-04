@@ -5,6 +5,11 @@ slurm_with_accounting: true
 slurm_with_munge: false
 slurm_with_gres_gpu: false
 slurm_gpus_models_map: {}
+# Shards per GPU, keyed by RacksDB node type id. Omitted types get no shard
+# GRES. The slurm.conf count is this value times the number of GPUs on the
+# type. Ignored in Slurm emulator mode. Shard scheduling needs select/cons_tres
+# (Slurm's default when SelectType is unset).
+slurm_shards_per_gpu: {}
 slurm_uid: 432  # picked randomly among 100-499
 slurm_gid: 432  # picked randomly among 100-499
 slurmrestd_uid: 433  # picked randomly among 100-499

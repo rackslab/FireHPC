@@ -28,6 +28,14 @@ CredType = cred/munge
 AuthType = auth/slurm
 CredType = cred/slurm
 {% endif %}
+{% set slurm_shard = namespace(enabled=false) -%}
+{%- if not slurm_emulator -%}
+{%- for node_type in slurm_compute_nodes -%}
+{%- if node_type.gpus | length > 0 and (slurm_shards_per_gpu.get(node_type.type, 0) | int) > 0 -%}
+{%- set slurm_shard.enabled = true -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endif -%}
 {% if slurm_with_accounting %}
 AccountingStorageType=accounting_storage/slurmdbd # default: accounting_storage/none
 AccountingStorageHost={{ slurm_server }}          # must be specified, as soon as slurmdbd is used
@@ -42,6 +50,9 @@ AccountingStorageEnforce=qos,limits,associations  # default: none
 {% endif %}
 {% endfor %}
 {% endfor %}
+{% if slurm_shard.enabled %}
+{% set _ = gpu_tres.append('gres/shard') %}
+{% endif %}
 AccountingStorageTRES={{ gpu_tres | unique | sort | join(',') }}
 {% endif %}
 {% endif %}
@@ -59,14 +70,16 @@ TaskPlugin=task/affinity
 {{ key }}={{ value }}
 {% endfor %}
 {% if slurm_with_gres_gpu %}
-GresTypes=gpu
+GresTypes=gpu{% if slurm_shard.enabled %},shard{% endif %}
 {% endif %}
 
 {% set slurm_emulator_ports = namespace(port=(slurm_emulator_port_base | int)) %}
 {% for node_type in slurm_compute_nodes -%}
 {% set node_names = node_type.nodes | nodeset_fold -%}
 {% set node_count = (node_names | nodeset_expand) | length -%}
-NodeName={{ node_names }} Sockets={{ node_type.sockets }} CoresPerSocket={{ node_type.cores }} RealMemory={{ node_type.memory }}{% if not slurm_emulator and node_type.gpus | length > 0 %} Gres={% for model, nb in node_type.gpus.items() %}gpu{% set has_model = (model in slurm_gpus_models_map and slurm_gpus_models_map.get(model) is not none) %}{% if has_model %}:{{ slurm_gpus_models_map.get(model, 'nvidia') }}{% endif %}:{{ nb }}{% if not loop.last %},{% endif %}{% endfor %}{% endif %}{% if slurm_emulator %} NodeHostname={{ slurm_emulator_host }} NodeAddr={{ slurm_emulator_host }} Port=[{{ slurm_emulator_ports.port }}-{{ slurm_emulator_ports.port + node_count - 1 }}]{% endif %} State=UNKNOWN
+{% set shards_per_gpu = slurm_shards_per_gpu.get(node_type.type, 0) | int -%}
+{% set gpu_count = node_type.gpus.values() | sum -%}
+NodeName={{ node_names }} Sockets={{ node_type.sockets }} CoresPerSocket={{ node_type.cores }} RealMemory={{ node_type.memory }}{% if not slurm_emulator and node_type.gpus | length > 0 %} Gres={% for model, nb in node_type.gpus.items() %}gpu{% set has_model = (model in slurm_gpus_models_map and slurm_gpus_models_map.get(model) is not none) %}{% if has_model %}:{{ slurm_gpus_models_map.get(model, 'nvidia') }}{% endif %}:{{ nb }}{% if not loop.last %},{% endif %}{% endfor %}{% if shards_per_gpu > 0 %},shard:{{ gpu_count * shards_per_gpu }}{% endif %}{% endif %}{% if slurm_emulator %} NodeHostname={{ slurm_emulator_host }} NodeAddr={{ slurm_emulator_host }} Port=[{{ slurm_emulator_ports.port }}-{{ slurm_emulator_ports.port + node_count - 1 }}]{% endif %} State=UNKNOWN
 {% if slurm_emulator -%}
 {% set slurm_emulator_ports.port = slurm_emulator_ports.port + node_count -%}
 {% endif -%}

@@ -12,6 +12,10 @@ and this project adheres to
 - conf:
   - Add pkgs.rackslab.io packages repositories by default.
   - Support GPU gres without model in Slurm configuration.
+  - Support optional shard GRES with `slurm_shards_per_gpu`, a map of RacksDB
+    node type id to shards per GPU. The Slurm count is that value times the
+    number of GPUs on the type. Omitted types and Slurm emulator mode keep GPU
+    GRES only.
   - Set `AccountingStorageTRES` for GPU GRES when Slurm accounting is enabled
     and the cluster defines GPUs.
   - Add SSL/TLS certificate for Slurm-web with internal CA.
