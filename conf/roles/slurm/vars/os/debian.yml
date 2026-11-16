@@ -7,6 +7,7 @@ slurm_accounting_packages:
   - slurm-smd-slurmdbd
 slurm_restd_packages:
   - slurm-smd-slurmrestd
+  - libnss-systemd  # resolve slurmrestd DynamicUser in NSS
 slurm_compute_packages:
   - slurm-smd-slurmd
 slurm_emulator_common_packages:
@@ -18,6 +19,7 @@ slurm_emulator_accounting_packages:
   - slurm-emulator-slurmdbd
 slurm_emulator_restd_packages:
   - slurm-emulator-slurmrestd
+  - libnss-systemd  # resolve slurmrestd DynamicUser in NSS
 slurm_emulator_compute_packages:
   - slurm-emulator-slurmd
 slurm_emulator_sackd_packages:

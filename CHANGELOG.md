@@ -78,6 +78,8 @@ and this project adheres to
     failed on debian14 because the `openldap` system account is expired.
   - Slurm-web v5 JWT for slurmrestd authentification ownership.
   - Run Slurm-web agent as slurm special user when authentication is local.
+  - Install `libnss-systemd` with slurmrestd on Debian so slurmrestd 26.11
+    can resolve its systemd dynamic user in NSS.
   - Replace embedded Jinja templates by inline variable references in redis,
     ldap and users role.
   - Create slurm system user and group on Debian before deploying slurm.conf.
