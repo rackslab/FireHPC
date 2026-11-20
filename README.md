@@ -240,6 +240,28 @@ http://admin.hpc:3000/
 Grafana is setup with a _Slurm_ dashboard showing diagrams of nodes states and
 job queue by default.
 
+### Remote host
+
+FireHPC can deploy clusters containers on a remote host reached through SSH,
+while Ansible, cluster state, RacksDB database and custom variables stay on the
+local host. FireHPC must be installed on both hosts.
+
+```
+$ firehpc --remote user@server deploy --db db/racksdb.yml --cluster hpc --os debian12
+```
+
+The remote host can also be defined with `FIREHPC_REMOTE` environment variable
+or in the user preferences file `~/.config/firehpc/firehpc.ini`:
+
+```ini
+[remote]
+host = user@server
+```
+
+The remote host is saved in cluster settings, all other commands on this
+cluster (`conf`, `status`, `ssh`, `clean`, etc) automatically use it. Please
+refer to `firehpc(1)` manpage for more details.
+
 ### Clean
 
 When you are done, you can clean up everything for a cluster with this command:

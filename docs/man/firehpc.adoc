@@ -57,6 +57,16 @@ are started.
   is defined, its value appended with _firehpc_ subfolder is considered the new
   default.
 
+[.cli-opt]#*--remote*=#[.cli-optval]##_[USER@]HOST[:PORT]_##::
+  Remote host where the containers of new clusters are deployed through SSH. See
+  *REMOTE HOST* section for details. By default, value of _$FIREHPC_REMOTE_
+  environment variable or remote host defined in user preferences file is used.
+  This option is mutually exclusive with [.cli-opt]#*--local*#.
+
+[.cli-opt]#*--local*#::
+  Deploy containers of new clusters on local host, even if a remote host is
+  defined in _$FIREHPC_REMOTE_ environment variable or user preferences file.
+
 == Commands
 
 All commands accept [.cli-opt]#*-h, --help*# option to get details about
@@ -336,6 +346,58 @@ This command accepts the following options:
   virtual node needs a dedicated TCP port, so the number of emulated nodes is
   limited by the available port range.
 --
+
+== Remote host
+
+FireHPC can deploy the containers of emulated clusters on a remote host
+reached through SSH. The remote host is selected with the following order of
+precedence:
+
+. [.cli-opt]#*--remote*# or [.cli-opt]#*--local*# general options,
+. _$FIREHPC_REMOTE_ environment variable,
+. _host_ parameter in _remote_ section of user preferences file
+  [.path]#`~/.config/firehpc/firehpc.ini`#. If _$XDG_CONFIG_HOME_ environment
+  variable is defined, [.path]#`firehpc/firehpc.ini`# in this directory is used
+  instead.
+
+When no remote host is defined, containers are deployed on local host.
+
+The remote host is saved in cluster settings on deployment. All other commands
+on this cluster automatically use the saved remote host. They fail if another
+host is explicitly requested with general options or environment variable.
+
+Example of user preferences file:
+
+----
+[remote]
+# Remote host destination, it can be an alias from SSH client configuration
+# file ~/.ssh/config
+host = user@server.example.org
+# Command run on remote host to manage containers (default: firehpc-agent)
+agent = firehpc-agent
+----
+
+FireHPC connects to the remote host with Paramiko SSH library. It honors
+_HostName_, _User_, _Port_, _IdentityFile_ and _ProxyCommand_ parameters from
+SSH client configuration file [.path]#`~/.ssh/config`#. _Include_ directives
+and _ProxyJump_ are not supported. The remote host key must be present in
+[.path]#`~/.ssh/known_hosts`#; connect once with `ssh` to add it.
+Authentication is performed with SSH agent or private keys.
+
+Ansible, its deployment environments, the cluster state directory, the RacksDB
+database and the custom Ansible variables remain on local host. FireHPC
+starts the _firehpc-agent_ program on the remote host to run the machine
+provider, the technology that manages cluster machines (currently
+systemd-nspawn containers). Ansible and SSH connections to the machines are
+forwarded through the remote host.
+
+The remote host must have:
+
+* FireHPC installed, including the _firehpc-agent_ program and the system
+  files (systemd services, wrappers and polkit rules),
+* the remote user in the _firehpc_ group,
+* SSH server with TCP forwarding and SFTP subsystem enabled,
+* _nss-mymachines_ to resolve container names.
 
 == Exit status
 
