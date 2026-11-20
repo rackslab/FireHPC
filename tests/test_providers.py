@@ -37,3 +37,12 @@ class TestProviders(unittest.TestCase):
 
     def test_nspawn(self):
         self.assertEqual(NspawnProvider.BOOTSTRAP_CONNECTION, "machinectl")
+        self.assertEqual(NspawnProvider.bootstrap_vars(None), {})
+        helper = ["/usr/bin/firehpc", "--remote", "server", "remote"]
+        self.assertEqual(
+            NspawnProvider.bootstrap_vars(helper),
+            {"ansible_machinectl_remote_helper": helper},
+        )
+
+    def test_base_bootstrap_vars(self):
+        self.assertEqual(MachineProvider.bootstrap_vars(["helper"]), {})

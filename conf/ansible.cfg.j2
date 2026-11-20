@@ -23,4 +23,4 @@ roles_path = /usr/share/firehpc/conf/roles
 precedence = 'all_plugins_play', 'groups_plugins_play', 'all_inventory', 'groups_inventory', 'all_plugins_inventory', 'groups_plugins_inventory'
 
 [ssh_connection]
-ssh_args = -C -o ControlMaster=auto -o ControlPersist=60s -o UserKnownHostsFile={{ state }}/ssh/known_hosts -i {{ state }}/ssh/id_rsa
+ssh_args = -C -o ControlMaster=auto -o ControlPersist=60s -o UserKnownHostsFile={{ state }}/ssh/known_hosts -i {{ state }}/ssh/id_rsa{% if proxy_command %} -o 'ProxyCommand={{ proxy_command }}'{% endif %}

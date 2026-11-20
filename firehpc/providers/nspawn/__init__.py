@@ -9,6 +9,7 @@ systemd-{machined,importd} and systemd DBus interfaces."""
 
 from __future__ import annotations
 import logging
+import typing as t
 
 from ..base import MachineProvider
 from .dbus import BaseImage, ContainersManager
@@ -23,6 +24,14 @@ class NspawnProvider(MachineProvider):
     def __init__(self, cluster: str):
         super().__init__(cluster)
         self.manager = ContainersManager(cluster)
+
+    @classmethod
+    def bootstrap_vars(cls, helper: t.Optional[list[str]]) -> dict[str, t.Any]:
+        # The machinectl connection plugin runs machinectl on the host of
+        # machines through the helper command.
+        if not helper:
+            return {}
+        return {"ansible_machinectl_remote_helper": helper}
 
     def namespace(self) -> str:
         return self.manager.namespace

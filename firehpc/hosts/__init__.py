@@ -54,6 +54,12 @@ class Host(abc.ABC):
             return []
         return ["-o", f"ProxyCommand={proxy_command}"]
 
+    def helper_command(self) -> t.Optional[list[str]]:
+        """Return the command used by programs on local host (eg. ansible
+        connection plugins) to reach this host, or None when not required. The
+        command accepts the subcommands exec, upload and download."""
+        return None
+
     def close(self) -> None:
         """Release resources associated to this host."""
 

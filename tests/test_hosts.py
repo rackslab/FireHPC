@@ -79,6 +79,7 @@ class TestLocalHost(unittest.TestCase):
         self.assertEqual(host.label, "local host")
         self.assertIsNone(host.ssh_proxy_command())
         self.assertEqual(host.ssh_proxy_args(), [])
+        self.assertIsNone(host.helper_command())
 
     def test_provider(self):
         fake = mock.Mock()
@@ -119,6 +120,12 @@ class TestRemoteHost(unittest.TestCase):
                 "-o",
                 "ProxyCommand=/usr/bin/firehpc --remote john@server remote proxy %h %p",
             ],
+        )
+
+    def test_helper_command(self):
+        self.assertEqual(
+            self.host.helper_command(),
+            ["/usr/bin/firehpc", "--remote", "john@server", "remote"],
         )
 
     def test_provider(self):

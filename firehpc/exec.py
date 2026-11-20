@@ -6,6 +6,7 @@
 
 import argparse
 import logging
+import shlex
 import sys
 from pathlib import Path
 
@@ -13,11 +14,19 @@ from racksdb import RacksDB
 from racksdb.errors import RacksDBFormatError, RacksDBSchemaError
 
 from .version import get_version
-from .settings import RuntimeSettings, ClusterSettings
+from .settings import (
+    RuntimeSettings,
+    ClusterSettings,
+    UserPreferences,
+    explicit_remote,
+    resolve_remote,
+)
 from .state import default_state_dir, UserState, ClusterState
 from .cluster import EmulatedCluster, clusters_list
 from .environments import bootstrap
 from .ssh import SSHClient
+from .hosts import get_host
+from .hosts.remote import RemoteHost, relay
 from .errors import FireHPCRuntimeError
 from .os import OSDatabase
 from .load import load_clusters
@@ -52,9 +61,11 @@ class FireHPCExec:
         parser = self._parser()
         self.args = parser.parse_args()
         self._setup_logger()
-        self.runtime_settings = RuntimeSettings()
-        self.user_state = UserState(self.args.state)
         try:
+            self.preferences = UserPreferences()
+            RemoteHost.agent_command = self.preferences.remote_agent
+            self.runtime_settings = RuntimeSettings()
+            self.user_state = UserState(self.args.state)
             self.args.func()
         except FireHPCRuntimeError as e:
             logger.critical(str(e))
@@ -85,6 +96,20 @@ class FireHPCExec:
             help="Directory to store cluster state (default: %(default)s)",
             type=Path,
             default=default_state_dir(),
+        )
+        remote_options = parser.add_mutually_exclusive_group()
+        remote_options.add_argument(
+            "--remote",
+            metavar="[USER@]HOST[:PORT]",
+            help=(
+                "Remote host where cluster containers are deployed (default: "
+                "FIREHPC_REMOTE environment variable or user preferences)"
+            ),
+        )
+        remote_options.add_argument(
+            "--local",
+            action="store_true",
+            help="Deploy cluster containers on local host",
         )
         subparsers = parser.add_subparsers(
             help="Action to perform",
@@ -342,6 +367,32 @@ class FireHPCExec:
         )
         parser_update.set_defaults(func=self._execute_update)
 
+        # remote command, internal helpers for ssh and ansible, hidden from help
+        parser_remote = subparsers.add_parser("remote")
+        remote_subparsers = parser_remote.add_subparsers(
+            dest="remote_action", required=True
+        )
+        parser_remote_proxy = remote_subparsers.add_parser("proxy")
+        parser_remote_proxy.add_argument("host")
+        parser_remote_proxy.add_argument("port", type=int)
+        parser_remote_proxy.set_defaults(func=self._execute_remote_proxy)
+        parser_remote_exec = remote_subparsers.add_parser("exec")
+        parser_remote_exec.add_argument("cmd", nargs=argparse.REMAINDER)
+        parser_remote_exec.set_defaults(func=self._execute_remote_exec)
+        parser_remote_upload = remote_subparsers.add_parser("upload")
+        parser_remote_upload.add_argument("source")
+        parser_remote_upload.add_argument("destination")
+        parser_remote_upload.set_defaults(func=self._execute_remote_upload)
+        parser_remote_download = remote_subparsers.add_parser("download")
+        parser_remote_download.add_argument("source")
+        parser_remote_download.add_argument("destination")
+        parser_remote_download.set_defaults(func=self._execute_remote_download)
+        # Hide remote command from the list of choices in help, commands without
+        # help are not present in choices actions.
+        subparsers.metavar = (
+            "{" + ",".join(action.dest for action in subparsers._choices_actions) + "}"
+        )
+
         return parser
 
     def _setup_logger(self):
@@ -369,9 +420,22 @@ class FireHPCExec:
             sys.exit(1)
 
     def _load_cluster(self, name: str) -> EmulatedCluster:
-        """Load cluster settings from state and return emulated cluster."""
+        """Load cluster settings from state and return emulated cluster. Fail if a
+        remote host is explicitly requested and differs from the cluster's host."""
         state = ClusterState(self.user_state, name)
-        return EmulatedCluster(self.runtime_settings, name, state, state.load())
+        cluster_settings = state.load()
+        self._check_remote(name, cluster_settings.remote)
+        return EmulatedCluster(self.runtime_settings, name, state, cluster_settings)
+
+    def _check_remote(self, name: str, remote) -> None:
+        requested = explicit_remote(self.args)
+        if requested is None:
+            return
+        if (requested or None) != remote:
+            raise FireHPCRuntimeError(
+                f"Cluster {name} is deployed on {remote or 'local host'}, not on "
+                f"{requested or 'local host'}"
+            )
 
     def _execute_bootstrap(self):
         bootstrap(self.user_state, self.runtime_settings)
@@ -384,8 +448,31 @@ class FireHPCExec:
             logger.info("Run `firehpc images` to get the list of supported OS")
             sys.exit(1)
 
+        remote = resolve_remote(self.args, self.preferences)
+
+        # When another cluster users directory is requested, check it is on the
+        # same host.
+        if self.args.users_from:
+            users_cluster_settings = ClusterState(
+                self.user_state, self.args.users_from
+            ).load()
+            if users_cluster_settings.remote != remote:
+                raise FireHPCRuntimeError(
+                    f"Cluster {self.args.users_from} is deployed on "
+                    f"{users_cluster_settings.remote or 'local host'}, it must be on "
+                    f"the same host as cluster {self.args.cluster} "
+                    f"({remote or 'local host'})"
+                )
+
         # Define cluster settings from args and save
         state = ClusterState(self.user_state, self.args.cluster)
+        if state.settings.exists():
+            existing_remote = state.load().remote
+            if existing_remote != remote:
+                raise FireHPCRuntimeError(
+                    f"Cluster {self.args.cluster} is already deployed on "
+                    f"{existing_remote or 'local host'}, clean it first"
+                )
         state.create()
         cluster_settings = ClusterSettings.from_values(
             os=self.args.os,
@@ -394,6 +481,7 @@ class FireHPCExec:
             db=self.args.db,
             schema=self.args.schema,
             custom=self.args.custom,
+            remote=remote,
         )
         state.save(cluster_settings)
 
@@ -477,10 +565,18 @@ class FireHPCExec:
         ssh.exec(self.args.args)
 
     def _execute_clean(self):
-        # Load cluster settings
+        # Load cluster settings when available to get the cluster host. Otherwise,
+        # fallback to requested remote host.
         state = ClusterState(self.user_state, self.args.cluster)
-
-        cluster = EmulatedCluster(self.runtime_settings, self.args.cluster, state)
+        if state.settings.exists():
+            cluster = self._load_cluster(self.args.cluster)
+        else:
+            cluster = EmulatedCluster(
+                self.runtime_settings,
+                self.args.cluster,
+                state,
+                remote=resolve_remote(self.args, self.preferences),
+            )
         cluster.clean()
 
     def _execute_status(self):
@@ -496,7 +592,12 @@ class FireHPCExec:
         print(str(os_db), end="")
 
     def _execute_list(self):
-        print("\n".join(clusters_list(self.args.state)))
+        for name in clusters_list(self.args.state):
+            try:
+                remote = ClusterState(self.user_state, name).load().remote
+            except FireHPCRuntimeError:
+                remote = None
+            print(f"{name} ({remote})" if remote else name)
 
     def _execute_load(self):
         load_clusters(
@@ -513,3 +614,34 @@ class FireHPCExec:
         # Update settings with provided args
         cluster_settings.update_from_args(self.args)
         state.save(cluster_settings)
+
+    def _remote_host(self) -> RemoteHost:
+        remote = resolve_remote(self.args, self.preferences)
+        if remote is None:
+            raise FireHPCRuntimeError("Remote host must be defined for this command")
+        return get_host(remote)
+
+    def _execute_remote_proxy(self):
+        channel = self._remote_host().open_tcp(self.args.host, self.args.port)
+        relay(channel, sys.stdin.fileno(), sys.stdout.fileno())
+
+    def _execute_remote_exec(self):
+        cmd = self.args.cmd
+        if cmd and cmd[0] == "--":
+            cmd = cmd[1:]
+        if not cmd:
+            raise FireHPCRuntimeError("Command to run on remote host is required")
+        sys.exit(
+            self._remote_host().run(
+                shlex.join(cmd),
+                sys.stdin.fileno(),
+                sys.stdout.fileno(),
+                sys.stderr.fileno(),
+            )
+        )
+
+    def _execute_remote_upload(self):
+        self._remote_host().upload(self.args.source, self.args.destination)
+
+    def _execute_remote_download(self):
+        self._remote_host().download(self.args.source, self.args.destination)

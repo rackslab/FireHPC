@@ -49,6 +49,8 @@ class ClusterSettingsConsoleDumper:
             result += f"{label('db')}: {obj.racksdb.db}\n"
         if obj.racksdb.schema:
             result += f"{label('schema')}: {obj.racksdb.schema}\n"
+        if obj.remote:
+            result += f"{label('remote')}: {obj.remote}\n"
         return result
 
 

@@ -13,6 +13,7 @@ through firehpc-agent on remote hosts."""
 
 from __future__ import annotations
 import abc
+import typing as t
 
 
 class MachineProvider(abc.ABC):
@@ -45,6 +46,13 @@ class MachineProvider(abc.ABC):
 
     def __init__(self, cluster: str):
         self.cluster = cluster
+
+    @classmethod
+    def bootstrap_vars(cls, helper: t.Optional[list[str]]) -> dict[str, t.Any]:
+        """Return the Ansible variables of the bootstrap connection plugin. The
+        helper is the command to reach the host of machines (see
+        Host.helper_command()), None on local host."""
+        return {}
 
     @abc.abstractmethod
     def namespace(self) -> str:

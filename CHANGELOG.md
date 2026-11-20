@@ -31,6 +31,12 @@ and this project adheres to
 - conf: Support running machinectl on the host of machines through a helper
   command in machinectl connection plugin, with
   `ansible_machinectl_remote_helper` variable.
+- Deploy clusters containers on a remote host through SSH with Paramiko, with
+  new `--remote` and `--local` general options, `FIREHPC_REMOTE` environment
+  variable and `host` parameter in `[remote]` section of new user preferences
+  file `~/.config/firehpc/firehpc.ini`. Remote host is saved in cluster
+  settings. Ansible, cluster state, RacksDB database and custom variables stay
+  on local host.
 - Add `firehpc-agent` program to run machine providers on behalf of firehpc
   running on another host.
 - cli: Add `deploy --users` option to set the number of generated users (#26).

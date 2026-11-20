@@ -58,18 +58,23 @@ class EmulatedCluster:
         name: str,
         state: ClusterState,
         cluster_settings: Optional[ClusterSettings] = None,
+        remote: Optional[str] = None,
     ):
         self.runtime_settings = runtime_settings
         self.name = name
         self.state = state
         self.cluster_settings = cluster_settings
+        # Remote host from cluster settings has precedence over remote argument.
+        if cluster_settings is not None:
+            remote = cluster_settings.remote
+        self.remote = remote or None
         self.provider_kind = DEFAULT_PROVIDER
         self._provider = None
         self._namespace = None
 
     @property
     def host(self) -> Host:
-        return get_host()
+        return get_host(self.remote)
 
     @property
     def provider(self):
@@ -128,6 +133,11 @@ class EmulatedCluster:
         provider = self.provider
 
         base_image_name = os.path.basename(url).split(".")[0]
+
+        if self.host.is_remote:
+            logger.info(
+                "Deploying cluster %s on remote host %s", self.name, self.remote
+            )
 
         # Check if base image is already present. If not or update_os_image is
         # True, download it. Otherwise, just use it in place.
@@ -213,6 +223,7 @@ class EmulatedCluster:
                         namespace=namespace,
                         infrastructure=infrastructure,
                         emulator_mode=self.cluster_settings.slurm_emulator,
+                        proxy_command=self.host.ssh_proxy_command(),
                     )
                 )
 
@@ -300,15 +311,15 @@ class EmulatedCluster:
                 f"Unable to find environment {environment.name}, bootstrap first?"
             )
 
-        # Prepend deployment environment bin folder in $PATH so that
-        # ansible-runnner will execute ansible-playbook in that folder instead of
-        # the one in system paths.
-        paths = [str(environment.bin)]
+        provider = provider_class(self.provider_kind)
 
         for playbook in playbooks:
-            logger.debug("Adding %s in PATH", paths)
+            # Prepend deployment environment bin folder in $PATH so that
+            # ansible-runnner will execute ansible-playbook in that folder instead of
+            # the one in system paths.
+            logger.debug("Adding %s in PATH", environment.bin)
             old_path = os.environ["PATH"]
-            os.environ["PATH"] = ":".join(paths + [old_path])
+            os.environ["PATH"] = f"{environment.bin}:{old_path}"
 
             # Run ansible-playbook
             runner = ansible_runner.run(
@@ -320,9 +331,8 @@ class EmulatedCluster:
                     "fhpc_db": str(Path.cwd() / db._loader.path),
                     "fhpc_emulator_mode": self.cluster_settings.slurm_emulator,
                     "fhpc_nodes": nodes,
-                    "fhpc_bootstrap_connection": provider_class(
-                        self.provider_kind
-                    ).BOOTSTRAP_CONNECTION,
+                    "fhpc_bootstrap_connection": provider.BOOTSTRAP_CONNECTION,
+                    **provider.bootstrap_vars(self.host.helper_command()),
                 },
             )
             # Raise exception on playbook failure

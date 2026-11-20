@@ -281,6 +281,9 @@ class RemoteHost(Host):
             + " %h %p"
         )
 
+    def helper_command(self) -> list[str]:
+        return [firehpc_command(), "--remote", self.remote, "remote"]
+
     def close(self) -> None:
         if self._session is not None:
             self._session.close()
