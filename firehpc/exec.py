@@ -368,6 +368,11 @@ class FireHPCExec:
             logger.critical("Unable to load RacksDB database: %s", err)
             sys.exit(1)
 
+    def _load_cluster(self, name: str) -> EmulatedCluster:
+        """Load cluster settings from state and return emulated cluster."""
+        state = ClusterState(self.user_state, name)
+        return EmulatedCluster(self.runtime_settings, name, state, state.load())
+
     def _execute_bootstrap(self):
         bootstrap(self.user_state, self.runtime_settings)
 
@@ -427,14 +432,10 @@ class FireHPCExec:
 
     def _execute_conf(self):
         # Load cluster settings
-        state = ClusterState(self.user_state, self.args.cluster)
-        cluster_settings = state.load()
+        cluster = self._load_cluster(self.args.cluster)
+        cluster_settings = cluster.cluster_settings
         # Update settings with provided args
         cluster_settings.update_from_args(self.args)
-
-        cluster = EmulatedCluster(
-            self.runtime_settings, self.args.cluster, state, cluster_settings
-        )
 
         playbooks = ["site"]
         if self.args.with_bootstrap:
@@ -449,14 +450,10 @@ class FireHPCExec:
 
     def _execute_restore(self):
         # Load cluster settings
-        state = ClusterState(self.user_state, self.args.cluster)
-        cluster_settings = state.load()
+        cluster = self._load_cluster(self.args.cluster)
+        cluster_settings = cluster.cluster_settings
         # Update settings with provided args
         cluster_settings.update_from_args(self.args)
-
-        cluster = EmulatedCluster(
-            self.runtime_settings, self.args.cluster, state, cluster_settings
-        )
         cluster.conf(
             self._load_racksdb(cluster_settings),
             playbooks=["restore"],
@@ -465,24 +462,10 @@ class FireHPCExec:
         )
 
     def _execute_start(self):
-        # Load cluster settings
-        state = ClusterState(self.user_state, self.args.cluster)
-        cluster_settings = state.load()
-
-        cluster = EmulatedCluster(
-            self.runtime_settings, self.args.cluster, state, cluster_settings
-        )
-        cluster.start()
+        self._load_cluster(self.args.cluster).start()
 
     def _execute_stop(self):
-        # Load cluster settings
-        state = ClusterState(self.user_state, self.args.cluster)
-        cluster_settings = state.load()
-
-        cluster = EmulatedCluster(
-            self.runtime_settings, self.args.cluster, state, cluster_settings
-        )
-        cluster.stop()
+        self._load_cluster(self.args.cluster).stop()
 
     def _execute_ssh(self):
         # Define cluster name
@@ -490,14 +473,7 @@ class FireHPCExec:
         if "." in self.args.args[0]:
             cluster_name = cluster_name.split(".")[1]
 
-        # Load cluster settings
-        state = ClusterState(self.user_state, cluster_name)
-        cluster_settings = state.load()
-
-        cluster = EmulatedCluster(
-            self.runtime_settings, cluster_name, state, cluster_settings
-        )
-        ssh = SSHClient(cluster)
+        ssh = SSHClient(self._load_cluster(cluster_name))
         ssh.exec(self.args.args)
 
     def _execute_clean(self):
@@ -508,13 +484,7 @@ class FireHPCExec:
         cluster.clean()
 
     def _execute_status(self):
-        # Load cluster settings
-        state = ClusterState(self.user_state, self.args.cluster)
-        cluster_settings = state.load()
-
-        cluster = EmulatedCluster(
-            self.runtime_settings, self.args.cluster, state, cluster_settings
-        )
+        cluster = self._load_cluster(self.args.cluster)
         print(
             DumperFactory.get("json" if self.args.json else "console").dump(
                 cluster.status()
