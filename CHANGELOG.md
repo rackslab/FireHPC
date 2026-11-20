@@ -75,6 +75,10 @@ and this project adheres to
   nodes.
 
 ### Fixed
+- conf: Merge latest upstream updates in machinectl connection plugin, to run
+  `shell` commands with `TERM=dumb` in containers so that systemd 258 and later
+  do not write OSC control sequences in commands output, to import text
+  converters from their current location in Ansible and to fix error paths.
 - conf:
   - Pin Ansible target Python interpreter to `/usr/bin/python3` instead of
     `auto_silent`, which could select an older interpreter (eg. Python 3.13)
