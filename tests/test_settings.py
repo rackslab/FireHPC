@@ -8,9 +8,19 @@ import unittest
 import argparse
 import os
 import copy
+import tempfile
+from unittest import mock
 from pathlib import Path
 
-from firehpc.settings import ClusterSettings, ClusterRacksDBSettings
+from firehpc.settings import (
+    ClusterSettings,
+    ClusterRacksDBSettings,
+    UserPreferences,
+    REMOTE_ENV_VAR,
+    default_preferences_path,
+    explicit_remote,
+    resolve_remote,
+)
 
 
 BASE_SETTINGS = {
@@ -305,3 +315,96 @@ class TestClusterSettings(unittest.TestCase):
         self.assertIsNone(settings.racksdb.db)
         self.assertIsNone(settings.racksdb.schema)
         self.assertIsNone(settings.custom)
+
+
+class TestClusterSettingsRemote(unittest.TestCase):
+    def test_default_local(self):
+        settings = ClusterSettings.deserialize(copy.deepcopy(BASE_SETTINGS))
+        self.assertIsNone(settings.remote)
+        self.assertNotIn("remote", settings.serialize())
+
+    def test_serialize_remote(self):
+        settings = ClusterSettings.from_values(
+            os="debian12",
+            environment="ansible-latest",
+            slurm_emulator=False,
+            remote="user@server",
+        )
+        self.assertEqual(settings.serialize()["remote"], "user@server")
+        copy_ = ClusterSettings.deserialize(settings.serialize())
+        self.assertEqual(copy_.remote, "user@server")
+
+    def test_empty_remote(self):
+        settings = ClusterSettings.from_values(
+            os="debian12",
+            environment="ansible-latest",
+            slurm_emulator=False,
+            remote="",
+        )
+        self.assertIsNone(settings.remote)
+
+
+class TestUserPreferences(unittest.TestCase):
+    def setUp(self):
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.path = Path(self.tmpdir.name) / "firehpc" / "firehpc.ini"
+
+    def tearDown(self):
+        self.tmpdir.cleanup()
+
+    def write(self, content):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.path.write_text(content)
+
+    def test_default_path_xdg(self):
+        with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": self.tmpdir.name}):
+            self.assertEqual(default_preferences_path(), self.path)
+
+    def test_missing_file(self):
+        preferences = UserPreferences(self.path)
+        self.assertIsNone(preferences.remote_host)
+        self.assertEqual(preferences.remote_agent, "firehpc-agent")
+
+    def test_remote(self):
+        self.write("[remote]\nhost = user@server\nagent = /opt/bin/firehpc-agent\n")
+        preferences = UserPreferences(self.path)
+        self.assertEqual(preferences.remote_host, "user@server")
+        self.assertEqual(preferences.remote_agent, "/opt/bin/firehpc-agent")
+
+    def test_empty_host(self):
+        self.write("[remote]\nhost =\n")
+        self.assertIsNone(UserPreferences(self.path).remote_host)
+
+
+class TestResolveRemote(unittest.TestCase):
+    def setUp(self):
+        self.preferences = mock.Mock(remote_host="prefs")
+
+    def args(self, remote=None, local=False):
+        return argparse.Namespace(remote=remote, local=local)
+
+    def test_preferences(self):
+        with mock.patch.dict(os.environ, clear=True):
+            self.assertIsNone(explicit_remote(self.args()))
+            self.assertEqual(resolve_remote(self.args(), self.preferences), "prefs")
+
+    def test_env_over_preferences(self):
+        with mock.patch.dict(os.environ, {REMOTE_ENV_VAR: "env"}, clear=True):
+            self.assertEqual(explicit_remote(self.args()), "env")
+            self.assertEqual(resolve_remote(self.args(), self.preferences), "env")
+
+    def test_args_over_env(self):
+        with mock.patch.dict(os.environ, {REMOTE_ENV_VAR: "env"}, clear=True):
+            self.assertEqual(
+                resolve_remote(self.args(remote="cli"), self.preferences), "cli"
+            )
+
+    def test_local(self):
+        with mock.patch.dict(os.environ, {REMOTE_ENV_VAR: "env"}, clear=True):
+            self.assertEqual(explicit_remote(self.args(local=True)), "")
+            self.assertIsNone(resolve_remote(self.args(local=True), self.preferences))
+
+    def test_nothing(self):
+        self.preferences.remote_host = None
+        with mock.patch.dict(os.environ, clear=True):
+            self.assertIsNone(resolve_remote(self.args(), self.preferences))
