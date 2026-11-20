@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from .cluster import EmulatedCluster
 
 from .runner import run
-from .containers import ContainersManager
 from .errors import FireHPCRuntimeError
 
 logger = logging.getLogger(__name__)
@@ -43,7 +42,7 @@ class SSHClient:
         if "." not in hostname:
             hostname = "admin." + hostname
         # append container namespace to hostname
-        hostname += f".{ContainersManager(self.cluster).namespace}"
+        hostname += f".{self.cluster.namespace}"
         if self.asbin:
             return self._exec_bin(username, hostname, args[1:])
         else:

@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 import os
+import pwd
 from datetime import datetime
 import signal
 import threading
@@ -18,9 +19,15 @@ from dasbus.connection import SystemMessageBus
 from dasbus.loop import EventLoop
 from dasbus.error import DBusError
 
-from .errors import FireHPCRuntimeError
+from ...errors import FireHPCRuntimeError
 
 logger = logging.getLogger(__name__)
+
+
+def current_user() -> str:
+    """Return the name of the user running the process. Contrary to os.getlogin(),
+    this does not require a controlling terminal."""
+    return pwd.getpwuid(os.getuid()).pw_name
 
 
 class Singleton(type):
@@ -414,7 +421,7 @@ class ContainersManager(DBusObject):
     def __init__(self, cluster: str) -> ContainersManager:
         super().__init__("/org/freedesktop/machine1")
         self.cluster = cluster
-        self.namespace = os.getlogin()
+        self.namespace = current_user()
 
     def running(self) -> list:
         return [

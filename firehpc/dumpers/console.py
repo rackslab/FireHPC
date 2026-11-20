@@ -60,7 +60,7 @@ class ClusterStatusConsoleDumper:
         # List of containers
         result += "containers:\n"
         for container in obj.containers:
-            result += f"  {container.name} is running\n"
+            result += f"  {container} is running\n"
 
         # Cluster settings
         result += "settings:\n"

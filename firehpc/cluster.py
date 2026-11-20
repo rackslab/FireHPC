@@ -17,7 +17,7 @@ import yaml
 
 from .templates import Templater
 from .users import UsersDirectory
-from .containers import ContainersManager
+from .providers import DEFAULT_PROVIDER, provider_class
 from .errors import FireHPCRuntimeError
 from .settings import ClusterSettings
 from .state import ClusterState, UserState
@@ -26,7 +26,6 @@ from .environments import DeploymentEnvironment
 if TYPE_CHECKING:
     from racksdb import RacksDB
     from .settings import RuntimeSettings
-    from .containers import Container
 
 logger = logging.getLogger(__name__)
 
@@ -38,13 +37,13 @@ def clusters_list(state: Path):
 
 @dataclass
 class ClusterStatus:
-    containers: list[Container]
+    containers: list[str]
     directory: UsersDirectory
     settings: ClusterSettings
 
     def _generic(self):
         return {
-            "containers": [container.name for container in self.containers],
+            "containers": self.containers,
             "users": self.directory._users_generic(),
             "settings": self.settings.serialize(),
             "groups": self.directory._groups_generic(),
@@ -63,6 +62,23 @@ class EmulatedCluster:
         self.name = name
         self.state = state
         self.cluster_settings = cluster_settings
+        self.provider_kind = DEFAULT_PROVIDER
+        self._provider = None
+        self._namespace = None
+
+    @property
+    def provider(self):
+        """Machine provider of the cluster."""
+        if self._provider is None:
+            self._provider = provider_class(self.provider_kind)(self.name)
+        return self._provider
+
+    @property
+    def namespace(self) -> str:
+        """Namespace of cluster machines names."""
+        if self._namespace is None:
+            self._namespace = self.provider.namespace()
+        return self._namespace
 
     @staticmethod
     def _emulator_container_names(infrastructure):
@@ -104,30 +120,23 @@ class EmulatedCluster:
     ) -> None:
         infrastructure = db.infrastructures[self.name]
 
-        manager = ContainersManager(self.name)
+        provider = self.provider
 
         base_image_name = os.path.basename(url).split(".")[0]
 
         # Check if base image is already present. If not or update_os_image is
         # True, download it. Otherwise, just use it in place.
-        if not manager.image_exists(base_image_name):
+        if not provider.image_exists(name=base_image_name):
             logger.info("Base image %s must be imported", base_image_name)
-            base_image = manager.download(
-                url,
-                base_image_name,
-            )
+            provider.import_image(url=url, name=base_image_name)
         else:
             logger.info("Base image %s is already imported", base_image_name)
-            base_image = manager.base_image(base_image_name)
             if update_os_image:
                 logger.info(
                     "Base image %s must be updated, removing it", base_image_name
                 )
-                base_image.remove()
-                base_image = manager.download(
-                    url,
-                    base_image_name,
-                )
+                provider.remove_image(name=base_image_name)
+                provider.import_image(url=url, name=base_image_name)
 
         # Emulator mode starts every admin and login node, and a container named
         # compute. RacksDB compute names stay virtual slurmd instances.
@@ -138,12 +147,12 @@ class EmulatedCluster:
 
         for name in names:
             logger.info("Cloning base image for %s.%s", name, self.name)
-            manager.clone_base(base_image, name)
+            provider.create_machine(base=base_image_name, name=name)
 
-        logger.info("Starting cluster storage service %s", self.name)
-        manager.storage().start()
+        logger.info("Preparing cluster %s shared resources", self.name)
+        provider.prepare_cluster()
 
-        manager.start(names)
+        provider.start(names=names)
 
     def conf(
         self,
@@ -182,7 +191,7 @@ class EmulatedCluster:
                     )
                     shutil.copytree(orig_custom_path, dest_custom_path)
 
-        manager = ContainersManager(self.name)
+        namespace = self.namespace
 
         infrastructure = db.infrastructures[self.name]
         for template in ["ansible.cfg", "hosts"]:
@@ -196,18 +205,14 @@ class EmulatedCluster:
                         self.runtime_settings.ansible.path / f"{template}.j2",
                         state=self.state.path,
                         cluster=self.name,
-                        namespace=manager.namespace,
+                        namespace=namespace,
                         infrastructure=infrastructure,
                         emulator_mode=self.cluster_settings.slurm_emulator,
                     )
                 )
 
         # variable fhpc_addresses
-        containers_addresses = {}
-        for container in manager.running():
-            containers_addresses[container.name] = [
-                str(address) for address in container.addresses()
-            ]
+        containers_addresses = self.provider.addresses()
 
         # variable fhpc_nodes, a dict where nodes are first grouped by tag,
         # then grouped by node type.
@@ -259,7 +264,7 @@ class EmulatedCluster:
             extravars = {
                 "fhpc_cluster_state_dir": str(self.state.path),
                 "fhpc_cluster": self.name,
-                "fhpc_namespace": manager.namespace,
+                "fhpc_namespace": namespace,
                 "fhpc_users": users_directory._users_generic(),
                 "fhpc_groups": users_directory._groups_generic(),
             }
@@ -290,13 +295,15 @@ class EmulatedCluster:
                 f"Unable to find environment {environment.name}, bootstrap first?"
             )
 
+        # Prepend deployment environment bin folder in $PATH so that
+        # ansible-runnner will execute ansible-playbook in that folder instead of
+        # the one in system paths.
+        paths = [str(environment.bin)]
+
         for playbook in playbooks:
-            # Prepend deployment environment bin folder in $PATH so that
-            # ansible-runnner will execute ansible-playbook in that folder instead of
-            # the one in system paths.
-            logger.debug("Adding %s in PATH", environment.bin)
+            logger.debug("Adding %s in PATH", paths)
             old_path = os.environ["PATH"]
-            os.environ["PATH"] = f"{environment.bin}:{old_path}"
+            os.environ["PATH"] = ":".join(paths + [old_path])
 
             # Run ansible-playbook
             runner = ansible_runner.run(
@@ -325,45 +332,37 @@ class EmulatedCluster:
             shutil.rmtree(generated_path)
 
     def clean(self) -> None:
-        manager = ContainersManager(self.name)
+        provider = self.provider
 
-        manager.stop()
+        provider.stop()
 
-        for image in manager.cluster_images():
-            logger.info("Removing image %s", image.name)
-            image.remove()
+        for machine in provider.machines():
+            provider.remove_machine(name=machine)
 
-        logger.info("Stopping cluster storage service")
-        manager.storage().stop()
+        logger.info("Releasing cluster %s shared resources", self.name)
+        provider.release_cluster()
 
         # Remove cluster state directory
         self.state.clean()
 
     def start(self) -> None:
-        manager = ContainersManager(self.name)
+        provider = self.provider
 
-        logger.info("Starting cluster storage service %s", self.name)
-        manager.storage().start()
+        logger.info("Preparing cluster %s shared resources", self.name)
+        provider.prepare_cluster()
 
-        # Search for the list of available images.
-        containers = [image.name for image in manager.cluster_images()]
-        # Look for the running container and start the other.
-        running = [container.name for container in manager.running()]
-        manager.start(
-            [
-                # .<cluster>.<namespace> suffix must be removed from container name.
-                container.split(".", 1)[0]
-                for container in containers
-                if container not in running
-            ]
+        # Look for the running machines and start the other.
+        running = provider.running()
+        provider.start(
+            names=[machine for machine in provider.machines() if machine not in running]
         )
 
     def stop(self) -> None:
-        ContainersManager(self.name).stop()
+        self.provider.stop()
 
     def status(self) -> ClusterStatus:
         return ClusterStatus(
-            ContainersManager(self.name).running(),
+            self.provider.running(),
             self.users_directory,
             self.cluster_settings,
         )
