@@ -6,9 +6,14 @@
 
 import contextlib
 import io
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
+from firehpc.errors import FireHPCRuntimeError
 from firehpc.exec import MIN_USERS, FireHPCExec
+from firehpc.state import UserState
 
 
 class TestArgs(unittest.TestCase):
@@ -67,3 +72,57 @@ class TestRemoteArgs(unittest.TestCase):
             self.parse_args(["--help"])
         self.assertNotIn("remote}", out.getvalue())
         self.assertNotIn(",remote", out.getvalue())
+
+
+class TestDeployState(unittest.TestCase):
+    """Errors before deployment must not leave a cluster state."""
+
+    def setUp(self):
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmpdir.cleanup)
+        self.cli = FireHPCExec.__new__(FireHPCExec)
+        self.cli.args = self.cli._parser().parse_args(
+            ["--remote", "server", "deploy", "--os", "debian13", "--cluster", "hpc"]
+        )
+        self.cli.user_state = UserState(Path(self.tmpdir.name))
+        self.cli.preferences = mock.Mock(remote_host=None)
+        self.cli.runtime_settings = mock.Mock()
+        os_db = mock.patch("firehpc.exec.OSDatabase").start().return_value
+        os_db.supported.return_value = True
+        os_db.environment.return_value = "ansible-latest"
+        os_db.url.return_value = "https://images.example.org/debian13.tar.xz"
+        self.addCleanup(mock.patch.stopall)
+        self.state = Path(self.tmpdir.name) / "clusters" / "hpc"
+
+    def test_unreachable_host(self):
+        mock.patch.object(FireHPCExec, "_load_racksdb").start()
+        mock.patch(
+            "firehpc.exec.EmulatedCluster.check_host",
+            side_effect=FireHPCRuntimeError("Unable to connect to remote host"),
+        ).start()
+        with self.assertRaises(FireHPCRuntimeError):
+            self.cli._execute_deploy()
+        self.assertFalse(self.state.exists())
+
+    def test_invalid_racksdb(self):
+        mock.patch.object(
+            FireHPCExec, "_load_racksdb", side_effect=SystemExit(1)
+        ).start()
+        check_host = mock.patch("firehpc.exec.EmulatedCluster.check_host").start()
+        with self.assertRaises(SystemExit):
+            self.cli._execute_deploy()
+        check_host.assert_not_called()
+        self.assertFalse(self.state.exists())
+
+    def test_settings_saved_after_checks(self):
+        mock.patch.object(FireHPCExec, "_load_racksdb").start()
+        mock.patch("firehpc.exec.EmulatedCluster.check_host").start()
+        deploy = mock.patch(
+            "firehpc.exec.EmulatedCluster.deploy",
+            side_effect=lambda *args: self.assertTrue(
+                (self.state / "settings.yml").exists()
+            ),
+        ).start()
+        mock.patch("firehpc.exec.EmulatedCluster.conf").start()
+        self.cli._execute_deploy()
+        deploy.assert_called_once()

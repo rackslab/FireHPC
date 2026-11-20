@@ -90,6 +90,12 @@ class EmulatedCluster:
             self._namespace = self.provider.namespace()
         return self._namespace
 
+    def check_host(self) -> None:
+        """Check the cluster host is reachable and its machine provider is available,
+        by retrieving the namespace of machines names."""
+        logger.debug("Checking machine provider on %s", self.host.label)
+        self.namespace
+
     @staticmethod
     def _emulator_container_names(infrastructure):
         """Return every admin and login node name, plus the compute container.

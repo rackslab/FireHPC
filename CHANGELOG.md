@@ -89,6 +89,9 @@ and this project adheres to
   nodes.
 
 ### Fixed
+- cli: Do not save cluster settings when `deploy` fails to load RacksDB database
+  or to reach the cluster host, so that a failed deployment does not leave a
+  cluster state behind.
 - conf: Merge latest upstream updates in machinectl connection plugin, to run
   `shell` commands with `TERM=dumb` in containers so that systemd 258 and later
   do not write OSC control sequences in commands output, to import text

@@ -464,7 +464,7 @@ class FireHPCExec:
                     f"({remote or 'local host'})"
                 )
 
-        # Define cluster settings from args and save
+        # Define cluster settings from args
         state = ClusterState(self.user_state, self.args.cluster)
         if state.settings.exists():
             existing_remote = state.load().remote
@@ -473,7 +473,6 @@ class FireHPCExec:
                     f"Cluster {self.args.cluster} is already deployed on "
                     f"{existing_remote or 'local host'}, clean it first"
                 )
-        state.create()
         cluster_settings = ClusterSettings.from_values(
             os=self.args.os,
             environment=os_db.environment(self.args.os),
@@ -483,7 +482,6 @@ class FireHPCExec:
             custom=self.args.custom,
             remote=remote,
         )
-        state.save(cluster_settings)
 
         # Load RacksDB
         db = self._load_racksdb(cluster_settings)
@@ -492,6 +490,13 @@ class FireHPCExec:
         cluster = EmulatedCluster(
             self.runtime_settings, self.args.cluster, state, cluster_settings
         )
+
+        # Check cluster host before saving cluster settings, so that an unreachable
+        # host does not leave a cluster state that cannot be cleaned.
+        cluster.check_host()
+
+        state.create()
+        state.save(cluster_settings)
 
         # If user specified another cluster name to extract its users directory, load
         # this users directory.
