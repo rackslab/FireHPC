@@ -12,8 +12,6 @@ import abc
 import atexit
 import typing as t
 
-from ..errors import FireHPCRuntimeError
-
 if t.TYPE_CHECKING:
     import socket
 
@@ -68,12 +66,15 @@ def get_host(remote: t.Optional[str] = None) -> Host:
     remote is None or empty. Hosts are cached so that connections to remote hosts
     are shared."""
     remote = remote or None
-    if remote is not None:
-        raise FireHPCRuntimeError("Remote hosts are not supported")
     if remote not in _hosts:
-        from .local import LocalHost
+        if remote is None:
+            from .local import LocalHost
 
-        _hosts[remote] = LocalHost()
+            _hosts[remote] = LocalHost()
+        else:
+            from .remote import RemoteHost
+
+            _hosts[remote] = RemoteHost(remote)
     return _hosts[remote]
 
 
