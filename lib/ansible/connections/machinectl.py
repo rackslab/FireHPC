@@ -643,4 +643,3 @@ class Connection(ConnectionBase):
                 os.chown(out_path, os.geteuid(), os.getegid() or -1)
         except OSError:
             raise AnsibleError('failed to change ownership on file {0} to user {1}'.format(out_path, os.getlogin()))
-
