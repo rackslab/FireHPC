@@ -28,6 +28,8 @@ and this project adheres to
     members use `organizationalRole` as their structural class.
 - cli: Add `deploy --update-os-image` option to force download of base OS image
   when already present on host.
+- Add `firehpc-agent` program to run machine providers on behalf of firehpc
+  running on another host.
 - cli: Add `deploy --users` option to set the number of generated users (#26).
 - lib: Add `deploy --users` option in bash-completion.
 - docs: Mention `deploy --users` option in manpage.

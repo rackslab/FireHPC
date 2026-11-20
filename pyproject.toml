@@ -40,6 +40,7 @@ tests = [
 
 [project.scripts]
 firehpc = 'firehpc.exec:FireHPCExec.run'
+firehpc-agent = 'firehpc.agent.server:main'
 
 [tool.setuptools.packages.find]
 include = ['firehpc*']
