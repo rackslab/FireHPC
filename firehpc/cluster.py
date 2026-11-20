@@ -17,6 +17,7 @@ import yaml
 
 from .templates import Templater
 from .users import UsersDirectory
+from .hosts import Host, get_host
 from .providers import DEFAULT_PROVIDER, provider_class
 from .errors import FireHPCRuntimeError
 from .settings import ClusterSettings
@@ -67,10 +68,14 @@ class EmulatedCluster:
         self._namespace = None
 
     @property
+    def host(self) -> Host:
+        return get_host()
+
+    @property
     def provider(self):
-        """Machine provider of the cluster."""
+        """Machine provider of the cluster, running on cluster host."""
         if self._provider is None:
-            self._provider = provider_class(self.provider_kind)(self.name)
+            self._provider = self.host.provider(self.provider_kind, self.name)
         return self._provider
 
     @property
@@ -315,6 +320,9 @@ class EmulatedCluster:
                     "fhpc_db": str(Path.cwd() / db._loader.path),
                     "fhpc_emulator_mode": self.cluster_settings.slurm_emulator,
                     "fhpc_nodes": nodes,
+                    "fhpc_bootstrap_connection": provider_class(
+                        self.provider_kind
+                    ).BOOTSTRAP_CONNECTION,
                 },
             )
             # Raise exception on playbook failure

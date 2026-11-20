@@ -56,6 +56,8 @@ class SSHClient:
             "-i",
             self.private_key,
         ]
+        # Reach machines through their host, if required.
+        _cmd += self.cluster.host.ssh_proxy_args()
         _cmd += [
             "-l",
             username,
@@ -76,10 +78,13 @@ class SSHClient:
                     logger.debug("Loading SSH hosts keys from %s", self.known_hosts)
                     client.load_host_keys(self.known_hosts)
                     logger.debug("Connecting client to %s@%s", username, hostname)
+                    # Open TCP connection from the host of cluster machines.
+                    sock = self.cluster.host.open_tcp(hostname, 22)
                     client.connect(
                         hostname,
                         username=username,
                         key_filename=self.private_key,
+                        sock=sock,
                     )
                     self.clients[client_key] = client
                 else:
