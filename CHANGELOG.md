@@ -36,6 +36,11 @@ and this project adheres to
 - docs: Mention `deploy --update-os-image` option in manpage.
 
 ### Changed
+- pkgs: Vendor Ansible machinectl connection plugin in
+  `lib/ansible/connections`, from
+  [ansible-connection-machinectl](https://github.com/tomeon/ansible-connection-machinectl)
+  with FireHPC modifications. It used to be injected in packages as a
+  supplementary source.
 - conf: `slurm_gpus_models_map` values are records with `type` and `topology`.
   An omitted `topology` key defaults to true. Set `topology: false` for none.
 - core: Remove the per-container task limit. `TasksMax=16384` is exhausted by

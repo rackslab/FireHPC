@@ -11,5 +11,8 @@ repos:
   - id: ruff
     types: [python]
     args: [ --fix ]
+    # Keep vendored code as close as possible to upstream.
+    exclude: ^lib/ansible/connections/
     # Run the formatter.
   - id: ruff-format
+    exclude: ^lib/ansible/connections/
