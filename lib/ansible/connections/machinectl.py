@@ -6,6 +6,9 @@
 # getent in the right machine, set TERM=dumb for machinectl, find machinectl
 # with shutil.which and explain why copy-to cannot overwrite files.
 #
+# FireHPC modifications after upstream merge: run machinectl on the host of
+# machines through a helper command (remote_helper option).
+#
 # Merged with upstream branch master, commit
 # 9356fcf8db92be9702b08c733482b38456ec174c.
 #
@@ -36,9 +39,32 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+DOCUMENTATION = '''
+name: machinectl
+short_description: Run tasks in machines managed by systemd-machined
+description:
+  - Run commands and transfer files in machines managed by systemd-machined
+    with machinectl, either on local host or on another host through a helper
+    command.
+options:
+  remote_helper:
+    description:
+      - Command to reach the host of machines when it is not the local host.
+        It must accept the subcommands C(exec -- CMD ...) to run a command on
+        the host of machines, C(upload SRC DST) to copy a local file to this
+        host and C(download SRC DST) to copy a file from this host.
+      - When empty, machinectl is run on local host.
+    type: list
+    elements: str
+    default: []
+    vars:
+      - name: ansible_machinectl_remote_helper
+'''
+
 import collections
 import fcntl
 import os
+import posixpath
 import pty
 import re
 import select
@@ -89,8 +115,12 @@ class MachineCtl(object):
     # command's output, which older versions of machinectl pass through.
     SHELL_OPTS = ['--setenv=TERM=dumb']
 
-    def __init__(self, command=None):
-        if command is not None:
+    def __init__(self, command=None, helper=None):
+        self.helper = list(helper or [])
+        if self.helper:
+            # machinectl is searched in PATH of the host of machines.
+            self.command = command or 'machinectl'
+        elif command is not None:
             self.command = command
         else:
             self.command = find_executable('machinectl')
@@ -98,6 +128,30 @@ class MachineCtl(object):
                 raise AnsibleError('machinectl executable not found in PATH')
 
         self.version = self._version()
+
+    def base_command(self):
+        '''
+        Returns the command to run machinectl, either on local host or on the
+        host of machines through the helper command. In the latter case, the
+        environment variables of machinectl_env() are set on the host of
+        machines.
+        '''
+        if self.helper:
+            return self.helper + [
+                'exec', '--', 'env',
+                'SYSTEMD_LOG_LEVEL={0}'.format(self.SYSTEMD_LOG_LEVEL),
+                'TERM=dumb', self.command,
+            ]
+        return [self.command]
+
+    def run_helper(self, args):
+        ''' Runs the helper command and returns its standard output '''
+        cmd = self.helper + args
+        display.vvv(u'HELPER {0}'.format(cmd))
+        try:
+            return subprocess.check_output(cmd, stdin=subprocess.DEVNULL)
+        except (OSError, subprocess.CalledProcessError) as e:
+            raise AnsibleError('failed to run helper command {0}: {1}'.format(cmd, e))
 
     @classmethod
     def machinectl_env(cls, **kwargs):
@@ -115,7 +169,7 @@ class MachineCtl(object):
         ''' Queries the installed version of machinectl/systemd '''
 
         try:
-            version_output = subprocess.check_output([self.command, '--version'])
+            version_output = subprocess.check_output(self.base_command() + ['--version'])
             matched = re.match(r'\Asystemd\s+(\d+)\D', to_native(version_output))
             return (matched.groups())[0]
         except subprocess.CalledProcessError as e:
@@ -136,7 +190,7 @@ class MachineCtl(object):
         if action == 'shell':
             opts = self.SHELL_OPTS + opts
 
-        local_cmd = [self.command] + opts + [action]
+        local_cmd = self.base_command() + opts + [action]
 
         if machine is not None:
             local_cmd.append(machine)
@@ -229,7 +283,10 @@ class Connection(ConnectionBase):
     def __init__(self, play_context, new_stdin, *args, **kwargs):
         super(Connection, self).__init__(play_context, new_stdin, *args, **kwargs)
 
-        self.machinectl = MachineCtl(kwargs.get('machinectl_command'))
+        # MachineCtl is initialized when connecting, once plugin options are
+        # set.
+        self.machinectl = None
+        self._machinectl_command = kwargs.get('machinectl_command')
         self.remote_uid = None
         self.remote_gid = None
         self._flags = collections.defaultdict(lambda: False)
@@ -255,6 +312,11 @@ class Connection(ConnectionBase):
             if returncode == 0:
                 return self._parse_passwd(stdout.decode())
 
+        # Machine root directory is not available on local host when machines
+        # are reached through the helper command.
+        if self.machinectl.helper:
+            return
+
         try:
             if passwd_path is None:
                 passwd_path = os.path.join(self.chroot, 'etc/passwd')
@@ -273,6 +335,12 @@ class Connection(ConnectionBase):
 
         if not self._connected:
             self.machine = self._play_context.remote_addr
+
+            if self.machinectl is None:
+                self.machinectl = MachineCtl(
+                    self._machinectl_command,
+                    helper=self.get_option('remote_helper'),
+                )
 
             display.vvv(u'ESTABLISH MACHINECTL CONNECTION FOR USER: {0}'.format(
                 self._play_context.remote_user or '?'), host=self.machine
@@ -620,9 +688,49 @@ class Connection(ConnectionBase):
         returncode, stdout, stderr = self._run_command('shell', args=remove_sh_cmd, machine=self.machine)
         if returncode != 0:
             raise AnsibleError('failed to perform cleanup of file {0}:\n{1}\n{2}'.format(out_path, stdout, stderr))
-        returncode, stdout, stderr = self._run_command('copy-to', args=[in_path, out_path], machine=self.machine)
+        if self.machinectl.helper:
+            returncode, stdout, stderr = self._helper_copy_to(in_path, out_path)
+        else:
+            returncode, stdout, stderr = self._run_command('copy-to', args=[in_path, out_path], machine=self.machine)
         if returncode != 0:
             raise AnsibleError('failed to transfer file {0} to {1}:\n{2}\n{3}'.format(in_path, out_path, stdout, stderr))
+
+    def _helper_tmpdir(self):
+        ''' Creates a temporary directory on the host of machines '''
+        return to_native(self.machinectl.run_helper(['exec', '--', 'mktemp', '-d'])).strip()
+
+    def _helper_cleanup(self, tmpdir):
+        ''' Removes temporary directory on the host of machines '''
+        self.machinectl.run_helper(['exec', '--', 'rm', '-rf', tmpdir])
+
+    def _helper_copy_to(self, in_path, out_path):
+        '''
+        Copies local file to the machine through a temporary file on the host
+        of machines, as machinectl copy-to only accepts files on this host.
+        '''
+        tmpdir = self._helper_tmpdir()
+        try:
+            host_path = posixpath.join(tmpdir, os.path.basename(in_path))
+            self.machinectl.run_helper(['upload', in_path, host_path])
+            return self._run_command('copy-to', args=[host_path, out_path], machine=self.machine)
+        finally:
+            self._helper_cleanup(tmpdir)
+
+    def _helper_copy_from(self, in_path, out_path):
+        '''
+        Copies file from the machine to local host through a temporary file on
+        the host of machines, as machinectl copy-from only accepts files on
+        this host.
+        '''
+        tmpdir = self._helper_tmpdir()
+        try:
+            host_path = posixpath.join(tmpdir, os.path.basename(out_path))
+            result = self._run_command('copy-from', args=[in_path, host_path], machine=self.machine)
+            if result[0] == 0:
+                self.machinectl.run_helper(['download', host_path, out_path])
+            return result
+        finally:
+            self._helper_cleanup(tmpdir)
 
     def fetch_file(self, in_path, out_path):
         super(Connection, self).fetch_file(in_path, out_path)
@@ -630,7 +738,10 @@ class Connection(ConnectionBase):
 
         in_path = self._prefix_login_path(in_path)
 
-        returncode, stdout, stderr = self._run_command('copy-from', args=[in_path, out_path], machine=self.machine)
+        if self.machinectl.helper:
+            returncode, stdout, stderr = self._helper_copy_from(in_path, out_path)
+        else:
+            returncode, stdout, stderr = self._run_command('copy-from', args=[in_path, out_path], machine=self.machine)
 
         if returncode != 0:
             raise AnsibleError('failed to transfer file {0} from {1}:\n{2}\n{3}'.format(out_path, in_path, stdout, stderr))

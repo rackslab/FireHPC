@@ -28,6 +28,9 @@ and this project adheres to
     members use `organizationalRole` as their structural class.
 - cli: Add `deploy --update-os-image` option to force download of base OS image
   when already present on host.
+- conf: Support running machinectl on the host of machines through a helper
+  command in machinectl connection plugin, with
+  `ansible_machinectl_remote_helper` variable.
 - Add `firehpc-agent` program to run machine providers on behalf of firehpc
   running on another host.
 - cli: Add `deploy --users` option to set the number of generated users (#26).
