@@ -240,6 +240,33 @@ http://admin.hpc:3000/
 Grafana is setup with a _Slurm_ dashboard showing diagrams of nodes states and
 job queue by default.
 
+### CEEMS and fake GPUs
+
+With `ceems_enabled: true` in cluster custom variables, the
+[CEEMS](https://ceems.dev) exporter is deployed on compute nodes. On nodes with
+GPUs, FireHPC installs the `firehpc-nvidia-fake` package, which provides:
+
+- `firehpc-nvidia-smi`, the subset of `nvidia-smi` that CEEMS uses to discover
+  GPUs,
+- `firehpc-dcgm-exporter`, a fake NVIDIA DCGM exporter on port 9400. GPUs
+  allocated to Slurm jobs report activity, the other GPUs stay idle.
+
+With `metrics_enabled: true`, Prometheus scrapes both exporters and loads the
+CEEMS recording rules for NVIDIA GPUs, which give GPU metrics per job (eg.
+`uuid:ceems_gpu_usage:ratio{uuid="<job id>"}`).
+
+DCGM renamed most of its metrics in versions 4.6 and 4.7. The
+`nvidia_fake_dcgm_flavor` variable selects the metric names emitted by the fake
+exporter, and used in the recording rules:
+
+- `legacy`: names and `Hostname` label of dcgm-exporter before 4.6.0,
+- `4.8.4` (default): legacy names with `hostname` label, like the latest
+  dcgm-exporter release,
+- `current`: new names and units of dcgm-exporter main branch.
+
+CEEMS is not supported in Slurm emulator mode. The fake tools are developed in
+[`utils/nvidia-fake`](utils/nvidia-fake).
+
 ### Remote host
 
 FireHPC can deploy clusters containers on a remote host reached through SSH,
