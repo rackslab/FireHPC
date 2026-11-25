@@ -82,12 +82,19 @@ Commands are listed in lexicographical order.
 
   Stop and clean and emulated HPC clusters, with the following steps: stop
   containers, remove container images and stop storage service of a cluster.
+  By default, the secrets generated for the cluster (SSH keys, internal CA,
+  passwords, munge, Slurm and JWT keys…) are kept in the cluster state
+  directory and reused by the next deployment of a cluster with the same name,
+  to avoid regenerating them. Cluster settings and configuration are removed.
 +
 --
 This command accepts the following options:
 
 [.cli-opt]#*--cluster*=#[.cli-optval]##_CLUSTER_##::
   Name of the cluster to clean. This option is required.
+
+[.cli-opt]#*--all*#::
+  Also remove the cluster secrets, with the whole cluster state directory.
 --
 
 [.cli-opt]#*conf*#::

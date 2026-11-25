@@ -57,6 +57,7 @@ and this project adheres to
 - docs: Mention `deploy --update-os-image` option in manpage.
 - cli: Add `clean --all` option to also remove cluster secrets.
 - lib: Add `clean --all` option in bash-completion.
+- docs: Mention `clean --all` option and kept secrets in manpage.
 
 ### Changed
 - pkgs: Vendor Ansible machinectl connection plugin in
