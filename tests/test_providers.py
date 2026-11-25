@@ -4,12 +4,15 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import socket
 import unittest
+from unittest import mock
 
 from firehpc.errors import FireHPCRuntimeError
 from firehpc.providers import DEFAULT_PROVIDER, PROVIDERS, provider_class
 from firehpc.providers.base import MachineProvider
 from firehpc.providers.nspawn import NspawnProvider
+from firehpc.providers.nspawn.dbus import Container
 
 
 class TestProviders(unittest.TestCase):
@@ -46,3 +49,39 @@ class TestProviders(unittest.TestCase):
 
     def test_base_bootstrap_vars(self):
         self.assertEqual(MachineProvider.bootstrap_vars(["helper"]), {})
+
+
+class TestContainerAddresses(unittest.TestCase):
+    V4 = (int(socket.AF_INET), (10, 0, 0, 2))
+    V6 = (int(socket.AF_INET6), (0xFE, 0x80) + (0,) * 13 + (2,))
+
+    def container(self, *replies):
+        # Bypass constructor to avoid connecting to DBus system bus.
+        container = Container.__new__(Container)
+        container.name = "cn1"
+        container.proxy = mock.Mock()
+        container.proxy.GetAddresses.side_effect = list(replies)
+        return container
+
+    @mock.patch("firehpc.providers.nspawn.dbus.time.sleep")
+    def test_wait(self, sleep):
+        container = self.container([self.V4], [self.V4, self.V6])
+        result = container.addresses()
+        # Addresses found in first attempt must not be duplicated.
+        self.assertEqual([str(address) for address in result], ["10.0.0.2", "fe80::2"])
+        sleep.assert_called_once_with(1)
+
+    @mock.patch("firehpc.providers.nspawn.dbus.time.sleep")
+    @mock.patch("firehpc.providers.nspawn.dbus.time.monotonic")
+    def test_timeout(self, monotonic, sleep):
+        monotonic.side_effect = [0, 30, 61]
+        container = self.container([self.V4], [self.V4])
+        with self.assertRaisesRegex(
+            FireHPCRuntimeError,
+            "Timeout after 60 seconds while waiting for IPv6 address of container cn1",
+        ):
+            container.addresses()
+
+    def test_no_wait(self):
+        container = self.container([])
+        self.assertEqual(container.addresses(wait=False), [])

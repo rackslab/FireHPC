@@ -298,17 +298,24 @@ class Container(DBusObject):
         # manager (1st process) in container to trigger clean poweroff.
         self.proxy.Kill("leader", signal.SIGRTMIN + 4)
 
-    def addresses(self, wait: bool = True) -> list[str]:
+    # Maximum number of seconds to wait for container IP addresses.
+    ADDRESSES_TIMEOUT = 60
+
+    def addresses(
+        self, wait: bool = True, timeout: float = ADDRESSES_TIMEOUT
+    ) -> list[str]:
         """Return the list of network addresses (ipv4 and ipv6) assigned to the
-        container. When wait is True, the method waits until the list of IP addresses is
-        not empty."""
-        found_v4 = False
-        found_v6 = False
-        result = []
+        container. When wait is True, the method waits until both IPv4 and IPv6
+        addresses are assigned, or raises FireHPCRuntimeError after timeout
+        seconds."""
+        deadline = time.monotonic() + timeout
         # machine1 DBus interface returns a sequence of pairs: the 1st element is the
         # address type and the 2nd element is a tuple with address all bytes as separate
         # integers.
         while True:
+            found_v4 = False
+            found_v6 = False
+            result = []
             try:
                 for address in self.proxy.GetAddresses():
                     if address[0] == int(socket.AF_INET):
@@ -342,6 +349,17 @@ class Container(DBusObject):
                 ) from err
             if (found_v4 and found_v6) or not wait:
                 break  # stop main while loop
+            elif time.monotonic() >= deadline:
+                missing = " and ".join(
+                    family
+                    for family, found in (("IPv4", found_v4), ("IPv6", found_v6))
+                    if not found
+                )
+                raise FireHPCRuntimeError(
+                    f"Timeout after {timeout:g} seconds while waiting for {missing} "
+                    f"address of container {self.name}, check systemd-networkd "
+                    "service in container"
+                )
             else:
                 logger.debug(
                     "IP addresses of containers %s are not yet available, retrying…",

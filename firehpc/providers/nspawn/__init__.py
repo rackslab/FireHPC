@@ -69,6 +69,7 @@ class NspawnProvider(MachineProvider):
         return [container.name for container in self.manager.running()]
 
     def addresses(self) -> dict[str, list[str]]:
+        logger.info("Waiting for IP addresses of containers…")
         return {
             container.name: [str(address) for address in container.addresses()]
             for container in self.manager.running()
