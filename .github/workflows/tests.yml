@@ -34,3 +34,41 @@ jobs:
       run: pip install PyGObject ansible-core -e .[tests]
     - name: Run unit tests
       run: pytest -v tests
+
+  nvidia-fake:
+    name: nvidia-fake (${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        os: [ubuntu-latest]
+        include:
+        - python-version: "3.9"
+          os: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v5
+    - uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: pip
+    - name: Install package
+      run: pip install -e utils/nvidia-fake[tests]
+    - name: Run unit tests
+      run: pytest -v utils/nvidia-fake/tests
+
+  # Rocky Linux 8 nodes run Python 3.6, which setup-python does not provide
+  # on current runners. Setuptools for Python 3.6 cannot read project metadata
+  # in pyproject.toml, tests run on the source tree.
+  nvidia-fake-py36:
+    name: nvidia-fake (3.6)
+    runs-on: ubuntu-latest
+    container: python:3.6
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install test dependencies
+      run: pip install prometheus_client pytest
+    - name: Run unit tests
+      run: pytest -v utils/nvidia-fake/tests
+      env:
+        PYTHONPATH: utils/nvidia-fake
