@@ -331,7 +331,7 @@ class Container(DBusObject):
                             ipaddress.IPv6Address(
                                 ":".join(
                                     [
-                                        f"{a:x}{b:x}"
+                                        f"{a:02x}{b:02x}"
                                         for a, b in zip(*[iter(address[1])] * 2)
                                     ]
                                 )

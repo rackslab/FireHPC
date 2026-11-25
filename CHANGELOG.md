@@ -112,6 +112,7 @@ and this project adheres to
 - nspawn: Fail with an explicit error after a timeout of 60 seconds instead
   of waiting forever when containers do not get IP addresses, and stop
   duplicating addresses found while waiting.
+- nspawn: Fix IPv6 addresses of containers with bytes lower than 0x10.
 - cli: Do not save cluster settings when `deploy` fails to load RacksDB database
   or to reach the cluster host, so that a failed deployment does not leave a
   cluster state behind.

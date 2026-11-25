@@ -82,6 +82,12 @@ class TestContainerAddresses(unittest.TestCase):
         ):
             container.addresses()
 
+    def test_ipv6_format(self):
+        # Bytes lower than 0x10 must be zero-padded.
+        v6 = (int(socket.AF_INET6), (0x20, 0x01, 0x0D, 0xB8, 0x01, 0x02) + (0,) * 10)
+        container = self.container([self.V4, v6])
+        self.assertEqual(str(container.addresses()[1]), "2001:db8:102::")
+
     def test_no_wait(self):
         container = self.container([])
         self.assertEqual(container.addresses(wait=False), [])
