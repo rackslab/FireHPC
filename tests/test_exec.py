@@ -12,8 +12,9 @@ from pathlib import Path
 from unittest import mock
 
 from firehpc.errors import FireHPCRuntimeError
+from firehpc.cluster import clusters_list
 from firehpc.exec import MIN_USERS, FireHPCExec
-from firehpc.state import UserState
+from firehpc.state import ClusterState, UserState
 
 
 class TestArgs(unittest.TestCase):
@@ -126,3 +127,41 @@ class TestDeployState(unittest.TestCase):
         mock.patch("firehpc.exec.EmulatedCluster.conf").start()
         self.cli._execute_deploy()
         deploy.assert_called_once()
+
+
+class TestClean(unittest.TestCase):
+    def setUp(self):
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmpdir.cleanup)
+        self.user_state = UserState(Path(self.tmpdir.name))
+        self.addCleanup(mock.patch.stopall)
+
+    def execute_clean(self, args):
+        cli = FireHPCExec.__new__(FireHPCExec)
+        cli.args = cli._parser().parse_args(["clean", "--cluster", "hpc", *args])
+        cli.user_state = self.user_state
+        cli.preferences = mock.Mock(remote_host=None)
+        cli.runtime_settings = mock.Mock()
+        clean = mock.patch("firehpc.exec.EmulatedCluster.clean").start()
+        clean_secrets = mock.patch("firehpc.exec.EmulatedCluster.clean_secrets").start()
+        cli._execute_clean()
+        return clean, clean_secrets
+
+    def test_clean_keeps_secrets_by_default(self):
+        clean, clean_secrets = self.execute_clean([])
+        clean.assert_called_once_with()
+        clean_secrets.assert_not_called()
+
+    def test_clean_all(self):
+        clean, clean_secrets = self.execute_clean(["--all"])
+        clean.assert_called_once_with()
+        clean_secrets.assert_called_once_with()
+
+    def test_list_skips_kept_secrets(self):
+        deployed = ClusterState(self.user_state, "deployed")
+        deployed.create()
+        deployed.settings.touch()
+        cleaned = ClusterState(self.user_state, "cleaned")
+        cleaned.create()
+        (cleaned.path / "ssh").mkdir()
+        self.assertEqual(clusters_list(self.user_state.path), ["deployed"])

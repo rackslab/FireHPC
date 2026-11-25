@@ -74,9 +74,25 @@ class ClusterState:
             self.path.mkdir()
 
     def clean(self):
+        """Remove cluster settings and configuration directory, keep everything
+        else in cluster state directory (SSH keys, CA, passwords, keys…) so that
+        they can be reused by next deployment."""
+        self.conf_clean()
+        if self.settings.exists():
+            logger.debug("Removing cluster settings file %s", self.settings)
+            self.settings.unlink()
+
+    def clean_secrets(self):
+        """Remove cluster state directory with all its content, including
+        secrets."""
         if self.path.exists():
             logger.info("Removing existing cluster state directory %s", self.path)
             shutil.rmtree(self.path)
+
+    def has_secrets(self):
+        """Return True if the cluster state directory exists with secrets kept from
+        a previous deployment, without cluster settings."""
+        return self.path.exists() and not self.settings.exists()
 
     def conf_create(self):
         if not self.conf.exists():

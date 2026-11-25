@@ -274,6 +274,11 @@ class FireHPCExec:
             help="Name of the cluster to clean",
             required=True,
         )
+        parser_clean.add_argument(
+            "--all",
+            action="store_true",
+            help="Also remove cluster secrets (SSH keys, CA, passwords, keys)",
+        )
         parser_clean.set_defaults(func=self._execute_clean)
 
         # start command
@@ -583,6 +588,14 @@ class FireHPCExec:
                 remote=resolve_remote(self.args, self.preferences),
             )
         cluster.clean()
+        if self.args.all:
+            cluster.clean_secrets()
+        elif state.has_secrets():
+            logger.info(
+                "Keeping cluster %s secrets in %s for next deployment",
+                self.args.cluster,
+                state.path,
+            )
 
     def _execute_status(self):
         cluster = self._load_cluster(self.args.cluster)

@@ -55,6 +55,7 @@ and this project adheres to
 - load: Add random yet realistic job names.
 - lib: Add `deploy --update-os-image` option in bash-completion.
 - docs: Mention `deploy --update-os-image` option in manpage.
+- cli: Add `clean --all` option to also remove cluster secrets.
 
 ### Changed
 - pkgs: Vendor Ansible machinectl connection plugin in
@@ -97,6 +98,10 @@ and this project adheres to
   deployment.
 - load: Submit jobs with GPU types when GPU GRES are declared with types on
   nodes.
+- cli: `clean` keeps cluster secrets (SSH keys, internal CA, passwords, munge,
+  Slurm and JWT keys) in cluster state directory, so that next `deploy` of a
+  cluster with the same name reuses them instead of regenerating them. Cleaned
+  clusters with kept secrets are not reported by `list` command.
 
 ### Fixed
 - cli: Do not save cluster settings when `deploy` fails to load RacksDB database

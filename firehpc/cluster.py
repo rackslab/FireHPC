@@ -33,7 +33,13 @@ logger = logging.getLogger(__name__)
 
 def clusters_list(state: Path):
     """Return list of cluster names present in state directory."""
-    return [path.name for path in UserState(state).clusters.glob("*")]
+    # Directories without settings only contain secrets kept from a cleaned
+    # cluster, they are not listed.
+    return [
+        path.name
+        for path in UserState(state).clusters.glob("*")
+        if ClusterState(UserState(state), path.name).settings.exists()
+    ]
 
 
 @dataclass
@@ -366,8 +372,13 @@ class EmulatedCluster:
         logger.info("Releasing cluster %s shared resources", self.name)
         provider.release_cluster()
 
-        # Remove cluster state directory
+        # Remove cluster settings and configuration, keep secrets for next
+        # deployment.
         self.state.clean()
+
+    def clean_secrets(self) -> None:
+        """Remove cluster secrets with the whole cluster state directory."""
+        self.state.clean_secrets()
 
     def start(self) -> None:
         provider = self.provider

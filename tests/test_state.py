@@ -51,16 +51,49 @@ class TestClusterState(unittest.TestCase):
             self.assertTrue(state.path.exists())
             self.assertTrue(state.exists())
 
+    def test_clean_secrets(self):
+        with tempfile.TemporaryDirectory() as _tmp:
+            tmp = Path(_tmp)
+            tmp.rmdir()
+            state = ClusterState(UserState(tmp), "foo")
+            state.create()
+            state.clean_secrets()
+            self.assertTrue(state.user_state.path.exists())
+            self.assertTrue(state.user_state.clusters.exists())
+            self.assertFalse(state.path.exists())
+            self.assertFalse(state.exists())
+
     def test_clean(self):
         with tempfile.TemporaryDirectory() as _tmp:
             tmp = Path(_tmp)
             tmp.rmdir()
             state = ClusterState(UserState(tmp), "foo")
             state.create()
+            state.conf_create()
+            state.extravars.touch()
+            state.settings.touch()
+            for secret in ["ssh/id_rsa", "ca/ca.crt", "munge/munge.key"]:
+                (state.path / secret).parent.mkdir()
+                (state.path / secret).touch()
+            self.assertFalse(state.has_secrets())
             state.clean()
-            self.assertTrue(state.user_state.path.exists())
-            self.assertTrue(state.user_state.clusters.exists())
-            self.assertFalse(state.path.exists())
+            self.assertFalse(state.settings.exists())
+            self.assertFalse(state.conf.exists())
+            for secret in ["ssh/id_rsa", "ca/ca.crt", "munge/munge.key"]:
+                self.assertTrue((state.path / secret).exists())
+            self.assertTrue(state.has_secrets())
+            # Secrets clean removes the whole directory
+            state.clean_secrets()
+            self.assertFalse(state.exists())
+            self.assertFalse(state.has_secrets())
+
+    def test_clean_missing(self):
+        with tempfile.TemporaryDirectory() as _tmp:
+            tmp = Path(_tmp)
+            tmp.rmdir()
+            state = ClusterState(UserState(tmp), "foo")
+            # Must not fail when cluster state directory does not exist
+            state.clean()
             self.assertFalse(state.exists())
 
     def test_conf_create(self):
