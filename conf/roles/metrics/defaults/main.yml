@@ -20,6 +20,16 @@ metrics_ldap_admins_group: "cn=admin,ou=groups,{{ metrics_ldap_search_base }}"  
 metrics_dashboards_dir: /var/lib/grafana/dashboards
 metrics_dashboards:
 - slurm.json
+# Scrape CEEMS exporter and DCGM exporter on compute nodes, and load CEEMS
+# recording rules for NVIDIA GPUs.
+metrics_ceems_enabled: false
+# DCGM exporter metric names in CEEMS recording rules: legacy, "4.8.4" or
+# current. See nvidia-fake role.
+metrics_dcgm_flavor: "4.8.4"
+# Lists of host:port
+metrics_ceems_targets: []
+metrics_dcgm_targets: []
+metrics_rules_dir: /etc/prometheus/rules
 
 metrics_confs:
 - template: alloy.j2

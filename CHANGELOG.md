@@ -31,6 +31,8 @@ and this project adheres to
     legacy, 4.8.4 or current DCGM metric names.
   - Add optional CEEMS exporter on compute nodes with `ceems_enabled`. Nodes
     with GPUs get fake NVIDIA GPUs from `nvidia-fake` role.
+  - Scrape CEEMS and DCGM exporters with Prometheus when CEEMS is enabled,
+    and load CEEMS recording rules for NVIDIA GPUs.
 - utils: Add `firehpc-nvidia-fake` package with `firehpc-nvidia-smi` and
   `firehpc-dcgm-exporter` programs, to emulate NVIDIA GPUs on cluster nodes.
   DCGM metrics follow the Slurm jobs allocated to the GPUs.

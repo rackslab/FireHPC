@@ -43,3 +43,24 @@
   notify:
     - "Restart {{ item.service }}"
   loop: "{{ metrics_confs }}"
+
+- name: Deploy CEEMS recording rules
+  when: metrics_ceems_enabled
+  block:
+    - name: Create Prometheus rules directory
+      ansible.builtin.file:
+        path: "{{ metrics_rules_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Deploy CEEMS recording rules for NVIDIA GPUs
+      ansible.builtin.template:
+        src: ceems-nvidia-dcgm-gpu.rules.j2
+        dest: "{{ metrics_rules_dir }}/ceems-nvidia-dcgm-gpu.rules"
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - Restart prometheus

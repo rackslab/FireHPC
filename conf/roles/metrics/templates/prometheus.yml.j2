@@ -1,3 +1,8 @@
+{% if metrics_ceems_enabled %}
+rule_files:
+  - {{ metrics_rules_dir }}/*.rules
+
+{% endif %}
 # A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
 scrape_configs:
@@ -33,3 +38,23 @@ scrape_configs:
       - targets: ['localhost:443']
     tls_config:
       insecure_skip_verify: yes
+{% if metrics_ceems_enabled %}
+
+  - job_name: ceems
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+{% for target in metrics_ceems_targets %}
+        - {{ target }}
+{% endfor %}
+{% if metrics_dcgm_targets | length > 0 %}
+
+  - job_name: dcgm
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+{% for target in metrics_dcgm_targets %}
+        - {{ target }}
+{% endfor %}
+{% endif %}
+{% endif %}
