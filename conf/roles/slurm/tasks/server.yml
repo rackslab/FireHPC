@@ -153,6 +153,23 @@
   - item not in slurmdbd_users.stdout_lines
   loop: "{{ slurm_users }}"
 
+# Output has one line per account, with its coordinators separated by commas:
+#   account|login1,login2
+- name: Get current slurmdbd account coordinators
+  ansible.builtin.command:
+    cmd: sacctmgr --noheader --parsable2 list accounts withcoord format=Account,Coordinators
+  register: slurmdbd_coordinators
+  changed_when: false
+  when: slurm_with_accounting
+
+- name: Add account coordinators in slurmdbd
+  ansible.builtin.command:
+    cmd: "sacctmgr --immediate add coordinator account={{ item.0.account }} names={{ item.1 }}"
+  when:
+  - slurm_with_accounting
+  - item.1 not in (dict(slurmdbd_coordinators.stdout_lines | map('split', '|')).get(item.0.account, '')).split(',')
+  loop: "{{ slurm_coordinators | subelements('users') }}"
+
 - name: Get current slurmdbd QOS
   ansible.builtin.command:
     cmd: sacctmgr --noheader --parsable2 list qos format=name

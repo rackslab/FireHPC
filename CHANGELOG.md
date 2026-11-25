@@ -36,6 +36,7 @@ and this project adheres to
     with GPUs get fake NVIDIA GPUs from `nvidia-fake` role.
   - Scrape CEEMS and DCGM exporters with Prometheus when CEEMS is enabled,
     and load CEEMS recording rules for NVIDIA GPUs.
+  - Support Slurm account coordinators with `slurm_coordinators` variable.
 - utils: Add `firehpc-nvidia-fake` package with `firehpc-nvidia-smi` and
   `firehpc-dcgm-exporter` programs, to emulate NVIDIA GPUs on cluster nodes.
   DCGM metrics follow the Slurm jobs allocated to the GPUs.

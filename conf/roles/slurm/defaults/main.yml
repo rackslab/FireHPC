@@ -48,6 +48,28 @@ slurm_db_purge_after: 14days
 slurm_users: []
 slurm_accounts: []
 slurm_qos: []
+# Account coordinators, added in slurmdbd when Slurm accounting is enabled.
+# Each item names one account and the logins of its coordinators. Accounts and
+# users must also be declared in slurm_accounts and slurm_users. Coordinators
+# are only added, never removed. Example:
+#
+#   slurm_coordinators:
+#   - account: physic
+#     users:
+#     - jsantos
+#
+# As logins are generated randomly for each cluster, values can be Jinja
+# expressions over the generated directory, for example the first member of a
+# group:
+#
+#   slurm_coordinators:
+#   - account: physic
+#     users:
+#     - "{{ (fhpc_groups | selectattr('name', 'equalto', 'physic') | first).members[0] }}"
+#
+# Note that FireHPC generates the physic, optic, acoustic and biology groups
+# only for clusters with more than 4 users.
+slurm_coordinators: []
 slurm_compute_nodes: []
 slurm_partitions:
 - name: normal
