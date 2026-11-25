@@ -1,0 +1,18 @@
+# This file is part of FireHPC.
+#
+# Copyright (c) 2026 Rackslab
+#
+# GNU General Public License v3.0+
+
+[Unit]
+Description=FireHPC fake NVIDIA DCGM exporter
+After=network.target
+
+[Service]
+# Root is required to read the environment of Slurm job processes in /proc.
+ExecStart=/usr/bin/firehpc-dcgm-exporter
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -26,6 +26,9 @@ and this project adheres to
     groups then also use `groupOfNames` and `member`, and `posixGroup` is
     auxiliary so both classes can share an entry. Groups that do not list
     members use `organizationalRole` as their structural class.
+- utils: Add `firehpc-nvidia-fake` package with `firehpc-nvidia-smi` and
+  `firehpc-dcgm-exporter` programs, to emulate NVIDIA GPUs on cluster nodes.
+  DCGM metrics follow the Slurm jobs allocated to the GPUs.
 - cli: Add `deploy --update-os-image` option to force download of base OS image
   when already present on host.
 - conf: Support running machinectl on the host of machines through a helper
