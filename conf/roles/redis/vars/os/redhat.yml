@@ -1,5 +1,13 @@
 ---
+# RHEL 10 and derivatives replaced Redis with Valkey, a compatible fork.
 redis_packages:
-- redis
-redis_conf_file: "{{ (ansible_distribution_major_version == '8') | ternary('/etc/redis.conf','/etc/redis/redis.conf') }}"
-redis_service: redis
+- "{{ (ansible_distribution_major_version | int >= 10) | ternary('valkey', 'redis') }}"
+redis_conf_file: >-
+  {%- if ansible_distribution_major_version | int >= 10 -%}
+  /etc/valkey/valkey.conf
+  {%- elif ansible_distribution_major_version == '8' -%}
+  /etc/redis.conf
+  {%- else -%}
+  /etc/redis/redis.conf
+  {%- endif -%}
+redis_service: "{{ (ansible_distribution_major_version | int >= 10) | ternary('valkey', 'redis') }}"

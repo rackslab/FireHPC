@@ -27,7 +27,7 @@
       - config-manager
       - --set-enabled
       - crb
-  when: ansible_distribution_major_version == "9"
+  when: ansible_distribution_major_version | int >= 9
 
 - name: Enable PowerTools repository
   ansible.builtin.command:

@@ -13,6 +13,8 @@ and this project adheres to
 - conf:
   - Add pkgs.rackslab.io packages repositories by default.
   - Support GPU gres without model in Slurm configuration.
+  - Enable CRB repository on EL10.
+  - Install Valkey instead of Redis on EL10.
   - Support optional shard GRES with `slurm_shards_per_gpu`, a map of RacksDB
     node type id to shards per GPU. The Slurm count is that value times the
     number of GPUs on the type. Omitted types and Slurm emulator mode keep GPU
