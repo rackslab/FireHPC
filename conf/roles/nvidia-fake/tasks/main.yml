@@ -1,0 +1,53 @@
+---
+- name: Find type of current compute node
+  ansible.builtin.set_fact:
+    nvidia_fake_node_type: "{{ nvidia_fake_compute_nodes | selectattr('nodes', 'contains', ansible_facts['hostname']) | list | first | default({'gpus': {}}) }}"
+
+- name: Deploy fake NVIDIA GPUs
+  when: nvidia_fake_node_type['gpus'] | length > 0
+  block:
+    - name: Install fake NVIDIA tools package
+      ansible.builtin.package:
+        name: "{{ nvidia_fake_package }}"
+        state: latest
+
+    - name: Create fake GPUs configuration directory
+      ansible.builtin.file:
+        path: "{{ nvidia_fake_config_path | dirname }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Deploy fake GPUs configuration file
+      ansible.builtin.template:
+        src: nvidia-fake.json.j2
+        dest: "{{ nvidia_fake_config_path }}"
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart firehpc-dcgm-exporter
+
+    - name: Create fake DCGM exporter service override directory
+      ansible.builtin.file:
+        path: "{{ nvidia_fake_dcgm_service_override_path | dirname }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Deploy fake DCGM exporter service override
+      ansible.builtin.template:
+        src: firehpc-dcgm-exporter.conf.j2
+        dest: "{{ nvidia_fake_dcgm_service_override_path }}"
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart firehpc-dcgm-exporter
+
+    - name: Ensure fake DCGM exporter service is started and enabled
+      ansible.builtin.systemd_service:
+        name: firehpc-dcgm-exporter
+        state: started
+        enabled: true
+        daemon_reload: true

@@ -26,6 +26,9 @@ and this project adheres to
     groups then also use `groupOfNames` and `member`, and `posixGroup` is
     auxiliary so both classes can share an entry. Groups that do not list
     members use `organizationalRole` as their structural class.
+  - Add `nvidia-fake` role to emulate NVIDIA GPUs on compute nodes, with fake
+    `nvidia-smi` and DCGM exporter. `nvidia_fake_dcgm_flavor` selects
+    legacy, 4.8.4 or current DCGM metric names.
 - utils: Add `firehpc-nvidia-fake` package with `firehpc-nvidia-smi` and
   `firehpc-dcgm-exporter` programs, to emulate NVIDIA GPUs on cluster nodes.
   DCGM metrics follow the Slurm jobs allocated to the GPUs.

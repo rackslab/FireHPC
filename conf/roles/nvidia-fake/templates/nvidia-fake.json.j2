@@ -1,0 +1,26 @@
+{#- GPUs are listed in the same order as in Slurm fake_gpus.conf (models,
+    then count), so that GPU index N matches /dev/nvidiaN and the indexes in
+    Slurm SLURM_JOB_GPUS. -#}
+{% set ns = namespace(index=0, gpus=[]) %}
+{% for model in nvidia_fake_node_type['gpus'] %}
+{% set profile = nvidia_fake_models_profiles.get(model, nvidia_fake_default_profile) %}
+{% for _ in range(nvidia_fake_node_type['gpus'][model]) %}
+{% set _ = ns.gpus.append({
+  'index': ns.index,
+  'uuid': 'GPU-' ~ ((inventory_hostname ~ '-gpu-' ~ ns.index) | to_uuid),
+  'pci_bus_id': '00000000:%02X:00.0' | format(16 + ns.index),
+  'name': profile.name,
+  'architecture': profile.architecture,
+  'memory_mib': profile.memory_mib | int,
+  'power_idle_w': profile.power_idle_w | float,
+  'power_max_w': profile.power_max_w | float,
+}) %}
+{% set ns.index = ns.index + 1 %}
+{% endfor %}
+{% endfor %}
+{{ {
+  'driver_version': nvidia_fake_driver_version | string,
+  'cuda_version': nvidia_fake_cuda_version | string,
+  'flavor': nvidia_fake_dcgm_flavor | string,
+  'gpus': ns.gpus,
+} | to_nice_json }}

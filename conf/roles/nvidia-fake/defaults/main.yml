@@ -1,0 +1,53 @@
+---
+nvidia_fake_package: firehpc-nvidia-fake
+nvidia_fake_config_path: /etc/firehpc/nvidia-fake.json
+nvidia_fake_dcgm_port: 9400
+nvidia_fake_dcgm_service_override_path: /etc/systemd/system/firehpc-dcgm-exporter.service.d/firehpc.conf
+# Metric names emitted by the fake DCGM exporter:
+#   legacy:  names and Hostname label of dcgm-exporter < 4.6.0, as expected by
+#            upstream CEEMS recording rules.
+#   "4.8.4": legacy names with hostname label, like dcgm-exporter 4.8.4 (latest
+#            release).
+#   current: names and units of dcgm-exporter main branch (DCGM >= 4.7).
+nvidia_fake_dcgm_flavor: "4.8.4"
+nvidia_fake_driver_version: 570.86.15
+nvidia_fake_cuda_version: "12.8"
+# List of compute node types, with nodes and gpus (map of RacksDB GPU model to
+# number of GPUs) keys, as in slurm_compute_nodes.
+nvidia_fake_compute_nodes: []
+# Characteristics of emulated GPUs, keyed by RacksDB GPU model. name is the
+# product name reported by nvidia-smi. CEEMS finds the number of SMs of a GPU
+# from its product name (eg. H100, A100).
+nvidia_fake_models_profiles:
+  Nvidia H100:
+    name: NVIDIA H100 80GB HBM3
+    architecture: Hopper
+    memory_mib: 81559
+    power_idle_w: 70
+    power_max_w: 700
+  Nvidia H200:
+    name: NVIDIA H200
+    architecture: Hopper
+    memory_mib: 143771
+    power_idle_w: 75
+    power_max_w: 700
+  Nvidia A100:
+    name: NVIDIA A100-SXM4-80GB
+    architecture: Ampere
+    memory_mib: 81920
+    power_idle_w: 55
+    power_max_w: 400
+  Nvidia L40S:
+    name: NVIDIA L40S
+    architecture: Ada Lovelace
+    memory_mib: 46068
+    power_idle_w: 35
+    power_max_w: 350
+  Nvidia V100:
+    name: Tesla V100-SXM2-32GB
+    architecture: Volta
+    memory_mib: 32768
+    power_idle_w: 40
+    power_max_w: 300
+# Profile of GPU models missing in nvidia_fake_models_profiles.
+nvidia_fake_default_profile: "{{ nvidia_fake_models_profiles['Nvidia H100'] }}"
