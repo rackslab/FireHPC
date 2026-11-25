@@ -1,0 +1,61 @@
+---
+- name: Check Slurm emulator mode is disabled
+  ansible.builtin.assert:
+    that:
+      - not ceems_emulator
+    fail_msg: >-
+      CEEMS is not supported in Slurm emulator mode: emulated nodes have no
+      GPU GRES and Slurm does not track jobs in cgroups.
+
+- name: Gather OS specific variables
+  ansible.builtin.include_vars:
+    file: "os/{{ ansible_facts.os_family | lower }}.yml"
+
+- name: Find type of current compute node
+  ansible.builtin.set_fact:
+    ceems_node_type: "{{ ceems_compute_nodes | selectattr('nodes', 'contains', ansible_facts['hostname']) | list | first | default({'gpus': {}}) }}"
+
+- name: Deploy fake NVIDIA GPUs
+  ansible.builtin.include_role:
+    name: nvidia-fake
+  vars:
+    nvidia_fake_compute_nodes: "{{ ceems_compute_nodes }}"
+  when: ceems_node_type['gpus'] | length > 0
+
+# The package enables and starts the service on installation.
+- name: Install CEEMS exporter Debian package
+  ansible.builtin.apt:
+    deb: "{{ ceems_exporter_package_url }}"
+  when: ansible_facts.os_family == 'Debian'
+
+- name: Install CEEMS exporter RPM package
+  ansible.builtin.dnf:
+    name: "{{ ceems_exporter_package_url }}"
+    # Release packages are not signed with a GPG key.
+    disable_gpg_check: true
+    state: present
+  when: ansible_facts.os_family == 'RedHat'
+
+- name: Create CEEMS exporter service override directory
+  ansible.builtin.file:
+    path: "{{ ceems_exporter_service_override_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy CEEMS exporter service override
+  ansible.builtin.template:
+    src: ceems_exporter.conf.j2
+    dest: "{{ ceems_exporter_service_override_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart ceems_exporter
+
+- name: Ensure CEEMS exporter service is started and enabled
+  ansible.builtin.systemd_service:
+    name: ceems_exporter
+    state: started
+    enabled: true
+    daemon_reload: true

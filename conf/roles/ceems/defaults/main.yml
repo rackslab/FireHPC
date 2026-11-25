@@ -1,0 +1,13 @@
+---
+ceems_enabled: false
+ceems_emulator: false
+ceems_version: 0.16.3
+ceems_release_url: "https://github.com/ceems-dev/ceems/releases/download/v{{ ceems_version }}"
+ceems_exporter_port: 9010
+ceems_exporter_extra_args: []
+ceems_exporter_service_override_path: /etc/systemd/system/ceems_exporter.service.d/firehpc.conf
+# Path of the fake nvidia-smi installed by nvidia-fake role.
+ceems_nvidia_smi_path: /usr/bin/firehpc-nvidia-smi
+# List of compute node types, with nodes and gpus (map of RacksDB GPU model to
+# number of GPUs) keys, as in slurm_compute_nodes.
+ceems_compute_nodes: []

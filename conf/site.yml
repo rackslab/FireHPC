@@ -50,6 +50,14 @@
     - role: clustershell
       tags: [ clustershell ]
 
+- hosts: compute
+  remote_user: root
+  roles:
+    - role: ceems
+      when:
+      - ceems_enabled
+      tags: [ ceems ]
+
 - hosts: admin
   remote_user: root
   roles:

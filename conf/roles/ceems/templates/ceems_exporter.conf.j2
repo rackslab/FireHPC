@@ -1,0 +1,17 @@
+{% set args = ['--collector.slurm', '--web.listen-address=:' ~ ceems_exporter_port] %}
+{% if ceems_node_type['gpus'] | length > 0 %}
+{# The fake nvidia-smi replaces GPU discovery. Setting the GPU type skips the
+   probe of PCI devices in sysfs, which shows the devices of the host. #}
+{% set _ = args.extend(['--collector.gpu.type=nvidia', '--collector.gpu.nvidia-smi-path=' ~ ceems_nvidia_smi_path]) %}
+{% else %}
+{% set _ = args.append('--collector.gpu.type=nogpu') %}
+{% endif %}
+{% set _ = args.extend(ceems_exporter_extra_args) %}
+[Service]
+# Run as root: the exporter reads the environment of Slurm job processes, and
+# the ambient capabilities of the packaged unit may not all be available in
+# containers.
+User=root
+Group=root
+AmbientCapabilities=
+Environment="CEEMS_EXPORTER_OPTIONS={{ args | join(' ') }}"

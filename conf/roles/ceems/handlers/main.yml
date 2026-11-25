@@ -1,0 +1,6 @@
+---
+- name: Restart ceems_exporter
+  ansible.builtin.systemd_service:
+    name: ceems_exporter
+    state: restarted
+    daemon_reload: true

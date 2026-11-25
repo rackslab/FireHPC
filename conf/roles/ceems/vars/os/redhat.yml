@@ -1,0 +1,2 @@
+---
+ceems_exporter_package_url: "{{ ceems_release_url }}/ceems_exporter-{{ ceems_version }}-linux-amd64.rpm"

@@ -29,6 +29,8 @@ and this project adheres to
   - Add `nvidia-fake` role to emulate NVIDIA GPUs on compute nodes, with fake
     `nvidia-smi` and DCGM exporter. `nvidia_fake_dcgm_flavor` selects
     legacy, 4.8.4 or current DCGM metric names.
+  - Add optional CEEMS exporter on compute nodes with `ceems_enabled`. Nodes
+    with GPUs get fake NVIDIA GPUs from `nvidia-fake` role.
 - utils: Add `firehpc-nvidia-fake` package with `firehpc-nvidia-smi` and
   `firehpc-dcgm-exporter` programs, to emulate NVIDIA GPUs on cluster nodes.
   DCGM metrics follow the Slurm jobs allocated to the GPUs.
