@@ -4,6 +4,7 @@ slurmweb_hostname: "{{ inventory_hostname }}"
 slurmweb_http_server_names:
 - "{{ slurmweb_hostname }}"
 slurmweb_jwt_key: /var/lib/slurm-web/jwt.key
+slurmweb_session_key: /var/lib/slurm-web/session.key
 slurmweb_slurmrestd_uri: unix:/run/slurmrestd/slurmrestd.socket
 slurmweb_slurmrestd_auth: local
 slurmweb_slurmrestd_jwt_mode: auto

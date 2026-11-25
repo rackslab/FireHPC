@@ -53,6 +53,22 @@
     cmd: "/usr/libexec/slurm-web/slurm-web-gen-jwt-key{% if slurmweb_slurmrestd_auth == 'local' %} --with-slurm{% endif %}"
     creates: "{{ slurmweb_jwt_key }}"
 
+#
+# Slurm-web >= 7.1 gateway requires a session key. slurm-web-gen-session-key
+# needs gateway configuration file. Older versions do not ship this script.
+#
+- name: Check Slurm-web session key generator is available
+  ansible.builtin.stat:
+    path: /usr/libexec/slurm-web/slurm-web-gen-session-key
+  register: slurmweb_gen_session_key_bin
+
+- name: Create session key
+  ansible.builtin.command:
+    cmd: /usr/libexec/slurm-web/slurm-web-gen-session-key
+    creates: "{{ slurmweb_session_key }}"
+  when: slurmweb_gen_session_key_bin.stat.exists
+  notify: Restart slurm-web-gateway uWSGI
+
 - name: Install systemd services for components
   ansible.builtin.copy:
     src: "/usr/share/slurm-web/wsgi/{{ item }}/slurm-web-{{ item }}-uwsgi.service"

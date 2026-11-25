@@ -1,4 +1,9 @@
-{% for section, settings in (slurmweb_gateway_settings_defaults | ansible.builtin.combine(slurmweb_gateway_settings)).items() %}
+{% set slurmweb_gateway_all_settings = slurmweb_gateway_settings_defaults %}
+{# Set session key in configuration only when it differs from Slurm-web default #}
+{% if slurmweb_session_key != '/var/lib/slurm-web/session.key' %}
+{% set slurmweb_gateway_all_settings = slurmweb_gateway_all_settings | ansible.builtin.combine({'service': {'session_key': slurmweb_session_key}}, recursive=true) %}
+{% endif %}
+{% for section, settings in (slurmweb_gateway_all_settings | ansible.builtin.combine(slurmweb_gateway_settings)).items() %}
 [{{ section }}]
 {% for parameter, value in settings.items() %}
 {{ parameter }}={{ value }}

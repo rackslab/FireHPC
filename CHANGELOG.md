@@ -124,6 +124,10 @@ and this project adheres to
   - Enable nginx sites on Debian by fixing `os_family` comparison in the nginx
     role. Slurm-web and slurm-quota configs were deployed to
     `sites-available` but never symlinked into `sites-enabled`.
+  - Generate Slurm-web gateway session key required by Slurm-web 7.1 and later,
+    when `slurm-web-gen-session-key` is available. Without this key, the
+    gateway fails to load and the UI and API return HTTP 500. The path can be
+    changed with `slurmweb_session_key`.
 
 ## [1.2.0] - 2025-09-18
 
