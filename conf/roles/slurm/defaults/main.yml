@@ -30,8 +30,8 @@ slurm_gpus_models_map: {}
 slurm_shards_per_gpu: {}
 # Set CgroupJobIdPaths=yes in cgroup.conf on compute nodes, so cgroup/v2 names
 # job cgroups job_<id> instead of the job SLUID. Only applied when installed
-# Slurm is 26.05 or later, older versions do not know this parameter. Ignored
-# in Slurm emulator mode.
+# Slurm is 26.05.2 or later, older versions do not know this parameter.
+# Ignored in Slurm emulator mode.
 slurm_cgroup_job_id_paths: false
 # Confine jobs in cgroups with TaskPlugin=task/cgroup,task/affinity in
 # slurm.conf, and ConstrainCores and ConstrainRAMSpace in cgroup.conf on
