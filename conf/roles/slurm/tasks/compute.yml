@@ -122,6 +122,34 @@
     - not slurm_emulator
     - slurm_current_compute_node_type['gpus'] | length > 0
 
+# Slurm needs a device file for each fake GPU to set GPU indexes in jobs
+# environment. The tmpfiles.d entries recreate the links at boot, the file
+# task creates them now, before slurmd is restarted.
+- name: Deploy fake GPUs device files tmpfiles configuration
+  ansible.builtin.template:
+    src: fake_gpus.tmpfiles.conf.j2
+    dest: /etc/tmpfiles.d/firehpc-fake-gpus.conf
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - not slurm_emulator
+    - slurm_current_compute_node_type['gpus'] | length > 0
+
+- name: Create fake GPUs device files
+  ansible.builtin.file:
+    src: /dev/null
+    dest: "/dev/nvidia{{ item }}"
+    state: link
+  # The loop is evaluated before when, and the node type fact is not set in
+  # Slurm emulator mode.
+  loop: "{{ range((slurm_current_compute_node_type | default({'gpus': {}}))['gpus'].values() | sum) | list }}"
+  notify:
+    - Restart slurmd
+  when:
+    - not slurm_emulator
+    - slurm_current_compute_node_type['gpus'] | length > 0
+
 # This is required on redhat based distributions as the service is not
 # automatically started by the RPM packages, and it does not hurt on Debian.
 - name: Ensure slurmd service is started

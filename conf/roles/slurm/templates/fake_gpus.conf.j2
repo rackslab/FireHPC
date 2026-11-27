@@ -1,6 +1,15 @@
-{# One line per GPU: <type>|<cpu_count>|<cpu_range>|<links>|<device>.
+{# One line per GPU:
+   <type>|<cpu_count>|<cpu_range>|<links>|<device>|<unique_id>|<flags>.
    (null) leaves that field unset. ~ is handed to the GPU plugin and, with
    gpu/generic, becomes no cores at all. It is not a CPU binding.
+
+   Slurm keeps a GPU in the device list used for job environment only when
+   <device> is a character or block device, so the slurm role links each
+   /dev/nvidiaN to /dev/null. Without it, jobs get SLURM_GPUS_ON_NODE but no
+   SLURM_JOB_GPUS or SLURM_STEP_GPUS. The nvidia_gpu_env flag makes Slurm set
+   CUDA_VISIBLE_DEVICES, as NVML autodetection does for real GPUs. unique_id
+   stays unset so that variable holds indexes. Neither changes the GRES
+   topology below.
 
    Slurm builds a topology record when the line has a type name or a real
    cpu_range. Those two are substitutes, so a real range is written only
@@ -10,18 +19,18 @@
 
    type and topology: the type name creates the topology, so the CPU columns
    stay 1 and ~.
-     h100|1|~|-1,0|/dev/nvidia0
+     h100|1|~|-1,0|/dev/nvidia0|(null)|nvidia_gpu_env
 
    topology, no type: (null) keeps gres_used as gpu:(null):…(IDX:…). The
    core list is the only remaining way to create topology.
-     (null)|8|0-7|-1,0|/dev/nvidia0
+     (null)|8|0-7|-1,0|/dev/nvidia0|(null)|nvidia_gpu_env
 
    topology off, with or without a type. There is no typed line for this
    case. h100|1|~|… would still carry a type name, and that name alone makes
    Slurm build topology, so gres_used would be gpu:h100:…(IDX:…) rather than
    gpu:h100:…. The type stays on the Gres= line in slurm.conf. This line has
    neither a type name nor a core list, so topo_cnt stays 0.
-     (null)|1|~|-1,0|/dev/nvidia0
+     (null)|1|~|-1,0|/dev/nvidia0|(null)|nvidia_gpu_env
 #}
 {% macro gpu_links(gpu_index, gpu_total) -%}
 {%- for link_index in range(gpu_total) -%}
@@ -41,14 +50,14 @@
 {% for _ in range(slurm_current_compute_node_type['gpus'][model]) %}
 {# Type name creates topology; ~ stores no cores. #}
 {% if gpu_type and topology -%}
-{{ gpu_type }}|1|~|{{ gpu_links(ns.index, total) }}|/dev/nvidia{{ ns.index }}
+{{ gpu_type }}|1|~|{{ gpu_links(ns.index, total) }}|/dev/nvidia{{ ns.index }}|(null)|nvidia_gpu_env
 {# No type name, so the full core list is what creates topology. #}
 {% elif topology -%}
-(null)|{{ ncores }}|{{ cpu_range }}|{{ gpu_links(ns.index, total) }}|/dev/nvidia{{ ns.index }}
+(null)|{{ ncores }}|{{ cpu_range }}|{{ gpu_links(ns.index, total) }}|/dev/nvidia{{ ns.index }}|(null)|nvidia_gpu_env
 {# Topology off. A typed line (h100|1|~|…) is not used: the type name would
    create topology. The type, if any, is only on Gres= in slurm.conf. #}
 {% else -%}
-(null)|1|~|{{ gpu_links(ns.index, total) }}|/dev/nvidia{{ ns.index }}
+(null)|1|~|{{ gpu_links(ns.index, total) }}|/dev/nvidia{{ ns.index }}|(null)|nvidia_gpu_env
 {% endif %}
 {% set ns.index = ns.index + 1 %}
 {% endfor %}

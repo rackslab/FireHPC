@@ -110,6 +110,11 @@ and this project adheres to
   clusters with kept secrets are not reported by `list` command.
 
 ### Fixed
+- conf: Expose allocated GPU indexes in the environment of jobs on fake GPU
+  nodes (`SLURM_JOB_GPUS`, `SLURM_STEP_GPUS` and `CUDA_VISIBLE_DEVICES`), so
+  that CEEMS and the fake DCGM exporter map GPUs to jobs. Each `/dev/nvidiaN`
+  is a link to `/dev/null`, as Slurm ignores GPUs without device file, and
+  fake GPUs get the `nvidia_gpu_env` flag.
 - nspawn: Fail with an explicit error after a timeout of 60 seconds instead
   of waiting forever when containers do not get IP addresses, and stop
   duplicating addresses found while waiting.
