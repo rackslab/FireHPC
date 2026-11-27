@@ -110,6 +110,9 @@ and this project adheres to
   clusters with kept secrets are not reported by `list` command.
 
 ### Fixed
+- conf: Refresh packages repositories metadata before installing
+  `firehpc-nvidia-fake` package in `nvidia-fake` role, which failed when the
+  role ran alone (eg. `firehpc conf --tags ceems`) with outdated cache.
 - conf: Set `CgroupJobIdPaths=yes` in Slurm `cgroup.conf` on compute nodes
   with Slurm 26.05 and later when CEEMS is enabled, so that CEEMS exporter
   finds jobs cgroups named `job_<id>` instead of job SLUID

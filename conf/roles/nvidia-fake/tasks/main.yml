@@ -6,10 +6,22 @@
 - name: Deploy fake NVIDIA GPUs
   when: nvidia_fake_node_type['gpus'] | length > 0
   block:
-    - name: Install fake NVIDIA tools package
-      ansible.builtin.package:
+    # Refresh repositories metadata as the package may be missing from an
+    # outdated cache when the role runs alone (eg. with --tags ceems).
+    - name: Install fake NVIDIA tools package (Debian)
+      ansible.builtin.apt:
         name: "{{ nvidia_fake_package }}"
         state: latest
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_facts.os_family == 'Debian'
+
+    - name: Install fake NVIDIA tools package (RedHat)
+      ansible.builtin.dnf:
+        name: "{{ nvidia_fake_package }}"
+        state: latest
+        update_cache: true
+      when: ansible_facts.os_family == 'RedHat'
 
     - name: Create fake GPUs configuration directory
       ansible.builtin.file:
