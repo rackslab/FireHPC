@@ -116,6 +116,9 @@ and this project adheres to
   clusters with kept secrets are not reported by `list` command.
 
 ### Fixed
+- conf: Select authselect `sssd` profile on EL10, where images select the
+  `local` profile which does not enable sss in nsswitch and PAM, so that LDAP
+  users are resolved.
 - conf: Refresh packages repositories metadata before installing
   `firehpc-nvidia-fake` package in `nvidia-fake` role, which failed when the
   role ran alone (eg. `firehpc conf --tags ceems`) with outdated cache.

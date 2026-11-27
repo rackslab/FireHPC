@@ -4,6 +4,23 @@
     name: "{{ sssd_packages }}"
     state: latest
 
+# On EL10, FireHPC images select authselect local profile, which does not
+# enable sss in nsswitch and PAM. Older images do not use authselect and rely
+# on glibc default nsswitch.conf, which already includes sss.
+- name: Get current authselect profile
+  ansible.builtin.command: authselect current --raw
+  register: sssd_authselect_current
+  changed_when: false
+  failed_when: false
+  when: ansible_facts.os_family == 'RedHat'
+
+- name: Select authselect sssd profile
+  ansible.builtin.command: authselect select sssd --force
+  when:
+  - ansible_facts.os_family == 'RedHat'
+  - sssd_authselect_current.rc == 0
+  - sssd_authselect_current.stdout.split() | first | default('') != 'sssd'
+
 - name: Deploy sssd service configuration file
   ansible.builtin.template:
     src: sssd.conf.j2
