@@ -110,6 +110,9 @@ and this project adheres to
   clusters with kept secrets are not reported by `list` command.
 
 ### Fixed
+- conf: Run CEEMS exporter as the `ceems` user of the packaged service
+  instead of root, which crashed at startup as it failed to set ACLs on its
+  configuration on read-only `/etc`.
 - conf: Expose allocated GPU indexes in the environment of jobs on fake GPU
   nodes (`SLURM_JOB_GPUS`, `SLURM_STEP_GPUS` and `CUDA_VISIBLE_DEVICES`), so
   that CEEMS and the fake DCGM exporter map GPUs to jobs. Each `/dev/nvidiaN`

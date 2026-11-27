@@ -8,10 +8,4 @@
 {% endif %}
 {% set _ = args.extend(ceems_exporter_extra_args) %}
 [Service]
-# Run as root: the exporter reads the environment of Slurm job processes, and
-# the ambient capabilities of the packaged unit may not all be available in
-# containers.
-User=root
-Group=root
-AmbientCapabilities=
 Environment="CEEMS_EXPORTER_OPTIONS={{ args | join(' ') }}"
