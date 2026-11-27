@@ -1,5 +1,14 @@
 ---
 common_cluster: foo  # dummy
+# Repositories derivatives priorities (common_hpckit_priorities,
+# common_pkgs_priorities and common_devs_priorities) are dicts of derivative
+# name to priority. Values are passed as is to the package manager, so their
+# meaning depends on the distribution of the cluster and they must be set
+# accordingly in cluster custom configuration:
+# - Debian: APT pin priority, default 500, a higher value is preferred (eg.
+#   900 to prefer a derivative over distribution repositories).
+# - RedHat: dnf repository priority, default 99, a lower value is preferred
+#   (eg. 50 to prefer a derivative over distribution and EPEL repositories).
 common_hpckit_derivatives:
 - main
 - slurm23.02
