@@ -19,6 +19,23 @@
     name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
     state: present
 
+# EPEL ships Fedora-style Slurm packages with the same names as hpck.it
+# packages. With equal repository priorities, dnf installs the highest version,
+# which can be EPEL build (eg. without sackd.service on EL10). Exclude Slurm
+# packages from EPEL repositories to always get them from hpck.it. Slurm
+# dependencies provided by EPEL are still installed from EPEL.
+- name: Exclude Slurm packages from EPEL repositories
+  community.general.ini_file:
+    path: "/etc/yum.repos.d/{{ item }}.repo"
+    section: "{{ item }}"
+    option: excludepkgs
+    value: "slurm*"
+    create: false
+    no_extra_spaces: true
+  loop:
+    - epel
+    - epel-testing
+
 # CR/PowerTools repo is required to install Slurm packages dependencies.
 - name: Enable CR repository
   ansible.builtin.command:

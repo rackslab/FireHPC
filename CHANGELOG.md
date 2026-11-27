@@ -116,6 +116,14 @@ and this project adheres to
   clusters with kept secrets are not reported by `list` command.
 
 ### Fixed
+- conf: Exclude Slurm packages from EPEL repositories on RedHat based
+  distributions, so that Slurm is always installed from hpck.it. EPEL ships
+  Fedora-style Slurm packages with the same names, which dnf installed instead
+  of hpck.it packages when EPEL version was higher (eg. on EL10, without
+  `sackd.service`). On clusters already deployed with EPEL Slurm packages,
+  remove them (`dnf repoquery --installed --qf '%{name} %{from_repo}\n'
+  'slurm*'` lists their origin) and run `firehpc conf` again with `slurm` tag
+  to install hpck.it packages.
 - conf: Select authselect `sssd` profile on EL10, where images select the
   `local` profile which does not enable sss in nsswitch and PAM, so that LDAP
   users are resolved.
