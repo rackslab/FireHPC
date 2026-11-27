@@ -40,9 +40,9 @@
   notify: Restart slurmd
   when:
     - not slurm_emulator
-    - slurm_cgroup_job_id_paths_applied
+    - slurm_cgroup_job_id_paths_applied or (slurm_task_cgroup | bool)
 
-# Without cgroup job id paths, Slurm defaults are used.
+# Without cgroup job id paths and task/cgroup, Slurm defaults are used.
 - name: Remove slurm cgroup configuration
   ansible.builtin.file:
     path: /etc/slurm/cgroup.conf
@@ -51,6 +51,7 @@
   when:
     - not slurm_emulator
     - not slurm_cgroup_job_id_paths_applied
+    - not (slurm_task_cgroup | bool)
 
 - name: Manage emulated slurmd instances
   when: slurm_emulator

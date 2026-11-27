@@ -4,6 +4,14 @@
 CgroupPlugin=cgroup/v2
 IgnoreSystemd=yes
 {% endif %}
+{% if not (slurm_emulator | bool) and slurm_task_cgroup | bool %}
+# Confine jobs to their allocated cores and memory.
+#
+# ConstrainDevices is not enabled. All fake GPUs are links to /dev/null, so
+# denying the GPUs not allocated to a job would deny /dev/null to that job.
+ConstrainCores=yes
+ConstrainRAMSpace=yes
+{% endif %}
 {% if slurm_cgroup_job_id_paths_applied | default(false) | bool %}
 # Name cgroup/v2 job cgroups job_<id> instead of the job SLUID.
 CgroupJobIdPaths=yes

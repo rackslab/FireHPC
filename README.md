@@ -273,6 +273,13 @@ enabled with these Slurm versions, FireHPC sets `CgroupJobIdPaths=yes` in
 `cgroup.conf` on compute nodes to keep `job_<id>` cgroups. Jobs started before
 this change are not tracked by CEEMS.
 
+CEEMS reads the CPUs and memory of jobs in their cgroups. Outside Slurm emulator
+mode, FireHPC confines jobs with `TaskPlugin=task/cgroup,task/affinity` and
+`ConstrainCores` and `ConstrainRAMSpace` in `cgroup.conf`. Without these
+constraints, CEEMS reports all the CPUs and memory of the node for every job.
+Set `slurm_task_cgroup: false` to opt out. Devices are not constrained, as all
+fake GPUs are links to `/dev/null`.
+
 CEEMS is not supported in Slurm emulator mode. The fake tools are developed in
 [`utils/nvidia-fake`](utils/nvidia-fake).
 

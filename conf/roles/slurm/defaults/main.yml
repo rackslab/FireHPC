@@ -33,6 +33,12 @@ slurm_shards_per_gpu: {}
 # Slurm is 26.05 or later, older versions do not know this parameter. Ignored
 # in Slurm emulator mode.
 slurm_cgroup_job_id_paths: false
+# Confine jobs in cgroups with TaskPlugin=task/cgroup,task/affinity in
+# slurm.conf, and ConstrainCores and ConstrainRAMSpace in cgroup.conf on
+# compute nodes. Jobs cgroups then get the allocated CPUs and memory, as
+# reported by CEEMS. TaskPlugin in slurm_params takes precedence. Ignored in
+# Slurm emulator mode.
+slurm_task_cgroup: true
 slurm_uid: 432  # picked randomly among 100-499
 slurm_gid: 432  # picked randomly among 100-499
 slurmrestd_uid: 433  # picked randomly among 100-499

@@ -64,6 +64,12 @@ and this project adheres to
 - docs: Mention `clean --all` option and kept secrets in manpage.
 
 ### Changed
+- conf: Confine Slurm jobs in cgroups outside emulator mode, with
+  `TaskPlugin=task/cgroup,task/affinity` in `slurm.conf` and `ConstrainCores`
+  and `ConstrainRAMSpace` in `cgroup.conf`. Jobs cgroups get their allocated
+  CPUs and memory, so CEEMS no longer reports the whole node. Set
+  `slurm_task_cgroup` to false to opt out. `TaskPlugin` in `slurm_params`
+  takes precedence. Devices are not constrained.
 - pkgs: Vendor Ansible machinectl connection plugin in
   `lib/ansible/connections`, from
   [ansible-connection-machinectl](https://github.com/tomeon/ansible-connection-machinectl)

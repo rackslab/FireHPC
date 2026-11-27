@@ -66,6 +66,9 @@ AuthAltParameters=jwt_key={{ slurm_jwt_key_path }}
 # container does not accumulate one cgroup hierarchy per node.
 ProctrackType=proctrack/linuxproc
 TaskPlugin=task/affinity
+{% elif slurm_task_cgroup | bool and 'TaskPlugin' not in slurm_params %}
+# Confine jobs to their allocated cores and memory, see cgroup.conf.
+TaskPlugin=task/cgroup,task/affinity
 {% endif %}
 {% for key, value in slurm_params.items() %}
 {{ key }}={{ value }}
