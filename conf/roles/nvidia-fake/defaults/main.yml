@@ -4,11 +4,12 @@ nvidia_fake_config_path: /etc/firehpc/nvidia-fake.json
 nvidia_fake_dcgm_port: 9400
 nvidia_fake_dcgm_service_override_path: /etc/systemd/system/firehpc-dcgm-exporter.service.d/firehpc.conf
 # Metric names emitted by the fake DCGM exporter:
-#   legacy:  names and Hostname label of dcgm-exporter < 4.6.0, as expected by
+#   legacy:  names and Hostname label of dcgm-exporter < 4.8.3, as expected by
 #            upstream CEEMS recording rules.
-#   "4.8.4": legacy names with hostname label, like dcgm-exporter 4.8.4 (latest
-#            release).
-#   current: names and units of dcgm-exporter main branch (DCGM >= 4.7).
+#   "4.8.4": legacy names with hostname label, like dcgm-exporter 4.8.3 and
+#            4.8.4, or >= 4.9.0 with the counters CSV recommended by CEEMS.
+#   current: names and units of dcgm-exporter >= 4.9.0 (DCGM 4.7) with its
+#            default counters CSV.
 nvidia_fake_dcgm_flavor: "4.8.4"
 nvidia_fake_driver_version: 570.86.15
 nvidia_fake_cuda_version: "12.8"

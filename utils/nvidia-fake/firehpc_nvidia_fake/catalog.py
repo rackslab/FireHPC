@@ -7,14 +7,19 @@
 """Metrics emitted by the fake DCGM exporter, for each flavor.
 
 DCGM 4.6 and 4.7 renamed most fields and changed some units (MHz to Hz, MiB
-to bytes, percent to ratio, mJ to J). dcgm-exporter 4.8.4, the latest release,
-still emits the legacy names by default, while its main branch emits the new
-names. Exporters from 4.6.0 on also renamed the Hostname label to hostname.
+to bytes, percent to ratio, mJ to J). The default counters of dcgm-exporter
+4.8.4 still use the legacy names, while those of 4.9.0 and later use the new
+names. DCGM still resolves the deprecated names, which the exporter emits as
+listed in its counters CSV, so 4.9.0 with a CSV of legacy names (like the one
+recommended by CEEMS) matches the 4.8.4 flavor. Exporters from 4.8.3 on also
+renamed the Hostname label to hostname.
 
 Names and types come from:
 
 - https://github.com/NVIDIA/dcgm-exporter/blob/4.8.4/etc/default-counters.csv
-- https://github.com/NVIDIA/dcgm-exporter/blob/main/etc/default-counters.csv
+- https://github.com/NVIDIA/dcgm-exporter/blob/4.9.0/etc/default-counters.csv
+- https://github.com/NVIDIA/dcgm-exporter/blob/4.9.0/internal/pkg/counters/default_counter_sources_test.go
+- https://github.com/NVIDIA/go-dcgm/blob/v1.4712.2/pkg/dcgm/const_fields.go
 - https://github.com/NVIDIA/DCGM/blob/master/dcgmlib/dcgm_fields.h
 - https://docs.nvidia.com/datacenter/dcgm/latest/release-notes/changelog.html
 
@@ -101,14 +106,14 @@ CATALOG = [
         ("DCGM_FI_DEV_POWER_USAGE", 1.0),
         ("DCGM_FI_DEV_BOARD_POWER_WATTS", 1.0),
     ),
-    # Not in exporter default counters, read by CEEMS power rules. No new
-    # name is confirmed for it, the current flavor relies on BOARD_POWER_WATTS.
+    # Not in exporter default counters, read by CEEMS power rules. DCGM 4.6
+    # deprecated POWER_USAGE_INSTANT for BOARD_POWER_RAW_WATTS (field 157).
     MetricDef(
         "power_instant",
         GAUGE,
         "Current instantaneous power usage (in W).",
         ("DCGM_FI_DEV_POWER_USAGE_INSTANT", 1.0),
-        None,
+        ("DCGM_FI_DEV_BOARD_POWER_RAW_WATTS", 1.0),
     ),
     MetricDef(
         "energy",

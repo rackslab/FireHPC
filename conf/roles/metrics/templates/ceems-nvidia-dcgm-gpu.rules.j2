@@ -5,15 +5,19 @@
 
   Changes from upstream, driven by metrics_dcgm_flavor:
   - The host label copied into hostname is Hostname with legacy flavor (DCGM
-    exporter < 4.6.0, as in upstream rules) or hostname with 4.8.4 and current
-    flavors. DCGM exporter renamed this label in 4.6.0, so upstream rules do
-    not join with newer exporters.
-  - With current flavor, DCGM metrics are renamed to the names of DCGM >= 4.7
-    (dcgm-exporter main branch). Profiling metrics are ratios in both
+    exporter < 4.8.3, as in upstream rules) or hostname with 4.8.4 and current
+    flavors. DCGM exporter renamed this label in 4.8.3 (tag 4.6.0-4.8.3,
+    NVIDIA/dcgm-exporter#655), so upstream rules do not join with newer
+    exporters.
+  - With current flavor, DCGM metrics are renamed to the names emitted by
+    dcgm-exporter >= 4.9.0 (DCGM 4.7) with its default counters CSV. DCGM
+    still resolves deprecated names, so with the counters CSV recommended by
+    CEEMS, which lists them, 4.9.0 matches 4.8.4 flavor. Profiling metrics are
+    ratios in both
     namings. DCGM_FI_DEV_GPU_UTIL_RATIO is a ratio instead of a percentage,
     it is multiplied by 100. Framebuffer metrics in bytes instead of MiB only
-    appear in ratios. DCGM_FI_DEV_POWER_USAGE_INSTANT has no confirmed new
-    name, DCGM_FI_DEV_BOARD_POWER_WATTS is used instead.
+    appear in ratios. DCGM_FI_DEV_POWER_USAGE_INSTANT is renamed
+    DCGM_FI_DEV_BOARD_POWER_RAW_WATTS (same field ID 157).
   Recording rule names are unchanged.
 #}
 {% set legacy = {
@@ -39,7 +43,7 @@
   'DCGM_FI_DEV_GPU_UTIL': 'DCGM_FI_DEV_GPU_UTIL_RATIO',
   'DCGM_FI_DEV_FB_USED': 'DCGM_FI_DEV_FB_USED_BYTES',
   'DCGM_FI_DEV_FB_FREE': 'DCGM_FI_DEV_FB_FREE_BYTES',
-  'DCGM_FI_DEV_POWER_USAGE_INSTANT': 'DCGM_FI_DEV_BOARD_POWER_WATTS',
+  'DCGM_FI_DEV_POWER_USAGE_INSTANT': 'DCGM_FI_DEV_BOARD_POWER_RAW_WATTS',
   'DCGM_FI_PROF_SM_ACTIVE': 'DCGM_FI_PROF_SM_UTIL_RATIO',
   'DCGM_FI_PROF_SM_OCCUPANCY': 'DCGM_FI_PROF_SM_OCCUPANCY_RATIO',
   'DCGM_FI_PROF_PIPE_TENSOR_ACTIVE': 'DCGM_FI_PROF_TENSOR_UTIL_RATIO',

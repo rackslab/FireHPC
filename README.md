@@ -259,10 +259,12 @@ DCGM renamed most of its metrics in versions 4.6 and 4.7. The
 `nvidia_fake_dcgm_flavor` variable selects the metric names emitted by the fake
 exporter, and used in the recording rules:
 
-- `legacy`: names and `Hostname` label of dcgm-exporter before 4.6.0,
-- `4.8.4` (default): legacy names with `hostname` label, like the latest
-  dcgm-exporter release,
-- `current`: new names and units of dcgm-exporter main branch.
+- `legacy`: names and `Hostname` label of dcgm-exporter before 4.8.3,
+- `4.8.4` (default): legacy names with `hostname` label, like dcgm-exporter
+  4.8.3 and 4.8.4, or 4.9.0 and later with the counters CSV recommended by
+  CEEMS,
+- `current`: new names and units of dcgm-exporter 4.9.0 and later with its
+  default counters CSV.
 
 CEEMS is not supported in Slurm emulator mode. The fake tools are developed in
 [`utils/nvidia-fake`](utils/nvidia-fake).

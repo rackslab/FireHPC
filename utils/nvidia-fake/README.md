@@ -52,9 +52,11 @@ selects the metric names, the host label and the driver label:
 | `4.8.4` (default) | same as legacy                                 | `hostname` | `DCGM_FI_DRIVER_VERSION`        |
 | `current`       | `DCGM_FI_DEV_GPU_UTIL_RATIO`, `DCGM_FI_DEV_FB_USED_BYTES`, `DCGM_FI_PROF_*_UTIL_RATIO`… | `hostname` | `DCGM_FI_SYSTEM_DRIVER_VERSION` |
 
-`legacy` matches dcgm-exporter before 4.6.0, and what upstream CEEMS recording
-rules expect. `4.8.4` matches the latest dcgm-exporter release. `current`
-matches the dcgm-exporter main branch.
+`legacy` matches dcgm-exporter before 4.8.3, and what upstream CEEMS recording
+rules expect. `4.8.4` matches dcgm-exporter 4.8.3 and 4.8.4. `current` matches
+dcgm-exporter 4.9.0 and later with its default counters CSV. DCGM still
+resolves the deprecated names, so dcgm-exporter 4.9.0 and later with a counters
+CSV that lists them, like the one recommended by CEEMS, match `4.8.4`.
 
 The emitted metrics are the exporter default counters, plus the profiling
 counters read by CEEMS recording rules (`SM_ACTIVE`, `SM_OCCUPANCY`,
