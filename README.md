@@ -266,6 +266,13 @@ exporter, and used in the recording rules:
 - `current`: new names and units of dcgm-exporter 4.9.0 and later with its
   default counters CSV.
 
+Slurm 26.05 and later name cgroup v2 jobs cgroups by job SLUID, which the CEEMS
+exporter does not recognize
+([ceems#654](https://github.com/ceems-dev/ceems/issues/654)). When CEEMS is
+enabled with these Slurm versions, FireHPC sets `CgroupJobIdPaths=yes` in
+`cgroup.conf` on compute nodes to keep `job_<id>` cgroups. Jobs started before
+this change are not tracked by CEEMS.
+
 CEEMS is not supported in Slurm emulator mode. The fake tools are developed in
 [`utils/nvidia-fake`](utils/nvidia-fake).
 

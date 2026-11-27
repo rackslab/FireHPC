@@ -105,6 +105,10 @@ metrics_ceems_targets: "{{ slurm_compute_nodes | map(attribute='nodes') | flatte
 metrics_dcgm_targets: "{{ slurm_compute_nodes | rejectattr('gpus', 'equalto', {}) | map(attribute='nodes') | flatten | nodeset_fold | nodeset_expand | map('regex_replace', '$', '.' ~ fhpc_cluster ~ ':' ~ (nvidia_fake_dcgm_port | default(9400))) | list }}"
 ceems_emulator: "{{ fhpc_emulator_mode }}"
 ceems_compute_nodes: "{{ slurm_compute_nodes }}"
+# CEEMS exporter does not find Slurm >= 26.05 jobs cgroups named by SLUID
+# (https://github.com/ceems-dev/ceems/issues/654). Name them job_<id> as before
+# until CEEMS supports SLUID.
+slurm_cgroup_job_id_paths: "{{ ceems_enabled | default(false) }}"
 slurmquota_web_hostname: "{{ fhpc_admin_server }}"
 slurmquota_web_tls_cert_file: "{{ fhpc_web_tls_cert_file }}"
 slurmquota_web_tls_key_file: "{{ fhpc_web_tls_key_file }}"

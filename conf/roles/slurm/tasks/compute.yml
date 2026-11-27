@@ -12,6 +12,46 @@
     name: "{{ slurm_emulator | ternary(slurm_emulator_compute_packages, slurm_compute_packages) }}"
     state: latest
 
+# CgroupJobIdPaths is unknown to slurmd before 26.05, which then fails to parse
+# cgroup.conf.
+- name: Get slurmd version
+  ansible.builtin.command:
+    argv:
+      - slurmd
+      - -V
+  register: slurm_slurmd_version
+  changed_when: false
+  when:
+    - not slurm_emulator
+    - slurm_cgroup_job_id_paths | bool
+
+- name: Set slurm cgroup job id paths fact
+  ansible.builtin.set_fact:
+    slurm_cgroup_job_id_paths_applied: "{{ (slurm_cgroup_job_id_paths | bool) and (slurm_slurmd_version.stdout.split()[1] is version('26.05', '>=')) }}"
+  when: not slurm_emulator
+
+- name: Deploy slurm cgroup configuration
+  ansible.builtin.template:
+    src: cgroup.conf.j2
+    dest: /etc/slurm/cgroup.conf
+    owner: slurm
+    group: slurm
+    mode: "0644"
+  notify: Restart slurmd
+  when:
+    - not slurm_emulator
+    - slurm_cgroup_job_id_paths_applied
+
+# Without cgroup job id paths, Slurm defaults are used.
+- name: Remove slurm cgroup configuration
+  ansible.builtin.file:
+    path: /etc/slurm/cgroup.conf
+    state: absent
+  notify: Restart slurmd
+  when:
+    - not slurm_emulator
+    - not slurm_cgroup_job_id_paths_applied
+
 - name: Manage emulated slurmd instances
   when: slurm_emulator
   block:

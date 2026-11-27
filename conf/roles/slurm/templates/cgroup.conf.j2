@@ -1,4 +1,10 @@
+{% if slurm_emulator | bool %}
 # One slurmd per virtual node would otherwise keep a system D-Bus connection
 # to create its systemd scope. dbus refuses connections after 256 per UID.
 CgroupPlugin=cgroup/v2
 IgnoreSystemd=yes
+{% endif %}
+{% if slurm_cgroup_job_id_paths_applied | default(false) | bool %}
+# Name cgroup/v2 job cgroups job_<id> instead of the job SLUID.
+CgroupJobIdPaths=yes
+{% endif %}

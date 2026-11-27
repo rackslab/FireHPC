@@ -110,6 +110,10 @@ and this project adheres to
   clusters with kept secrets are not reported by `list` command.
 
 ### Fixed
+- conf: Set `CgroupJobIdPaths=yes` in Slurm `cgroup.conf` on compute nodes
+  with Slurm 26.05 and later when CEEMS is enabled, so that CEEMS exporter
+  finds jobs cgroups named `job_<id>` instead of job SLUID
+  (ceems-dev/ceems#654).
 - conf: Run CEEMS exporter as the `ceems` user of the packaged service
   instead of root, which crashed at startup as it failed to set ACLs on its
   configuration on read-only `/etc`.

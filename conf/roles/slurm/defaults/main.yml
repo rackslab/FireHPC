@@ -28,6 +28,11 @@ slurm_gpus_models_map: {}
 # type. Ignored in Slurm emulator mode. Shard scheduling needs select/cons_tres
 # (Slurm's default when SelectType is unset).
 slurm_shards_per_gpu: {}
+# Set CgroupJobIdPaths=yes in cgroup.conf on compute nodes, so cgroup/v2 names
+# job cgroups job_<id> instead of the job SLUID. Only applied when installed
+# Slurm is 26.05 or later, older versions do not know this parameter. Ignored
+# in Slurm emulator mode.
+slurm_cgroup_job_id_paths: false
 slurm_uid: 432  # picked randomly among 100-499
 slurm_gid: 432  # picked randomly among 100-499
 slurmrestd_uid: 433  # picked randomly among 100-499
